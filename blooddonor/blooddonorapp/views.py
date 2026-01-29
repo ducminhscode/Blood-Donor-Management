@@ -2,6 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.http import HttpResponse
+from rest_framework import viewsets
 
-def index(request):
-    return HttpResponse("e-Course App")
+
+class AccountViewSet(viewsets.ViewSet):
+    pass

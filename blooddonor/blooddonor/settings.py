@@ -42,6 +42,11 @@ INSTALLED_APPS = [
     'blooddonorapp.apps.BlooddonorappConfig',
     'cloudinary',
     'cloudinary_storage',
+    'rest_framework',
+    'oauth2_provider',
+    'corsheaders',
+    'drf_yasg',
+    'debug_toolbar'
 ]
 
 MEDIA_URL = '/data/'
@@ -75,7 +80,21 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
+
+INTERNAL_IPS = [
+    '127.0.0.1'
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    )
+}
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
@@ -152,3 +171,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
