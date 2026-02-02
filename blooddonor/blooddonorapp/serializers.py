@@ -1,5 +1,134 @@
-from rest_framework.serializers import ModelSerializer
+import os
+
+from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, Serializer, CharField, EmailField, ValidationError
+from .models import Account, Donor, Staff, DonationEvent, Hospital, EmergencyRequest
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class AccountSerializer(ModelSerializer):
-    pass
+    class Meta:
+        model = Account
+        fields = ['id', 'username', 'password', 'avatar', 'first_name', 'last_name', 'email', 'phone',
+                  'birth_date', 'gender', 'role', 'is_active', 'date_joined']  # Cac thuoc tinh response JSON
+        extra_kwargs = {
+            'password': {
+                'write_only': True  # Chi request client -> server, khong response lai
+            },
+        }
+        read_only_fields = ['id', 'role', 'date_joined',
+                            'is_active', 'last_login', 'is_superuser', 'is_staff']  # Cac thuoc tinh khong duoc request
+
+
+class ResetPasswordSerializer(Serializer):
+    email = EmailField()
+    otp = CharField(min_length=6, max_length=6)
+    new_password = CharField(write_only=True, required=True)
+    confirm_password = CharField(write_only=True, required=True)
+
+    def validate(self, value):
+        if value['new_password'] != value['confirm_password']:
+            raise ValidationError({"error": "Mật khẩu xác nhận không khớp."})
+        return value
+
+
+class ChangePasswordSerializer(Serializer):
+    current_password = CharField(write_only=True, required=True)
+    new_password = CharField(write_only=True, required=True)
+    confirm_password = CharField(write_only=True, required=True)
+
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise ValidationError("Mật khẩu hiện tại không đúng.")
+        return value
+
+    def validate(self, attrs):
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+        current_password = attrs.get('current_password')
+
+        if new_password != confirm_password:
+            raise ValidationError({"confirm_password": "Mật khẩu xác nhận không khớp."})
+
+        if new_password == current_password:
+            raise ValidationError({"new_password": "Mật khẩu mới phải khác mật khẩu hiện tại."})
+
+        return attrs
+
+
+class ProfileUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['avatar', 'first_name', 'last_name', 'phone', 'birth_date', 'gender']
+
+
+class DonorSerializer(ModelSerializer):
+    account = AccountSerializer()
+
+    class Meta:
+        model = Donor
+        fields = ['id', 'account', 'blood_type', 'rh_factor', 'province', 'sub_district', 'permanent_address', 'weight',
+                  'height', 'identification', 'bmi', 'career', 'organization', 'donation_count', 'can_donation',
+                  'last_donation', 'points', 'is_private', 'is_active', 'created_at', 'updated_at']
+
+        read_only_fields = ['id', 'account', 'blood_type', 'rh_factor', 'weight', 'height', 'bmi', 'donation_count',
+                            'can_donation', 'last_donation', 'points', 'is_active', 'created_at', 'updated_at']
+
+
+class HospitalSerializer(ModelSerializer):
+    class Meta:
+        model = Hospital
+        fields = ['id', 'is_active', 'created_at', 'updated_at', 'name', 'image_url', 'province', 'sub_district',
+                  'hospital_address']
+
+
+class StaffSerializer(ModelSerializer):
+    account = AccountSerializer()
+    hospital_id = serializers.PrimaryKeyRelatedField(
+        queryset=Hospital.objects.filter(is_active=True),
+        source='hospital',
+        write_only=True,
+        required=True
+    )
+    hospital = HospitalSerializer(read_only=True)
+
+    class Meta:
+        model = Staff
+        fields = ['id', 'account', 'department', 'degree', 'license_number', 'experience_years', 'emergency_phone',
+                  'current_status', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at', 'updated_at']
+
+        read_only_fields = ['id', 'account', 'department', 'degree', 'license_number', 'is_verified', 'hospital',
+                            'hospital_id', 'is_active', 'created_at', 'updated_at']
+
+
+class DonationEventSerializer(ModelSerializer):
+    staff = StaffSerializer(read_only=True)
+
+    class Meta:
+        model = DonationEvent
+        fields = ['id', 'title', 'description', 'image_url', 'province', 'sub_district', 'time_start', 'time_end',
+                  'is_expire', 'is_active', 'created_at', 'updated_at', 'staff']
+
+        read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active', 'is_expire']
+
+
+class EmergencyRequestSerializer(ModelSerializer):
+    staff = StaffSerializer(read_only=True)
+    hospital_id = serializers.PrimaryKeyRelatedField(
+        queryset=Hospital.objects.filter(is_active=True),
+        source='hospital',
+        write_only=True,
+        required=True
+    )
+    hospital = HospitalSerializer(read_only=True)
+
+    class Meta:
+        model = EmergencyRequest
+        fields = ['id', 'staff', 'is_active', 'created_at', 'updated_at', 'blood_type', 'rh_factor', 'donation_type',
+                  'patient_name', 'phone', 'blood_volume', 'critical', 'emergency_note', 'deadline_at', 'is_expire',
+                  'hospital', 'hospital_id']
+
+        read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active', 'is_expire']

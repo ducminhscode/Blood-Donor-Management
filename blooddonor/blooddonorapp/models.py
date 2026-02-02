@@ -53,7 +53,7 @@ class Account(AbstractUser):
     phone = models.CharField(max_length=15, null=True, blank=True, unique=True)
     gender = models.IntegerField(choices=Gender.choices(), default=Gender.MALE.value, null=True, blank=True)
     avatar = CloudinaryField('avatar', null=True, folder=os.getenv('CLOUD_FOLDER'),
-                             default='https://res.cloudinary.com/dp9b0dkkt/image/upload/v1745512749/de995be2-6311-4125-9ac2-19e11fcaf801_jo8gcs.png')
+                             default='image/upload/v1745512749/de995be2-6311-4125-9ac2-19e11fcaf801_jo8gcs.png')
     role = models.IntegerField(choices=Role.choices(), default=Role.ADMIN.value)
 
     class Meta:
@@ -72,7 +72,6 @@ class BloodType(IntEnum):
 
 
 class Donor(BaseModel):
-    donor_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     blood_type = models.IntegerField(choices=BloodType.choices(), null=True, blank=True)
     rh_factor = models.BooleanField(null=True, blank=True)
     province = models.CharField(max_length=254, null=True, blank=True)
@@ -120,16 +119,15 @@ class Hospital(BaseModel):
 
 
 class Staff(BaseModel):
-    staff_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     department = models.TextField()
     degree = models.TextField()
     license_number = models.CharField(max_length=50, unique=True)
     experience_years = models.FloatField(null=True, blank=True)
-    emergency_phone = models.TextField()
+    emergency_phone = models.CharField(max_length=20)
     current_status = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
-    hospital = models.OneToOneField(Hospital, on_delete=models.SET_NULL, null=True, blank=True)
+    hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT, related_name='hospital_staff')
 
 
 class KnowledgeBase(BaseModel):
@@ -204,6 +202,7 @@ class DonationEvent(BaseModel):
     location = models.TextField()
     time_start = models.DateTimeField()
     time_end = models.DateTimeField()
+    is_expire = models.BooleanField(default=False)
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_donation_event')
 
 
@@ -288,8 +287,9 @@ class EmergencyRequest(BaseModel):
     critical = models.BooleanField(default=True)
     emergency_note = models.TextField(null=True, blank=True)
     deadline_at = models.DateTimeField()
+    is_expire = models.BooleanField(default=False)
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_emergency_request')
-    hospital = models.OneToOneField(Hospital, on_delete=models.SET_NULL, null=True, blank=True)
+    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True, related_name='hospital_emergency_request')
 
 
 class ResponseStatus(IntEnum):

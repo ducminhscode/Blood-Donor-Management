@@ -55,6 +55,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
 
 AUTH_USER_MODEL = 'blooddonorapp.Account'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_SEND')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 cloudinary.config(
     cloud_name=os.getenv('CLOUD_NAME'),
     api_key=os.getenv('CLOUD_API_KEY'),
@@ -174,3 +182,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+# OAUTH2_PROVIDER = {'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore'}

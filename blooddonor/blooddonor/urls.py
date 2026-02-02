@@ -28,9 +28,9 @@ load_dotenv()
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Course API",
+        title="Blood Donor API",
         default_version='v1',
-        description="APIs for CourseApp",
+        description="APIs for BloodDonorApp",
         contact=openapi.Contact(email=os.getenv('EMAIL_SEND')),
         license=openapi.License(name="Blood Donor App"),
     ),
