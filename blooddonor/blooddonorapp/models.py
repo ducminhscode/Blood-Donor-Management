@@ -201,7 +201,6 @@ class DonationEvent(BaseModel):
     sub_district = models.CharField(max_length=254)
     location = models.TextField()
     time_start = models.DateTimeField()
-    time_end = models.DateTimeField()
     is_expire = models.BooleanField(default=False)
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_donation_event')
 
@@ -286,7 +285,6 @@ class EmergencyRequest(BaseModel):
     blood_volume = models.IntegerField()
     critical = models.BooleanField(default=True)
     emergency_note = models.TextField(null=True, blank=True)
-    deadline_at = models.DateTimeField()
     is_expire = models.BooleanField(default=False)
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_emergency_request')
     hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True, related_name='hospital_emergency_request')

@@ -109,10 +109,10 @@ class DonationEventSerializer(ModelSerializer):
 
     class Meta:
         model = DonationEvent
-        fields = ['id', 'title', 'description', 'image_url', 'province', 'sub_district', 'time_start', 'time_end',
+        fields = ['id', 'title', 'description', 'image_url', 'province', 'sub_district', 'time_start',
                   'is_expire', 'is_active', 'created_at', 'updated_at', 'staff']
 
-        read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active', 'is_expire']
+        read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active']
 
 
 class EmergencyRequestSerializer(ModelSerializer):
@@ -128,7 +128,7 @@ class EmergencyRequestSerializer(ModelSerializer):
     class Meta:
         model = EmergencyRequest
         fields = ['id', 'staff', 'is_active', 'created_at', 'updated_at', 'blood_type', 'rh_factor', 'donation_type',
-                  'patient_name', 'phone', 'blood_volume', 'critical', 'emergency_note', 'deadline_at', 'is_expire',
+                  'patient_name', 'phone', 'blood_volume', 'critical', 'emergency_note', 'is_expire',
                   'hospital', 'hospital_id']
 
-        read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active', 'is_expire']
+        read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active']
