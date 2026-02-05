@@ -17,7 +17,7 @@ from .permissions import OwnerPermission, StaffPermission, OwnedStaffPermission,
 from .serializers import AccountSerializer, ResetPasswordSerializer, \
     ChangePasswordSerializer, ProfileUpdateSerializer, DonorSerializer, StaffSerializer, DonationEventSerializer, \
     HospitalSerializer, EmergencyRequestSerializer, RewardCategorySerializer, RewardSerializer, \
-    RecipientInformationSerializer, RedeemRewardSerializer, FriendSerializer
+    FriendSerializer, RecipientInformationSerializer, RewardHistorySerializer
 
 
 class AccountViewSet(viewsets.ViewSet):
@@ -528,28 +528,47 @@ class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Ret
 class RewardViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = Reward.objects.filter(is_active=True)
     serializer_class = RewardSerializer
-    permission_classes = [IsAuthenticated, DonorPermission]
+    permission_classes = [DonorPermission]
 
-    @action(methods=['post'], url_path='redeem', detail=True)
-    def redeem(self, request, pk=None):
+    def get_permissions(self):
+        if self.action in ['history']:
+            return [OwnedDonorPermission()]
+        return [DonorPermission()]
+
+    @action(methods=['post'], detail=True, url_path='redeem')
+    def redeem_reward(self, request, pk=None):
+        donor = request.user.donor
         reward = get_object_or_404(Reward, pk=pk, is_active=True)
 
-        serializer = RedeemRewardSerializer(
-            data=request.data,
-            context={
-                'request': request,
-                'reward': reward
-            }
-        )
-        serializer.is_valid(raise_exception=True)
-        history = serializer.save()
+        if reward.remaining_stock <= 0:
+            return Response({"error": "This reward is gone"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(
-            {
-                "message": "Claim reward successful",
-                "reward": reward.name,
-                "points_used": history.points_used,
-                "remaining_points": request.user.donor.points
-            },
-            status=status.HTTP_201_CREATED
-        )
+        if donor.points < reward.points_required:
+            return Response({"error": "Not enough points"}, status=status.HTTP_400_BAD_REQUEST)
+
+        recipient_serializer = RecipientInformationSerializer(data=request.data.get('recipient_information'))
+        recipient_serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            recipient = recipient_serializer.save()
+
+            donor.points -= reward.points_required
+            donor.save(update_fields=['points'])
+
+            reward.remaining_stock -= 1
+            reward.save(update_fields=['remaining_stock'])
+
+            history = RewardHistory.objects.create(
+                reward=reward,
+                donor=donor,
+                points_used=reward.points_required,
+                recipient_information=recipient
+            )
+
+        return Response(RewardHistorySerializer(history).data, status=status.HTTP_201_CREATED)
+
+
+class RewardHistoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+    queryset = RewardHistory.objects.filter(is_active=True)
+    serializer_class = RewardHistorySerializer
+    permission_classes = [OwnedDonorPermission]

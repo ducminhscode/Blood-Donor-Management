@@ -166,38 +166,10 @@ class RewardHistorySerializer(ModelSerializer):
         fields = '__all__'
 
 
-class RedeemRewardSerializer(serializers.Serializer):
-    recipient = RecipientInformationSerializer()
-
-    def create(self, validated_data):
-        request = self.context['request']
-        donor = request.user.donor
-        reward = self.context['reward']
-
-        if reward.remaining_stock <= 0:
-            raise serializers.ValidationError({"error": "This reward is gone"})
-
-        if donor.points < reward.points_required:
-            raise serializers.ValidationError({"error": "Not enough points"})
-
-        with transaction.atomic():
-            donor.points -= reward.points_required
-            donor.save()
-
-            reward.remaining_stock -= 1
-            reward.save()
-            recipient = RecipientInformation.objects.create(**validated_data['recipient'])
-
-            history = RewardHistory.objects.create(
-                donor=donor,
-                reward=reward,
-                points_used=reward.points_required,
-                recipient_information=recipient
-            )
-        return history
-
-
 class FriendSerializer(ModelSerializer):
+    requester = DonorSerializer(read_only=True)
+    addressee = DonorSerializer(read_only=True)
+
     class Meta:
         model = Friend
         fields = '__all__'

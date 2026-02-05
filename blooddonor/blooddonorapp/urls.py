@@ -14,6 +14,7 @@ router.register('staff', views.StaffViewSet, basename='staff')
 router.register('hospital', views.HospitalViewSet, basename='hospital')
 router.register('reward-category', views.RewardCategoryViewSet, basename='reward-category')
 router.register('reward', views.RewardViewSet, basename='reward')
+router.register('reward-history', views.RewardHistoryViewSet, basename='reward-history')
 
 urlpatterns = [
     path('', include(router.urls))
