@@ -11,11 +11,13 @@ from rest_framework.response import Response
 import random
 
 from blooddonor import settings
-from .models import Account, Role, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, Friend, FriendStatus
+from .models import Account, Role, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, Friend, FriendStatus, \
+    RewardCategory, Reward, RewardHistory
 from .permissions import OwnerPermission, StaffPermission, OwnedStaffPermission, OwnedDonorPermission, DonorPermission
 from .serializers import AccountSerializer, ResetPasswordSerializer, \
     ChangePasswordSerializer, ProfileUpdateSerializer, DonorSerializer, StaffSerializer, DonationEventSerializer, \
-    HospitalSerializer, EmergencyRequestSerializer
+    HospitalSerializer, EmergencyRequestSerializer, RewardCategorySerializer, RewardSerializer, \
+    RecipientInformationSerializer, RedeemRewardSerializer, FriendSerializer
 
 
 class AccountViewSet(viewsets.ViewSet):
@@ -242,13 +244,10 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=['post'], url_path='request-friend', detail=False)
-    def request_friend(self, request):
+    @action(methods=['post'], url_path='request-friend', detail=True)
+    def request_friend(self, request, pk=None):
         requester = request.user.donor
-        addressee_id = request.data.get('donor_id')
-
-        if not addressee_id:
-            return Response({"error": "Missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        addressee_id = pk
 
         try:
             addressee_id = int(addressee_id)
@@ -256,15 +255,15 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
             return Response({"error": "Invalid donor_id"}, status=status.HTTP_400_BAD_REQUEST)
 
         if requester.id == addressee_id:
-            return Response({"error": "Can't be friend"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Can't be friend with yourself"}, status=status.HTTP_400_BAD_REQUEST)
 
-        addressee = get_object_or_404(Donor, id=addressee_id)
+        addressee = get_object_or_404(Donor, id=addressee_id, is_active=True)
 
         if Friend.objects.filter(requester=requester, addressee=addressee).exists():
-            return Response({"error": "Already be friend"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Already sent friend request"}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
-            Friend.objects.create(
+            friend_request = Friend.objects.create(
                 requester=requester,
                 addressee=addressee,
                 status=FriendStatus.ADD_FRIEND.value
@@ -274,16 +273,12 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
                 addressee=requester,
                 status=FriendStatus.PENDING.value
             )
+        return Response(FriendSerializer(friend_request).data, status=status.HTTP_201_CREATED)
 
-        return Response({"message": "Invitation sent"}, status=status.HTTP_201_CREATED)
-
-    @action(methods=['post'], url_path='accept-friend', detail=False)
-    def accept_friend(self, request):
+    @action(methods=['post'], url_path='accept-friend', detail=True)
+    def accept_friend(self, request, pk=None):
         donor = request.user.donor
-        requester_id = request.data.get('donor_id')
-
-        if not requester_id:
-            return Response({"error": "Missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        requester_id = pk
 
         try:
             requester_id = int(requester_id)
@@ -311,23 +306,24 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
                 addressee=friend.requester
             ).update(status=FriendStatus.BEFRIEND.value)
 
-        return Response({"message": "Has become friend"}, status=status.HTTP_200_OK)
+            friend.refresh_from_db()
 
-    @action(methods=['post'], url_path='reject-friend', detail=False)
-    def reject_friend(self, request):
+        return Response(FriendSerializer(friend).data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='reject-friend', detail=True)
+    def reject_friend(self, request, pk=None):
         donor = request.user.donor
-        requester_id = request.data.get('donor_id')
-
-        if not requester_id:
-            return Response({"error": "Missing donor_id"}, status=status.HTTP_400_BAD_REQUEST)
+        requester_id = pk
 
         try:
             requester_id = int(requester_id)
-        except ValueError:
+        except (TypeError, ValueError):
             return Response({"error": "Invalid donor_id"}, status=status.HTTP_400_BAD_REQUEST)
 
         if donor.id == requester_id:
             return Response({"error": "Can't reject yourself"}, status=status.HTTP_400_BAD_REQUEST)
+
+        get_object_or_404(Friend, requester_id=requester_id, addressee=donor)
 
         with transaction.atomic():
             Friend.objects.filter(
@@ -370,13 +366,10 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['post'], url_path='unfriend', detail=False)
-    def unfriend(self, request):
+    @action(methods=['post'], url_path='unfriend', detail=True)
+    def unfriend(self, request, pk=None):
         donor = request.user.donor
-        friend_id = request.data.get('donor_id')
-
-        if not friend_id:
-            return Response({"error": "Missing data"}, status=status.HTTP_400_BAD_REQUEST)
+        friend_id = pk
 
         try:
             friend_id = int(friend_id)
@@ -385,6 +378,8 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
 
         if donor.id == friend_id:
             return Response({"error": "Can't unfriend"}, status=status.HTTP_400_BAD_REQUEST)
+
+        get_object_or_404(Friend, requester=donor, addressee_id=friend_id, status=FriendStatus.BEFRIEND.value)
 
         with transaction.atomic():
             Friend.objects.filter(
@@ -409,7 +404,7 @@ class StaffViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
     def get_permissions(self):
         if self.action in ['staff_update']:
             return [OwnedStaffPermission()]
-        if self.action in ['event_management', 'emergency_request']:
+        if self.action in ['donation_event', 'emergency_request']:
             return [StaffPermission()]
         return super().get_permissions()
 
@@ -422,8 +417,8 @@ class StaffViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=['get'], url_path='event-management', detail=False)
-    def event_management(self, request):
+    @action(methods=['get'], url_path='donation-event', detail=False)
+    def donation_event(self, request):
         staff = request.user.staff
         events = DonationEvent.objects.filter(staff=staff, is_active=True).order_by('-created_at')
         serializer = DonationEventSerializer(events, many=True)
@@ -444,7 +439,7 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
     def get_permissions(self):
         if self.action in ['create']:
             return [StaffPermission()]
-        if self.action in ['update', 'destroy']:
+        if self.action in ['update', 'destroy', 'dnt_detail_staff']:
             return [OwnedStaffPermission()]
         return super().get_permissions()
 
@@ -469,6 +464,14 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
         donation_event.save(update_fields=["is_active"])
         return Response({"message": "Xoá thành công"}, status=status.HTTP_204_NO_CONTENT)
 
+    @action(methods=['get'], url_path='staff', detail=True)
+    def dnt_detail_staff(self, request, pk=None):
+        staff = request.user.staff
+        donation_event = get_object_or_404(DonationEvent, pk=pk, staff=staff, is_active=True)
+
+        serializer = DonationEventSerializer(donation_event)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class HospitalViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Hospital.objects.filter(is_active=True)
@@ -482,7 +485,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
     def get_permissions(self):
         if self.action in ['create']:
             return [StaffPermission()]
-        if self.action in ['update', 'destroy']:
+        if self.action in ['update', 'destroy', 'emc_detail_staff']:
             return [OwnedStaffPermission()]
         return super().get_permissions()
 
@@ -506,3 +509,47 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
         emergency_request.is_active = False
         emergency_request.save(update_fields=["is_active"])
         return Response({"message": "Xoá thành công"}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get'], url_path='staff', detail=True)
+    def emc_detail_staff(self, request, pk=None):
+        staff = request.user.staff
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, staff=staff, is_active=True)
+
+        serializer = EmergencyRequestSerializer(emergency_request)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+    queryset = RewardCategory.objects.filter(is_active=True)
+    serializer_class = RewardCategorySerializer
+    permission_classes = [IsAuthenticated, DonorPermission]
+
+
+class RewardViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+    queryset = Reward.objects.filter(is_active=True)
+    serializer_class = RewardSerializer
+    permission_classes = [IsAuthenticated, DonorPermission]
+
+    @action(methods=['post'], url_path='redeem', detail=True)
+    def redeem(self, request, pk=None):
+        reward = get_object_or_404(Reward, pk=pk, is_active=True)
+
+        serializer = RedeemRewardSerializer(
+            data=request.data,
+            context={
+                'request': request,
+                'reward': reward
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        history = serializer.save()
+
+        return Response(
+            {
+                "message": "Claim reward successful",
+                "reward": reward.name,
+                "points_used": history.points_used,
+                "remaining_points": request.user.donor.points
+            },
+            status=status.HTTP_201_CREATED
+        )

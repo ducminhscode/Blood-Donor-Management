@@ -2,8 +2,10 @@ import os
 
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer, CharField, EmailField, ValidationError
-from .models import Account, Donor, Staff, DonationEvent, Hospital, EmergencyRequest
+from .models import Account, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, RewardCategory, Reward, \
+    RewardHistory, RecipientInformation, Friend
 from dotenv import load_dotenv
+from django.db import transaction
 
 load_dotenv()
 
@@ -132,3 +134,70 @@ class EmergencyRequestSerializer(ModelSerializer):
                   'hospital', 'hospital_id']
 
         read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active']
+
+
+class RewardCategorySerializer(ModelSerializer):
+    class Meta:
+        model = RewardCategory
+        fields = '__all__'
+
+
+class RewardSerializer(ModelSerializer):
+    reward_category = RewardCategorySerializer(read_only=True)
+
+    class Meta:
+        model = Reward
+        fields = '__all__'
+
+
+class RecipientInformationSerializer(ModelSerializer):
+    class Meta:
+        model = RecipientInformation
+        fields = '__all__'
+
+
+class RewardHistorySerializer(ModelSerializer):
+    donor = DonorSerializer(read_only=True)
+    recipient_information = RecipientInformationSerializer(read_only=True)
+    reward = RewardSerializer(read_only=True)
+
+    class Meta:
+        model = RewardHistory
+        fields = '__all__'
+
+
+class RedeemRewardSerializer(serializers.Serializer):
+    recipient = RecipientInformationSerializer()
+
+    def create(self, validated_data):
+        request = self.context['request']
+        donor = request.user.donor
+        reward = self.context['reward']
+
+        if reward.remaining_stock <= 0:
+            raise serializers.ValidationError({"error": "This reward is gone"})
+
+        if donor.points < reward.points_required:
+            raise serializers.ValidationError({"error": "Not enough points"})
+
+        with transaction.atomic():
+            donor.points -= reward.points_required
+            donor.save()
+
+            reward.remaining_stock -= 1
+            reward.save()
+            recipient = RecipientInformation.objects.create(**validated_data['recipient'])
+
+            history = RewardHistory.objects.create(
+                donor=donor,
+                reward=reward,
+                points_used=reward.points_required,
+                recipient_information=recipient
+            )
+        return history
+
+
+class FriendSerializer(ModelSerializer):
+    class Meta:
+        model = Friend
+        fields = '__all__'
