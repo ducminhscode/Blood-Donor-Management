@@ -3,9 +3,8 @@ import os
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer, CharField, EmailField, ValidationError
 from .models import Account, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, RewardCategory, Reward, \
-    RewardHistory, RecipientInformation, Friend, EmergencyResponse, EventRegistration
+    RewardHistory, RecipientInformation, Friend, EmergencyResponse, EventRegistration, MedicalCheckUp, BloodDonation
 from dotenv import load_dotenv
-from django.db import transaction
 
 load_dotenv()
 
@@ -187,3 +186,16 @@ class FriendSerializer(ModelSerializer):
     class Meta:
         model = Friend
         fields = '__all__'
+
+
+class MedicalCheckUpSerializer(ModelSerializer):
+    class Meta:
+        model = MedicalCheckUp
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'staff', 'event_registration', 'emergency_response']
+
+class BloodDonationSerializer(ModelSerializer):
+    class Meta:
+        model = BloodDonation
+        fields = '__all__'
+        read_only_fields = ['id', 'created_at', 'updated_at', 'staff', 'medical_check_up']

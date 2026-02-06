@@ -1,10 +1,12 @@
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import transaction
+from django.utils import timezone
 
 # Create your views here.
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
+from rest_framework.permissions import OR
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -12,13 +14,14 @@ import random
 
 from blooddonor import settings
 from .models import Account, Role, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, Friend, FriendStatus, \
-    RewardCategory, Reward, RewardHistory, ResponseStatus, EmergencyResponse, EventRegistration, RegistrationStatus
+    RewardCategory, Reward, RewardHistory, ResponseStatus, EmergencyResponse, EventRegistration, RegistrationStatus, \
+    MedicalCheckUp, BloodDonation
 from .permissions import OwnerPermission, StaffPermission, OwnedStaffPermission, OwnedDonorPermission, DonorPermission
 from .serializers import AccountSerializer, ResetPasswordSerializer, \
     ChangePasswordSerializer, ProfileUpdateSerializer, DonorSerializer, StaffSerializer, DonationEventSerializer, \
     HospitalSerializer, EmergencyRequestSerializer, RewardCategorySerializer, RewardSerializer, \
     FriendSerializer, RecipientInformationSerializer, RewardHistorySerializer, EmergencyResponseSerializer, \
-    EventRegistrationSerializer
+    EventRegistrationSerializer, MedicalCheckUpSerializer, BloodDonationSerializer
 
 
 class AccountViewSet(viewsets.ViewSet):
@@ -440,7 +443,12 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
     def get_permissions(self):
         if self.action in ['create']:
             return [StaffPermission()]
-        if self.action in ['update', 'destroy', 'dnt_detail_staff']:
+        if self.action in ['update', 'destroy', 'dnt_detail_staff', 'registrations', 'registration_detail',
+                           'reject_registration', 'approve_registration']:
+            return [OwnedStaffPermission()]
+        if self.action in ['medical_checkup', 'blood_donation']:
+            if self.request.method == 'GET':
+                return [OR(OwnedStaffPermission(), OwnedDonorPermission())]
             return [OwnedStaffPermission()]
         if self.action in ['register']:
             return [DonorPermission()]
@@ -482,8 +490,13 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
         serializer = EventRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        identification = serializer.validated_data.get('identification')
+        phone = serializer.validated_data.get('phone')
+        email = serializer.validated_data.get('email')
+        is_proxy = serializer.validated_data.get('is_proxy', False)
+
         with transaction.atomic():
-            if not serializer.validated_data.get('is_proxy', False):
+            if not is_proxy:
                 exists = EventRegistration.objects.filter(
                     donor=donor,
                     donation_event=donation_event,
@@ -496,6 +509,30 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
+            if EventRegistration.objects.filter(
+                    donation_event=donation_event,
+                    identification=identification
+            ).exists():
+                return Response(
+                    {"error": "Identification already registered for this event"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if EventRegistration.objects.filter(
+                    donation_event=donation_event,
+                    phone=phone
+            ).exists():
+                return Response(
+                    {"error": "Phone number already registered for this event"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if EventRegistration.objects.filter(donation_event=donation_event, email=email).exists():
+                return Response(
+                    {"error": "Email already registered for this event"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             registration = EventRegistration.objects.create(
                 donor=donor,
                 donation_event=donation_event,
@@ -503,6 +540,351 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             )
 
         return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], url_path='registrations', detail=True)
+    def registrations(self, request, pk=None):
+        staff = request.user.staff
+
+        donation_event = get_object_or_404(DonationEvent, pk=pk, staff=staff, is_active=True)
+
+        registrations = EventRegistration.objects.filter(
+            donation_event=donation_event,
+            is_active=True
+        ).order_by('-created_at')
+
+        serializer = EventRegistrationSerializer(registrations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path=r'registrations/(?P<registration_id>[^/.]+)', detail=True)
+    def registration_detail(self, request, pk=None, registration_id=None):
+        staff = request.user.staff
+
+        donation_event = get_object_or_404(DonationEvent, pk=pk, staff=staff, is_active=True)
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donation_event=donation_event,
+            is_active=True
+        )
+
+        serializer = EventRegistrationSerializer(registration)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='registrations/(?P<registration_id>[^/.]+)/reject', detail=True)
+    def reject_registration(self, request, pk=None, registration_id=None):
+        staff = request.user.staff
+
+        donation_event = get_object_or_404(DonationEvent, pk=pk, staff=staff, is_active=True)
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donation_event=donation_event,
+            is_active=True
+        )
+
+        if registration.status == RegistrationStatus.COMPLETED.value:
+            return Response(
+                {"error": "Cannot reject a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.APPROVED.value:
+            return Response(
+                {"error": "Cannot reject a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.CHECKED_IN.value:
+            return Response(
+                {"error": "Cannot reject a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.REJECTED.value:
+            return Response({"error": "Donor already rejected"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            registration.status = RegistrationStatus.REJECTED.value
+            registration.save(update_fields=['status'])
+
+        return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='registrations/(?P<registration_id>[^/.]+)/approve', detail=True)
+    def approve_registration(self, request, pk=None, registration_id=None):
+        staff = request.user.staff
+
+        donation_event = get_object_or_404(DonationEvent, pk=pk, staff=staff, is_active=True)
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donation_event=donation_event,
+            is_active=True
+        )
+
+        if registration.status == RegistrationStatus.COMPLETED.value:
+            return Response(
+                {"error": "Cannot approve a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.CHECKED_IN.value:
+            return Response(
+                {"error": "Cannot approve a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.REJECTED.value:
+            return Response(
+                {"error": "Cannot approve a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.APPROVED.value:
+            return Response({"error": "Donor already approved"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            registration.status = RegistrationStatus.APPROVED.value
+            registration.save(update_fields=['status'])
+
+        return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='registrations/(?P<registration_id>[^/.]+)/checkin', detail=True)
+    def checkin_registration(self, request, pk=None, registration_id=None):
+        staff = request.user.staff
+
+        donation_event = get_object_or_404(DonationEvent, pk=pk, staff=staff, is_active=True)
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donation_event=donation_event,
+            is_active=True
+        )
+
+        if registration.status == RegistrationStatus.COMPLETED.value:
+            return Response(
+                {"error": "Cannot checkin a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.REJECTED.value:
+            return Response(
+                {"error": "Cannot checkin a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.REGISTERED.value:
+            return Response(
+                {"error": "Cannot checkin a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.CHECKED_IN.value:
+            return Response({"error": "Donor already checked in"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            registration.status = RegistrationStatus.CHECKED_IN.value
+            registration.save(update_fields=['status'])
+
+        return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='registrations/(?P<registration_id>[^/.]+)/complete', detail=True)
+    def complete_registration(self, request, pk=None, registration_id=None):
+        staff = request.user.staff
+
+        donation_event = get_object_or_404(DonationEvent, pk=pk, staff=staff, is_active=True)
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donation_event=donation_event,
+            is_active=True
+        )
+
+        if registration.status == RegistrationStatus.REGISTERED.value:
+            return Response(
+                {"error": "Cannot complete a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.REJECTED.value:
+            return Response(
+                {"error": "Cannot complete a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.APPROVED.value:
+            return Response(
+                {"error": "Cannot complete a completed registration"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if registration.status == RegistrationStatus.COMPLETED.value:
+            return Response({"error": "Donor already completed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            registration.status = RegistrationStatus.COMPLETED.value
+            registration.save(update_fields=['status'])
+
+        return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
+
+    @action(methods=['get', 'post', 'patch', 'delete'],
+            url_path=r'registrations/(?P<registration_id>[^/.]+)/medical-checkup', detail=True)
+    def medical_checkup(self, request, pk=None, registration_id=None):
+        donation_event = get_object_or_404(DonationEvent, pk=pk, is_active=True)
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donation_event=donation_event,
+            is_active=True
+        )
+
+        if request.method == 'GET':
+            medical_checkup = get_object_or_404(MedicalCheckUp, event_registration=registration, is_active=True)
+
+            return Response(MedicalCheckUpSerializer(medical_checkup).data, status=status.HTTP_200_OK)
+
+        staff = request.user.staff
+
+        if request.method == 'POST':
+
+            if registration.status != RegistrationStatus.CHECKED_IN.value:
+                return Response(
+                    {"error": "Medical checkup only allowed for CHECKED_IN registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if MedicalCheckUp.objects.filter(event_registration=registration).exists():
+                return Response(
+                    {"error": "Medical checkup already exists for this registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = MedicalCheckUpSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                medical_checkup = serializer.save(event_registration=registration, staff=staff)
+
+            return Response(MedicalCheckUpSerializer(medical_checkup).data, status=status.HTTP_201_CREATED)
+
+        elif request.method == 'PATCH':
+
+            medical_checkup = get_object_or_404(MedicalCheckUp, event_registration=registration, is_active=True)
+
+            if registration.status == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot update medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = MedicalCheckUpSerializer(medical_checkup, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        elif request.method == 'DELETE':
+            medical_checkup = get_object_or_404(MedicalCheckUp, event_registration=registration, is_active=True)
+
+            if registration.status == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot delete medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            with transaction.atomic():
+                medical_checkup.is_active = False
+                medical_checkup.save(update_fields=['is_active'])
+
+            return Response({"message": "Medical checkup deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @action(methods=['get', 'post', 'patch', 'delete'],
+            url_path=r'registrations/(?P<registration_id>[^/.]+)/medical-checkup/(?P<medical_check_up_id>[^/.]+)/blood-donation',
+            detail=True)
+    def blood_donation(self, request, pk=None, registration_id=None, medical_check_up_id=None):
+
+        donation_event = get_object_or_404(DonationEvent, pk=pk, is_active=True)
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donation_event=donation_event,
+            is_active=True
+        )
+
+        medical_checkup = get_object_or_404(
+            MedicalCheckUp,
+            pk=medical_check_up_id,
+            event_registration=registration,
+            is_active=True
+        )
+
+        if request.method == 'GET':
+            blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+            return Response(BloodDonationSerializer(blood_donation).data, status=status.HTTP_200_OK)
+
+        staff = request.user.staff
+
+        if request.method == 'POST':
+
+            if not medical_checkup.is_eligible:
+                return Response(
+                    {"error": "Donor is not eligible for blood donation"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if BloodDonation.objects.filter(medical_check_up=medical_checkup).exists():
+                return Response(
+                    {"error": "Blood donation already exists for this medical checkup"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = BloodDonationSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                blood_donation = serializer.save(medical_check_up=medical_checkup, staff=staff)
+
+                registration.status = RegistrationStatus.COMPLETED.value
+                registration.save(update_fields=['status'])
+
+                donor = registration.donor
+                donor.donation_count += 1
+                donor.last_donation = timezone.now()
+                donor.save(update_fields=['donation_count', 'last_donation'])
+
+            return Response(BloodDonationSerializer(blood_donation).data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'PATCH':
+            blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            serializer = BloodDonationSerializer(blood_donation, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if request.method == 'DELETE':
+            blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            with transaction.atomic():
+                blood_donation.is_active = False
+                blood_donation.save(update_fields=['is_active'])
+
+            return Response({"message": "Blood donation deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class HospitalViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
@@ -517,7 +899,12 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
     def get_permissions(self):
         if self.action in ['create']:
             return [StaffPermission()]
-        if self.action in ['update', 'destroy', 'emc_detail_staff']:
+        if self.action in ['update', 'destroy', 'emc_detail_staff', 'responses', 'response_detail', 'checkin_response',
+                           'complete_response']:
+            return [OwnedStaffPermission()]
+        if self.action in ['medical_checkup', 'blood_donation']:
+            if self.request.method == 'GET':
+                return [OR(OwnedStaffPermission(), OwnedDonorPermission())]
             return [OwnedStaffPermission()]
         if self.action in ['response']:
             return [DonorPermission()]
@@ -581,10 +968,247 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             }
 
             if status_value == ResponseStatus.ACCEPTED.value:
-                response_data["status_registration"] = RegistrationStatus.REGISTERED.value
+                response_data["status_registration"] = RegistrationStatus.APPROVED.value
             response_obj = EmergencyResponse.objects.create(**response_data)
 
         return Response(EmergencyResponseSerializer(response_obj).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], url_path='responses', detail=True)
+    def responses(self, request, pk=None):
+        staff = request.user.staff
+
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, staff=staff, is_active=True)
+
+        responses = EmergencyResponse.objects.filter(
+            emergency_request=emergency_request,
+            is_active=True
+        )
+
+        serializer = EmergencyResponseSerializer(responses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path=r'responses/(?P<response_id>[^/.]+)', detail=True)
+    def response_detail(self, request, pk=None, response_id=None):
+        staff = request.user.staff
+
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, staff=staff, is_active=True)
+
+        response_obj = get_object_or_404(
+            EmergencyResponse,
+            pk=response_id,
+            emergency_request=emergency_request,
+            is_active=True
+        )
+
+        serializer = EmergencyResponseSerializer(response_obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path=r'responses/(?P<response_id>[^/.]+)/checkin', detail=True)
+    def checkin_response(self, request, pk=None, response_id=None):
+        staff = request.user.staff
+
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, staff=staff, is_active=True)
+
+        response_obj = get_object_or_404(
+            EmergencyResponse,
+            pk=response_id,
+            emergency_request=emergency_request,
+            is_active=True
+        )
+
+        if response_obj.status_response != ResponseStatus.ACCEPTED.value:
+            return Response(
+                {"error": "Donor has not accepted this emergency request"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if response_obj.status_registration == RegistrationStatus.CHECKED_IN.value:
+            return Response({"error": "Donor already checked in"}, status=status.HTTP_400_BAD_REQUEST)
+
+        response_obj.status_registration = RegistrationStatus.CHECKED_IN.value
+        response_obj.save(update_fields=['status_registration'])
+
+        return Response(EmergencyResponseSerializer(response_obj).data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path=r'responses/(?P<response_id>[^/.]+)/complete', detail=True)
+    def complete_response(self, request, pk=None, response_id=None):
+        staff = request.user.staff
+
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, staff=staff, is_active=True)
+
+        response_obj = get_object_or_404(
+            EmergencyResponse,
+            pk=response_id,
+            emergency_request=emergency_request,
+            is_active=True
+        )
+
+        if response_obj.status_response != ResponseStatus.ACCEPTED.value:
+            return Response(
+                {"error": "Donor has not accepted this emergency request"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if response_obj.status_registration == RegistrationStatus.COMPLETED.value:
+            return Response({"error": "Donor already complete"}, status=status.HTTP_400_BAD_REQUEST)
+
+        response_obj.status_registration = RegistrationStatus.COMPLETED.value
+        response_obj.save(update_fields=['status_registration'])
+
+        return Response(EmergencyResponseSerializer(response_obj).data, status=status.HTTP_200_OK)
+
+    @action(methods=['get', 'post', 'patch', 'delete'], url_path=r'responses/(?P<response_id>[^/.]+)/medical-checkup',
+            detail=True)
+    def medical_checkup(self, request, pk=None, response_id=None):
+
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, is_active=True)
+
+        response_obj = get_object_or_404(
+            EmergencyResponse,
+            pk=response_id,
+            emergency_request=emergency_request,
+            is_active=True
+        )
+
+        if request.method == 'GET':
+            medical_checkup = get_object_or_404(MedicalCheckUp, emergency_response=response_obj, is_active=True)
+
+            return Response(MedicalCheckUpSerializer(medical_checkup).data, status=status.HTTP_200_OK)
+
+        staff = request.user.staff
+
+        if request.method == 'POST':
+
+            if response_obj.status_registration != RegistrationStatus.CHECKED_IN.value:
+                return Response({"error": "Donor has not checked in"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if MedicalCheckUp.objects.filter(emergency_request=emergency_request).exists():
+                return Response(
+                    {"error": "Medical checkup already exists for this registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = MedicalCheckUpSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                medical_checkup = serializer.save(emergency_response=response_obj, staff=staff)
+
+            return Response(MedicalCheckUpSerializer(medical_checkup).data, status=status.HTTP_201_CREATED)
+
+        elif request.method == 'PATCH':
+
+            medical_checkup = get_object_or_404(MedicalCheckUp, emergency_response=response_obj, is_active=True)
+
+            if response_obj.status_registration == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot update medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = MedicalCheckUpSerializer(medical_checkup, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        elif request.method == 'DELETE':
+            medical_checkup = get_object_or_404(MedicalCheckUp, emergency_response=response_obj, is_active=True)
+
+            if response_obj.status == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot delete medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            with transaction.atomic():
+                medical_checkup.is_active = False
+                medical_checkup.save(update_fields=['is_active'])
+
+            return Response({"message": "Medical checkup deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response({"error": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @action(methods=['get', 'post', 'patch', 'delete'],
+            url_path=r'responses/(?P<response_id>[^/.]+)/medical-checkup/(?P<medical_check_up_id>[^/.]+)/blood-donation',
+            detail=True)
+    def blood_donation(self, request, pk=None, response_id=None, medical_check_up_id=None):
+
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, is_active=True)
+
+        response_obj = get_object_or_404(
+            EmergencyResponse,
+            pk=response_id,
+            emergency_request=emergency_request,
+            is_active=True
+        )
+
+        medical_checkup = get_object_or_404(
+            MedicalCheckUp,
+            pk=medical_check_up_id,
+            emergency_response=response_obj,
+            is_active=True
+        )
+
+        if request.method == 'GET':
+            blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+            return Response(BloodDonationSerializer(blood_donation).data, status=status.HTTP_200_OK)
+
+        staff = request.user.staff
+
+        if request.method == 'POST':
+
+            if not medical_checkup.is_eligible:
+                return Response(
+                    {"error": "Donor is not eligible for blood donation"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if BloodDonation.objects.filter(medical_check_up=medical_checkup).exists():
+                return Response(
+                    {"error": "Blood donation already exists for this medical checkup"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = BloodDonationSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                blood_donation = serializer.save(medical_check_up=medical_checkup, staff=staff)
+
+                response_obj.status_registration = RegistrationStatus.COMPLETED.value
+                response_obj.save(update_fields=['status_registration'])
+
+                donor = response_obj.donor
+                donor.donation_count += 1
+                donor.last_donation = timezone.now()
+                donor.save(update_fields=['donation_count', 'last_donation'])
+
+            return Response(BloodDonationSerializer(blood_donation).data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'PATCH':
+            blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            serializer = BloodDonationSerializer(blood_donation, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+
+            with transaction.atomic():
+                serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if request.method == 'DELETE':
+            blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            with transaction.atomic():
+                blood_donation.is_active = False
+                blood_donation.save(update_fields=['is_active'])
+
+            return Response({"message": "Blood donation deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
