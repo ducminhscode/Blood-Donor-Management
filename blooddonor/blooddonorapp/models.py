@@ -134,7 +134,8 @@ class KnowledgeBase(BaseModel):
     title = models.CharField(max_length=254)
     description = models.TextField(null=True, blank=True)
     file = models.FileField(upload_to='knowledgebase/')
-    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True, related_name='account_knowledge_base')
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='account_knowledge_base')
 
     def __str__(self):
         return self.title
@@ -219,7 +220,8 @@ class RegistrationStatus(IntEnum):
 
 class EventRegistration(BaseModel):
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE, related_name='donors_event_registration')
-    donation_event = models.ForeignKey(DonationEvent, on_delete=models.CASCADE, related_name='donation_events_event_registration')
+    donation_event = models.ForeignKey(DonationEvent, on_delete=models.CASCADE,
+                                       related_name='donation_events_event_registration')
     last_name = models.CharField(max_length=254)
     first_name = models.CharField(max_length=254)
     birth_date = models.DateField()
@@ -235,7 +237,6 @@ class EventRegistration(BaseModel):
     organization = models.TextField()
     status = models.IntegerField(choices=RegistrationStatus.choices(), default=RegistrationStatus.REGISTERED.value)
     is_proxy = models.BooleanField(default=False)
-    staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True, related_name='staff_event_registration')
 
     class Meta:
         constraints = [
@@ -287,7 +288,8 @@ class EmergencyRequest(BaseModel):
     emergency_note = models.TextField(null=True, blank=True)
     is_expire = models.BooleanField(default=False)
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='staff_emergency_request')
-    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True, related_name='hospital_emergency_request')
+    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name='hospital_emergency_request')
 
 
 class ResponseStatus(IntEnum):
@@ -301,8 +303,10 @@ class ResponseStatus(IntEnum):
 
 
 class EmergencyResponse(BaseModel):
-    status = models.IntegerField(choices=ResponseStatus.choices(), default=ResponseStatus.NO_RESPONSE.value)
-    emergency_request = models.ForeignKey(EmergencyRequest, on_delete=models.CASCADE, related_name='emergency_requests_emergency_response')
+    status_response = models.IntegerField(choices=ResponseStatus.choices(), default=ResponseStatus.NO_RESPONSE.value)
+    status_registration = models.IntegerField(choices=RegistrationStatus.choices(), null=True, blank=True, default=-1)
+    emergency_request = models.ForeignKey(EmergencyRequest, on_delete=models.CASCADE,
+                                          related_name='emergency_requests_emergency_response')
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE, related_name='donors_emergency_response')
 
 
@@ -326,7 +330,8 @@ class MedicalCheckUp(BaseModel):
     doctor = models.CharField(max_length=254)
     event_registration = models.OneToOneField(EventRegistration, on_delete=models.CASCADE, null=True, blank=True)
     emergency_response = models.OneToOneField(EmergencyResponse, on_delete=models.CASCADE, null=True, blank=True)
-    staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True, related_name='staff_medical_check_up')
+    staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name='staff_medical_check_up')
 
     class Meta:
         constraints = [
@@ -347,5 +352,6 @@ class BloodDonation(BaseModel):
     donation_note = models.TextField(null=True, blank=True)
     blood_taker = models.CharField(max_length=254)
     donation_type = models.IntegerField(choices=DonationType.choices())
-    staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True, related_name='staff_blood_donation')
+    staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name='staff_blood_donation')
     medical_check_up = models.OneToOneField(MedicalCheckUp, on_delete=models.CASCADE)

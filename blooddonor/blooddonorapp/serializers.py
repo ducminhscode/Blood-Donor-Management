@@ -3,7 +3,7 @@ import os
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer, CharField, EmailField, ValidationError
 from .models import Account, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, RewardCategory, Reward, \
-    RewardHistory, RecipientInformation, Friend
+    RewardHistory, RecipientInformation, Friend, EmergencyResponse, EventRegistration
 from dotenv import load_dotenv
 from django.db import transaction
 
@@ -102,8 +102,8 @@ class StaffSerializer(ModelSerializer):
         fields = ['id', 'account', 'department', 'degree', 'license_number', 'experience_years', 'emergency_phone',
                   'current_status', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at', 'updated_at']
 
-        read_only_fields = ['id', 'account', 'department', 'degree', 'license_number', 'is_verified', 'hospital',
-                            'hospital_id', 'is_active', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'account', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at',
+                            'updated_at']
 
 
 class DonationEventSerializer(ModelSerializer):
@@ -164,6 +164,20 @@ class RewardHistorySerializer(ModelSerializer):
     class Meta:
         model = RewardHistory
         fields = '__all__'
+
+
+class EmergencyResponseSerializer(ModelSerializer):
+    class Meta:
+        model = EmergencyResponse
+        fields = ['id', 'status_response', 'emergency_request', 'donor', 'created_at', 'status_registration']
+        read_only_fields = ['id', 'donor', 'created_at', 'emergency_request', 'status_registration']
+
+
+class EventRegistrationSerializer(ModelSerializer):
+    class Meta:
+        model = EventRegistration
+        fields = '__all__'
+        read_only_fields = ['id', 'donor', 'created_at', 'donation_event', 'updated_at', 'is_active', 'status']
 
 
 class FriendSerializer(ModelSerializer):

@@ -12,12 +12,13 @@ import random
 
 from blooddonor import settings
 from .models import Account, Role, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, Friend, FriendStatus, \
-    RewardCategory, Reward, RewardHistory
+    RewardCategory, Reward, RewardHistory, ResponseStatus, EmergencyResponse, EventRegistration, RegistrationStatus
 from .permissions import OwnerPermission, StaffPermission, OwnedStaffPermission, OwnedDonorPermission, DonorPermission
 from .serializers import AccountSerializer, ResetPasswordSerializer, \
     ChangePasswordSerializer, ProfileUpdateSerializer, DonorSerializer, StaffSerializer, DonationEventSerializer, \
     HospitalSerializer, EmergencyRequestSerializer, RewardCategorySerializer, RewardSerializer, \
-    FriendSerializer, RecipientInformationSerializer, RewardHistorySerializer
+    FriendSerializer, RecipientInformationSerializer, RewardHistorySerializer, EmergencyResponseSerializer, \
+    EventRegistrationSerializer
 
 
 class AccountViewSet(viewsets.ViewSet):
@@ -441,6 +442,8 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             return [StaffPermission()]
         if self.action in ['update', 'destroy', 'dnt_detail_staff']:
             return [OwnedStaffPermission()]
+        if self.action in ['register']:
+            return [DonorPermission()]
         return super().get_permissions()
 
     def create(self, request):
@@ -472,6 +475,35 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
         serializer = DonationEventSerializer(donation_event)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=['post'], url_path='register', detail=True)
+    def register(self, request, pk=None):
+        donor = request.user.donor
+        donation_event = get_object_or_404(DonationEvent, pk=pk, is_active=True, is_expire=False)
+        serializer = EventRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            if not serializer.validated_data.get('is_proxy', False):
+                exists = EventRegistration.objects.filter(
+                    donor=donor,
+                    donation_event=donation_event,
+                    is_proxy=False
+                ).exists()
+
+                if exists:
+                    return Response(
+                        {"error": "Donor already registered for this event"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+            registration = EventRegistration.objects.create(
+                donor=donor,
+                donation_event=donation_event,
+                **serializer.validated_data
+            )
+
+        return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_201_CREATED)
+
 
 class HospitalViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Hospital.objects.filter(is_active=True)
@@ -487,6 +519,8 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             return [StaffPermission()]
         if self.action in ['update', 'destroy', 'emc_detail_staff']:
             return [OwnedStaffPermission()]
+        if self.action in ['response']:
+            return [DonorPermission()]
         return super().get_permissions()
 
     def create(self, request):
@@ -517,6 +551,40 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
 
         serializer = EmergencyRequestSerializer(emergency_request)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='response', detail=True)
+    def response(self, request, pk=None):
+        donor = request.user.donor
+        emergency_request = get_object_or_404(EmergencyRequest, pk=pk, is_active=True, is_expire=False)
+
+        status_value = request.data.get('status_response')
+
+        try:
+            status_value = int(status_value)
+        except (TypeError, ValueError):
+            return Response({"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if status_value not in [ResponseStatus.ACCEPTED.value, ResponseStatus.REJECTED.value]:
+            return Response({"error": "Invalid response status"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if EmergencyResponse.objects.filter(emergency_request=emergency_request, donor=donor).exists():
+            return Response(
+                {"error": "You have already responded to this emergency request"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            response_data = {
+                "emergency_request": emergency_request,
+                "donor": donor,
+                "status_response": status_value
+            }
+
+            if status_value == ResponseStatus.ACCEPTED.value:
+                response_data["status_registration"] = RegistrationStatus.REGISTERED.value
+            response_obj = EmergencyResponse.objects.create(**response_data)
+
+        return Response(EmergencyResponseSerializer(response_obj).data, status=status.HTTP_201_CREATED)
 
 
 class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
