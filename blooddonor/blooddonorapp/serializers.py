@@ -63,11 +63,14 @@ class ChangePasswordSerializer(Serializer):
 class ProfileUpdateSerializer(ModelSerializer):
     class Meta:
         model = Account
-        fields = ['avatar', 'first_name', 'last_name', 'phone', 'birth_date', 'gender']
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'email', 'phone',
+                  'birth_date', 'gender', 'role', 'is_active', 'date_joined']
+
+        read_only_fields = ['id', 'role', 'date_joined', 'is_active', 'last_login', 'is_superuser', 'is_staff',
+                            'username', 'password', 'email']
 
 
 class DonorSerializer(ModelSerializer):
-    account = AccountSerializer()
 
     class Meta:
         model = Donor
@@ -76,7 +79,7 @@ class DonorSerializer(ModelSerializer):
                   'last_donation', 'points', 'is_private', 'is_active', 'created_at', 'updated_at']
 
         read_only_fields = ['id', 'account', 'blood_type', 'rh_factor', 'weight', 'height', 'bmi', 'donation_count',
-                            'can_donation', 'last_donation', 'points', 'is_active', 'created_at', 'updated_at']
+                            'last_donation', 'points', 'is_active', 'created_at', 'updated_at']
 
 
 class HospitalSerializer(ModelSerializer):
@@ -87,7 +90,7 @@ class HospitalSerializer(ModelSerializer):
 
 
 class StaffSerializer(ModelSerializer):
-    account = AccountSerializer()
+    # account = AccountSerializer()
     hospital_id = serializers.PrimaryKeyRelatedField(
         queryset=Hospital.objects.filter(is_active=True),
         source='hospital',
@@ -106,7 +109,7 @@ class StaffSerializer(ModelSerializer):
 
 
 class DonationEventSerializer(ModelSerializer):
-    staff = StaffSerializer(read_only=True)
+    # staff = StaffSerializer(read_only=True)
 
     class Meta:
         model = DonationEvent
@@ -117,7 +120,7 @@ class DonationEventSerializer(ModelSerializer):
 
 
 class EmergencyRequestSerializer(ModelSerializer):
-    staff = StaffSerializer(read_only=True)
+    # staff = StaffSerializer(read_only=True)
     hospital_id = serializers.PrimaryKeyRelatedField(
         queryset=Hospital.objects.filter(is_active=True),
         source='hospital',
@@ -142,8 +145,6 @@ class RewardCategorySerializer(ModelSerializer):
 
 
 class RewardSerializer(ModelSerializer):
-    reward_category = RewardCategorySerializer(read_only=True)
-
     class Meta:
         model = Reward
         fields = '__all__'
@@ -153,12 +154,13 @@ class RecipientInformationSerializer(ModelSerializer):
     class Meta:
         model = RecipientInformation
         fields = '__all__'
+        read_only_fields = ['id', 'updated_at', 'created_at', 'is_active']
 
 
 class RewardHistorySerializer(ModelSerializer):
-    donor = DonorSerializer(read_only=True)
-    recipient_information = RecipientInformationSerializer(read_only=True)
-    reward = RewardSerializer(read_only=True)
+    # donor = DonorSerializer(read_only=True)
+    # recipient_information = RecipientInformationSerializer(read_only=True)
+    # reward = RewardSerializer(read_only=True)
 
     class Meta:
         model = RewardHistory
@@ -180,8 +182,8 @@ class EventRegistrationSerializer(ModelSerializer):
 
 
 class FriendSerializer(ModelSerializer):
-    requester = DonorSerializer(read_only=True)
-    addressee = DonorSerializer(read_only=True)
+    # requester = DonorSerializer(read_only=True)
+    # addressee = DonorSerializer(read_only=True)
 
     class Meta:
         model = Friend
@@ -193,6 +195,7 @@ class MedicalCheckUpSerializer(ModelSerializer):
         model = MedicalCheckUp
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at', 'staff', 'event_registration', 'emergency_response']
+
 
 class BloodDonationSerializer(ModelSerializer):
     class Meta:

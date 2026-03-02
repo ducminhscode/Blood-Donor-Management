@@ -237,7 +237,7 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
         if self.action in ['request_friend', 'accept_friend', 'reject_friend', 'pending_list', 'friend_list',
                            'unfriend']:
             return [DonorPermission()]
-        return super().get_permissions()
+        return [IsAuthenticated()]
 
     @action(methods=['patch'], url_path='donor-update', detail=False)
     def donor_update(self, request):
@@ -410,7 +410,7 @@ class StaffViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
             return [OwnedStaffPermission()]
         if self.action in ['donation_event', 'emergency_request']:
             return [StaffPermission()]
-        return super().get_permissions()
+        return [IsAuthenticated()]
 
     @action(methods=['patch'], url_path='staff-update', detail=False)
     def staff_update(self, request):
@@ -729,6 +729,38 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             registration.status = RegistrationStatus.COMPLETED.value
             registration.save(update_fields=['status'])
 
+            if not registration.is_proxy:
+                donor = registration.donor
+
+                medical_checkup = MedicalCheckUp.objects.filter(event_registration=registration, is_active=True).first()
+                if medical_checkup:
+                    height_m = donor.height / 100
+                    bmi = round(donor.weight / (height_m * height_m), 2)
+
+                    donor.weight = medical_checkup.weight
+                    donor.height = medical_checkup.height
+                    donor.bmi = bmi
+                    donor.province = registration.province
+                    donor.sub_district = registration.sub_district
+                    donor.permanent_address = registration.permanent_address
+                    donor.identification = registration.identification
+                    donor.career = registration.career
+                    donor.organization = registration.organization
+
+                    blood_donation = BloodDonation.objects.filter(
+                        medical_check_up=medical_checkup,
+                        is_active=True
+                    ).first()
+
+                    if blood_donation:
+                        donor.blood_type = blood_donation.blood_type
+                        donor.rh_factor = blood_donation.rh_factor
+                        donor.donation_count += 1
+                        donor.last_donation = timezone.now()
+                        donor.points += 100
+
+                    donor.save()
+
         return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'post', 'patch', 'delete'],
@@ -854,18 +886,16 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             with transaction.atomic():
                 blood_donation = serializer.save(medical_check_up=medical_checkup, staff=staff)
 
-                registration.status = RegistrationStatus.COMPLETED.value
-                registration.save(update_fields=['status'])
-
-                donor = registration.donor
-                donor.donation_count += 1
-                donor.last_donation = timezone.now()
-                donor.save(update_fields=['donation_count', 'last_donation'])
-
             return Response(BloodDonationSerializer(blood_donation).data, status=status.HTTP_201_CREATED)
 
         if request.method == 'PATCH':
             blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            if registration.status == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot update medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             serializer = BloodDonationSerializer(blood_donation, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
@@ -877,6 +907,12 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
 
         if request.method == 'DELETE':
             blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            if registration.status == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot update medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             with transaction.atomic():
                 blood_donation.is_active = False
@@ -890,6 +926,7 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
 class HospitalViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Hospital.objects.filter(is_active=True)
     serializer_class = HospitalSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -1055,6 +1092,26 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
         response_obj.status_registration = RegistrationStatus.COMPLETED.value
         response_obj.save(update_fields=['status_registration'])
 
+        donor = response_obj.donor
+
+        medical_checkup = MedicalCheckUp.objects.filter(emergency_response=response_obj, is_active=True).first()
+        if medical_checkup:
+            height_m = donor.height / 100
+            bmi = round(donor.weight / (height_m * height_m), 2)
+
+            donor.weight = medical_checkup.weight
+            donor.height = medical_checkup.height
+            donor.bmi = bmi
+
+            blood_donation = BloodDonation.objects.filter(medical_check_up=medical_checkup, is_active=True).first()
+
+            if blood_donation:
+                donor.donation_count += 1
+                donor.last_donation = timezone.now()
+                donor.points += 200
+
+            donor.save()
+
         return Response(EmergencyResponseSerializer(response_obj).data, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'post', 'patch', 'delete'], url_path=r'responses/(?P<response_id>[^/.]+)/medical-checkup',
@@ -1178,18 +1235,16 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             with transaction.atomic():
                 blood_donation = serializer.save(medical_check_up=medical_checkup, staff=staff)
 
-                response_obj.status_registration = RegistrationStatus.COMPLETED.value
-                response_obj.save(update_fields=['status_registration'])
-
-                donor = response_obj.donor
-                donor.donation_count += 1
-                donor.last_donation = timezone.now()
-                donor.save(update_fields=['donation_count', 'last_donation'])
-
             return Response(BloodDonationSerializer(blood_donation).data, status=status.HTTP_201_CREATED)
 
         if request.method == 'PATCH':
             blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            if response_obj.status_registration == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot update medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             serializer = BloodDonationSerializer(blood_donation, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
@@ -1201,6 +1256,12 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
 
         if request.method == 'DELETE':
             blood_donation = get_object_or_404(BloodDonation, medical_check_up=medical_checkup, is_active=True)
+
+            if response_obj.status_registration == RegistrationStatus.COMPLETED.value:
+                return Response(
+                    {"error": "Cannot update medical checkup for completed registration"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             with transaction.atomic():
                 blood_donation.is_active = False
@@ -1214,20 +1275,36 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
 class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = RewardCategory.objects.filter(is_active=True)
     serializer_class = RewardCategorySerializer
-    permission_classes = [IsAuthenticated, DonorPermission]
+
+    @action(methods=['get'], url_path='reward', detail=True)
+    def get_reward_by_category(self, request, pk=None):
+        category = self.get_object()
+
+        rewards = Reward.objects.filter(reward_category=category, is_active=True)
+
+        serializer = RewardSerializer(rewards, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='reward/(?P<reward_id>\d+)', detail=True)
+    def get_reward_retrieve_by_category(self, request, pk=None, reward_id=None):
+        category = self.get_object()
+
+        reward = get_object_or_404(Reward, pk=reward_id, reward_category=category, is_active=True)
+
+        serializer = RewardSerializer(reward)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RewardViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+class RewardViewSet(viewsets.ViewSet):
     queryset = Reward.objects.filter(is_active=True)
     serializer_class = RewardSerializer
-    permission_classes = [DonorPermission]
 
     def get_permissions(self):
-        if self.action in ['history']:
-            return [OwnedDonorPermission()]
-        return [DonorPermission()]
+        if self.action in ['redeem_reward']:
+            return [DonorPermission()]
+        return [IsAuthenticated()]
 
-    @action(methods=['post'], detail=True, url_path='redeem')
+    @action(methods=['post'], url_path='redeem', detail=True)
     def redeem_reward(self, request, pk=None):
         donor = request.user.donor
         reward = get_object_or_404(Reward, pk=pk, is_active=True)
@@ -1238,7 +1315,7 @@ class RewardViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPI
         if donor.points < reward.points_required:
             return Response({"error": "Not enough points"}, status=status.HTTP_400_BAD_REQUEST)
 
-        recipient_serializer = RecipientInformationSerializer(data=request.data.get('recipient_information'))
+        recipient_serializer = RecipientInformationSerializer(data=request.data)
         recipient_serializer.is_valid(raise_exception=True)
 
         with transaction.atomic():
@@ -1260,7 +1337,20 @@ class RewardViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPI
         return Response(RewardHistorySerializer(history).data, status=status.HTTP_201_CREATED)
 
 
-class RewardHistoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
-    queryset = RewardHistory.objects.filter(is_active=True)
-    serializer_class = RewardHistorySerializer
-    permission_classes = [OwnedDonorPermission]
+class RewardHistoryViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, OwnedDonorPermission]
+
+    def get_queryset(self):
+        return RewardHistory.objects.filter(is_active=True, donor__account=self.request.user)
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = RewardHistorySerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, pk=None):
+        reward_history = get_object_or_404(RewardHistory, pk=pk, is_active=True, donor__account=request.user)
+        self.check_object_permissions(request, reward_history)
+
+        serializer = RewardHistorySerializer(reward_history)
+        return Response(serializer.data, status=status.HTTP_200_OK)
