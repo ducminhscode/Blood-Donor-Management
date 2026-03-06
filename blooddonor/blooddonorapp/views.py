@@ -450,7 +450,7 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             if self.request.method == 'GET':
                 return [OR(OwnedStaffPermission(), OwnedDonorPermission())]
             return [OwnedStaffPermission()]
-        if self.action in ['register']:
+        if self.action in ['register', 'my_registrations', 'my_registration_detail']:
             return [DonorPermission()]
         return super().get_permissions()
 
@@ -565,6 +565,31 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             EventRegistration,
             pk=registration_id,
             donation_event=donation_event,
+            is_active=True
+        )
+
+        serializer = EventRegistrationSerializer(registration)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='my-registrations', detail=False)
+    def my_registrations(self, request):
+        donor = request.user.donor
+        registrations = EventRegistration.objects.filter(
+            donor=donor,
+            is_active=True
+        ).select_related('donation_event').order_by('-created_at')
+        serializer = EventRegistrationSerializer(registrations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path=r'my-registrations/(?P<registration_id>[^/.]+)', detail=False)
+    def my_registration_detail(self, request, registration_id=None):
+
+        donor = request.user.donor
+
+        registration = get_object_or_404(
+            EventRegistration,
+            pk=registration_id,
+            donor=donor,
             is_active=True
         )
 
@@ -943,7 +968,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             if self.request.method == 'GET':
                 return [OR(OwnedStaffPermission(), OwnedDonorPermission())]
             return [OwnedStaffPermission()]
-        if self.action in ['response']:
+        if self.action in ['response', 'my_responses', 'my_response_detail']:
             return [DonorPermission()]
         return super().get_permissions()
 
@@ -1034,6 +1059,32 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             EmergencyResponse,
             pk=response_id,
             emergency_request=emergency_request,
+            is_active=True
+        )
+
+        serializer = EmergencyResponseSerializer(response_obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='my-responses', detail=False)
+    def my_responses(self, request):
+        donor = request.user.donor
+
+        responses = EmergencyResponse.objects.filter(
+            donor=donor,
+            is_active=True
+        ).select_related('emergency_request').order_by('-created_at')
+
+        serializer = EmergencyResponseSerializer(responses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path=r'my-responses/(?P<response_id>[^/.]+)', detail=False)
+    def my_response_detail(self, request, response_id=None):
+        donor = request.user.donor
+
+        response_obj = get_object_or_404(
+            EmergencyResponse,
+            pk=response_id,
+            donor=donor,
             is_active=True
         )
 

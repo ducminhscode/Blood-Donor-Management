@@ -117,6 +117,9 @@ class Hospital(BaseModel):
     sub_district = models.CharField(max_length=254)
     hospital_address = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 
 class Staff(BaseModel):
     department = models.TextField()
@@ -166,6 +169,9 @@ class Message(BaseModel):
 class RewardCategory(BaseModel):
     name = models.CharField(max_length=120, unique=True)
     description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Reward(BaseModel):

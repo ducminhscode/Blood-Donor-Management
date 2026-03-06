@@ -24,6 +24,8 @@ from rest_framework import permissions
 import debug_toolbar
 from dotenv import load_dotenv
 
+from blooddonorapp.admin import my_admin_site
+
 load_dotenv()
 
 schema_view = get_schema_view(
@@ -39,7 +41,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', my_admin_site.urls),
     path('', include('blooddonorapp.urls')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
