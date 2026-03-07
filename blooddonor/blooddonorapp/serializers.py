@@ -71,14 +71,14 @@ class ProfileUpdateSerializer(ModelSerializer):
 
 
 class DonorSerializer(ModelSerializer):
-
+    account = AccountSerializer()
     class Meta:
         model = Donor
         fields = ['id', 'account', 'blood_type', 'rh_factor', 'province', 'sub_district', 'permanent_address', 'weight',
                   'height', 'identification', 'bmi', 'career', 'organization', 'donation_count', 'can_donation',
                   'last_donation', 'points', 'is_private', 'is_active', 'created_at', 'updated_at']
 
-        read_only_fields = ['id', 'account', 'blood_type', 'rh_factor', 'weight', 'height', 'bmi', 'donation_count',
+        read_only_fields = ['id', 'blood_type', 'rh_factor', 'weight', 'height', 'bmi', 'donation_count',
                             'last_donation', 'points', 'is_active', 'created_at', 'updated_at']
 
 
@@ -90,7 +90,7 @@ class HospitalSerializer(ModelSerializer):
 
 
 class StaffSerializer(ModelSerializer):
-    # account = AccountSerializer()
+    account = AccountSerializer()
     hospital_id = serializers.PrimaryKeyRelatedField(
         queryset=Hospital.objects.filter(is_active=True),
         source='hospital',
@@ -104,7 +104,7 @@ class StaffSerializer(ModelSerializer):
         fields = ['id', 'account', 'department', 'degree', 'license_number', 'experience_years', 'emergency_phone',
                   'current_status', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at', 'updated_at']
 
-        read_only_fields = ['id', 'account', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at',
+        read_only_fields = ['id', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at',
                             'updated_at']
 
 

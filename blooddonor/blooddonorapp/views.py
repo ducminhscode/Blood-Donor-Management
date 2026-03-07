@@ -951,7 +951,6 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
 class HospitalViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Hospital.objects.filter(is_active=True)
     serializer_class = HospitalSerializer
-    permission_classes = [IsAuthenticated]
 
 
 class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -1392,7 +1391,18 @@ class RewardHistoryViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, OwnedDonorPermission]
 
     def get_queryset(self):
-        return RewardHistory.objects.filter(is_active=True, donor__account=self.request.user)
+        if getattr(self, 'swagger_fake_view', False):
+            return RewardHistory.objects.none()
+
+        user = self.request.user
+
+        if user.is_anonymous:
+            return RewardHistory.objects.none()
+
+        return RewardHistory.objects.filter(
+            is_active=True,
+            donor__account=user
+        )
 
     def list(self, request):
         queryset = self.get_queryset()

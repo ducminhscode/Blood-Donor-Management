@@ -1,35 +1,70 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Home from "./components/Home/Home";
+import Login from "./components/User/Login";
+import Profile from "./components/User/Profile";
+import { useEffect, useReducer, useState } from "react";
+import { authApis, endpoints } from "./configs/APIs";
+import { UserContexts, UserDispatchContext } from "./configs/UserContexts";
+import cookie from 'react-cookies';
+import MyUserReducer from "./configs/UserReducers";
+import Header from "./components/Home/layouts/Header";
+import Footer from "./components/Home/layouts/Footer";
+import Register from "./components/User/Register";
+import VerifyOTP from "./components/User/VerifyOTP";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, dispatch] = useReducer(MyUserReducer, null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = cookie.load("access_token");
+    if (token) {
+      authApis().get(endpoints['current_user'])
+        .then(res => {
+          dispatch({
+            type: 'login',
+            payload: res.data,
+          });
+        })
+        .catch(err => {
+          console.error('Failed to load user data:', err);
+          cookie.remove('access_token');
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading) {
+    return <div></div>;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <UserContexts.Provider value={user}>
+      <UserDispatchContext.Provider value={dispatch}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/verify-otp" element={<VerifyOTP />} />
+            <Route path="*" element={
+              <>
+                {user && <Header />}
+                <div>
+                  <Routes>
+                    <Route path="/profile" element={user ? <Profile /> : <Login />} />
+                  </Routes>
+                </div>
+                {user && <Footer />}
+              </>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </UserDispatchContext.Provider>
+    </UserContexts.Provider>
+  );
 }
 
-export default App
+export default App;
