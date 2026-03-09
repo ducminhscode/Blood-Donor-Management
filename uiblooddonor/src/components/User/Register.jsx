@@ -171,6 +171,7 @@ const Register = () => {
 
         try {
             const formData = new FormData();
+            let registrationData = {};
 
             if (userType === 'donor') {
                 // Tạo object account cho donor
@@ -183,6 +184,13 @@ const Register = () => {
                     phone: donorForm.phone || null,
                     birth_date: donorForm.birth_date || null,
                     gender: donorForm.gender || null
+                };
+
+                // Lưu thông tin đăng ký để dùng cho resend OTP
+                registrationData = {
+                    ...donorForm,
+                    userType: 'donor',
+                    accountData: accountData
                 };
 
                 // Append account fields
@@ -221,6 +229,7 @@ const Register = () => {
                     formData.append('organization', donorForm.organization);
                 }
 
+                // Log để debug
                 console.log("=== Donor FormData Contents ===");
                 for (let pair of formData.entries()) {
                     if (pair[0] === 'account.avatar') {
@@ -230,11 +239,31 @@ const Register = () => {
                     }
                 }
 
-                await APIs.post(endpoints['register_donor'], formData, {
+                const response = await APIs.post(endpoints['register_donor'], formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
+                // Kiểm tra response status
+                if (response.status === 201 || response.status === 200) {
+                    // Lưu thông tin đăng ký vào localStorage (chỉ lưu các trường cần thiết, không lưu password)
+                    const safeRegistrationData = {
+                        ...registrationData,
+                        password: undefined, // Không lưu password
+                        confirmPassword: undefined, // Không lưu confirmPassword
+                        avatar: registrationData.avatar ? 'uploaded' : null // Chỉ lưu trạng thái đã upload avatar
+                    };
+                    localStorage.setItem('tempRegistration', JSON.stringify(safeRegistrationData));
 
+                    setSuccess("Đăng ký thành công! Đang chuyển đến trang xác thực...");
+                    setTimeout(() => {
+                        navigate('/verify-otp', {
+                            state: {
+                                email: donorForm.email,
+                                userType: 'donor'
+                            }
+                        });
+                    }, 2000);
+                }
 
             } else {
                 // Tạo object account cho staff
@@ -247,6 +276,13 @@ const Register = () => {
                     phone: staffForm.phone || null,
                     birth_date: staffForm.birth_date || null,
                     gender: staffForm.gender || null
+                };
+
+                // Lưu thông tin đăng ký để dùng cho resend OTP
+                registrationData = {
+                    ...staffForm,
+                    userType: 'staff',
+                    accountData: accountData
                 };
 
                 // Append account fields
@@ -285,23 +321,50 @@ const Register = () => {
                     formData.append('hospital_id', Number(staffForm.hospital_id));
                 }
 
-                await APIs.post(endpoints['register_staff'], formData, {
+                const response = await APIs.post(endpoints['register_staff'], formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
-            }
 
-            setSuccess("Đăng ký thành công! Đang chuyển đến trang xác thực...");
-            setTimeout(() => {
-                navigate('/verify-otp', {
-                    state: {
-                        email: userType === 'donor' ? donorForm.email : staffForm.email
-                    }
-                });
-            }, 2000);
+                // Kiểm tra response status
+                if (response.status === 201 || response.status === 200) {
+                    // Lưu thông tin đăng ký vào localStorage (chỉ lưu các trường cần thiết, không lưu password)
+                    const safeRegistrationData = {
+                        ...registrationData,
+                        password: undefined, // Không lưu password
+                        confirmPassword: undefined, // Không lưu confirmPassword
+                        avatar: staffForm.avatar ? 'uploaded' : null // Chỉ lưu trạng thái đã upload avatar
+                    };
+                    localStorage.setItem('tempRegistration', JSON.stringify(safeRegistrationData));
+
+                    setSuccess("Đăng ký thành công! Đang chuyển đến trang xác thực...");
+                    setTimeout(() => {
+                        navigate('/verify-otp', {
+                            state: {
+                                email: staffForm.email,
+                                userType: 'staff'
+                            }
+                        });
+                    }, 2000);
+                }
+            }
 
         } catch (err) {
             console.error("Register error:", err);
-            setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+            if (err.response?.status === 400) {
+                // Xử lý lỗi validation từ server
+                const errorData = err.response.data;
+                if (errorData.email) {
+                    setError(`Email: ${errorData.email.join(', ')}`);
+                } else if (errorData.username) {
+                    setError(`Tên đăng nhập: ${errorData.username.join(', ')}`);
+                } else if (errorData.phone) {
+                    setError(`Số điện thoại: ${errorData.phone.join(', ')}`);
+                } else {
+                    setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+                }
+            } else {
+                setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+            }
         } finally {
             setLoading(false);
         }
@@ -536,6 +599,7 @@ const Register = () => {
                                         onChange={userType === 'donor' ? handleDonorChange : handleStaffChange}
                                         className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                         placeholder="Số điện thoại"
+                                        maxLength={10}
                                     />
                                 </div>
                             </div>

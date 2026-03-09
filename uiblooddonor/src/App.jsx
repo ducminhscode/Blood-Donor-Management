@@ -11,6 +11,7 @@ import Header from "./components/Home/layouts/Header";
 import Footer from "./components/Home/layouts/Footer";
 import Register from "./components/User/Register";
 import VerifyOTP from "./components/User/VerifyOTP";
+import ForgotPassword from "./components/User/ForgotPassword";
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -49,6 +50,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-otp" element={<VerifyOTP />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="*" element={
               <>
                 {user && <Header />}

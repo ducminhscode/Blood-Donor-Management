@@ -49,7 +49,7 @@ const Login = () => {
         }
       });
 
-      const cookieOptions = { path: "/" };
+      const cookieOptions = { path: "/", maxAge: rememberMe ? 24 * 60 * 60 : undefined };
 
       const accessToken = tokenRes.data.access_token;
       const refreshToken = tokenRes.data.refresh_token;
@@ -68,17 +68,14 @@ const Login = () => {
     } catch (err) {
       console.error("Login error:", err);
       if (err.response) {
-        // Server trả về lỗi
         if (err.response.status === 401) {
           setError("Sai tên đăng nhập hoặc mật khẩu!");
         } else {
           setError(err.response.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
         }
       } else if (err.request) {
-        // Không nhận được response
         setError("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!");
       } else {
-        // Lỗi khác
         setError("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
       }
     } finally {

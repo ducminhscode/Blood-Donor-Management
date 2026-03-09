@@ -25,14 +25,7 @@ class AccountSerializer(ModelSerializer):
 
 class ResetPasswordSerializer(Serializer):
     email = EmailField()
-    otp = CharField(min_length=6, max_length=6)
     new_password = CharField(write_only=True, required=True)
-    confirm_password = CharField(write_only=True, required=True)
-
-    def validate(self, value):
-        if value['new_password'] != value['confirm_password']:
-            raise ValidationError({"error": "Mật khẩu xác nhận không khớp."})
-        return value
 
 
 class ChangePasswordSerializer(Serializer):

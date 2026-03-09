@@ -62,15 +62,19 @@ class AccountViewSet(viewsets.ViewSet):
 
     @action(methods=['post'], url_path='forgot-password', detail=False)
     def forgot_password(self, request):
+        username = request.data.get("username")
         email = request.data.get("email")
-        if not email:
-            return Response({"error": "Vui lòng nhập email."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not Account.objects.filter(email=email).exists():
-            return Response({"error": "Email không tồn tại"}, status=status.HTTP_400_BAD_REQUEST)
+        if not username or not email:
+            return Response({"error": "Vui lòng nhập username và email."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = Account.objects.get(username=username, email=email)
+        except Account.DoesNotExist:
+            return Response({"error": "Username hoặc email không đúng."}, status=status.HTTP_400_BAD_REQUEST)
 
         otp = f"{random.randint(100000, 999999)}"
-        cache_key = f"reset_password_{email}"
+        cache_key = f"reset_password_{user.email}"
 
         cache.set(
             cache_key,
@@ -82,7 +86,7 @@ class AccountViewSet(viewsets.ViewSet):
             subject="Mã OTP đặt lại mật khẩu",
             message=f"Mã OTP reset mật khẩu của bạn là: {otp}. Có hiệu lực 5 phút.",
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
+            recipient_list=[user.email],
             fail_silently=False,
         )
 
@@ -94,17 +98,13 @@ class AccountViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data['email']
-        otp = serializer.validated_data['otp']
         new_password = serializer.validated_data['new_password']
 
-        cache_key = f"reset_password_{email}"
-        cached_data = cache.get(cache_key)
+        verified_key = f"reset_verified_{email}"
+        is_verified = cache.get(verified_key)
 
-        if not cached_data:
-            return Response({"error": "OTP hết hạn hoặc không tồn tại"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if cached_data['otp'] != otp:
-            return Response({"error": "OTP không đúng"}, status=status.HTTP_400_BAD_REQUEST)
+        if not is_verified:
+            return Response({"error": "Bạn chưa xác thực OTP"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             acc = Account.objects.get(email=email)
@@ -114,7 +114,7 @@ class AccountViewSet(viewsets.ViewSet):
         acc.set_password(new_password)
         acc.save()
 
-        cache.delete(cache_key)
+        cache.delete(verified_key)
 
         return Response({"message": "Đặt lại mật khẩu thành công"}, status=status.HTTP_200_OK)
 
@@ -122,6 +122,20 @@ class AccountViewSet(viewsets.ViewSet):
     def verify_otp(self, request):
         email = request.data.get("email")
         otp = request.data.get("otp")
+
+        reset_key = f"reset_password_{email}"
+        reset_cached = cache.get(reset_key)
+
+        if reset_cached:
+            if not reset_cached:
+                return Response({"error": "OTP hết hạn hoặc không tồn tại"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if reset_cached["otp"] != otp:
+                return Response({"error": "OTP không đúng"}, status=status.HTTP_400_BAD_REQUEST)
+
+            cache.set(f"reset_verified_{email}", True, timeout=300)
+
+            return Response({"message": "OTP hợp lệ, bạn có thể đặt lại mật khẩu"}, status=status.HTTP_200_OK)
 
         donor_key = f"register_donor_{email}"
         staff_key = f"register_staff_{email}"

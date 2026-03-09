@@ -22,8 +22,8 @@ class AccountAdmin(admin.ModelAdmin):
     ordering = ("id",)
 
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ('department', 'degree', 'license_number', 'experience_years', 'emergency_phone', 'current_status', 'is_verified', 'account', 'hospital')
-    list_filter = ('is_verified', 'hospital', 'current_status')
+    list_display = ('department', 'degree', 'license_number', 'experience_years', 'emergency_phone', 'current_status', 'is_verified', 'account', 'hospital', 'is_active')
+    list_filter = ('is_verified', 'hospital', 'current_status', 'is_active')
     search_fields = ('department', 'degree', 'license_number', 'experience_years', 'emergency_phone', 'hospital')
     ordering = ('id',)
 

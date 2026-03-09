@@ -12,6 +12,8 @@ export const endpoints = {
     'register_donor': '/register/donor/',
     'register_staff': '/register/staff/',
     'verify_otp': '/account/verify-otp/',
+    'forgot_password': '/account/forgot-password/',
+    'reset_password': '/account/reset-password/',
 }
 
 export const authApis = () => {
