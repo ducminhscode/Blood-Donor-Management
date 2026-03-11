@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 # Create your views here.
@@ -16,6 +17,7 @@ from blooddonor import settings
 from .models import Account, Role, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, Friend, FriendStatus, \
     RewardCategory, Reward, RewardHistory, ResponseStatus, EmergencyResponse, EventRegistration, RegistrationStatus, \
     MedicalCheckUp, BloodDonation
+from .paginators import Pagination
 from .permissions import OwnerPermission, StaffPermission, OwnedStaffPermission, OwnedDonorPermission, DonorPermission
 from .serializers import AccountSerializer, ResetPasswordSerializer, \
     ChangePasswordSerializer, ProfileUpdateSerializer, DonorSerializer, StaffSerializer, DonationEventSerializer, \
@@ -244,16 +246,40 @@ class RegistrationViewSet(viewsets.ViewSet):
 class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Donor.objects.filter(is_active=True)
     serializer_class = DonorSerializer
+    pagination_class = Pagination
 
     def get_permissions(self):
         if self.action in ['donor_update']:
             return [OwnedDonorPermission()]
         if self.action in ['request_friend', 'accept_friend', 'reject_friend', 'pending_list', 'friend_list',
-                           'unfriend']:
+                           'unfriend', 'get_my_donor', 'cancel_request', 'get_friend_status']:
             return [DonorPermission()]
         return [IsAuthenticated()]
 
-    @action(methods=['patch'], url_path='donor-update', detail=False)
+    def get_queryset(self):
+        queryset = Donor.objects.filter(is_active=True).select_related('account')
+        search = self.request.query_params.get('search')
+        if search:
+            keywords = search.strip().split()
+
+            query = Q()
+            for word in keywords:
+                query &= (
+                        Q(account__first_name__icontains=word) |
+                        Q(account__last_name__icontains=word)
+                )
+
+            queryset = queryset.filter(query)
+
+        return queryset
+
+    @action(methods=['get'], url_path='me', detail=False)
+    def get_my_donor(self, request):
+        donor = request.user.donor
+        serializer = DonorSerializer(donor)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['patch'], url_path='update', detail=False)
     def donor_update(self, request):
         donor = request.user.donor
         serializer = DonorSerializer(donor, data=request.data, partial=True)
@@ -377,12 +403,33 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
         friends = Friend.objects.filter(
             requester=donor,
             status=FriendStatus.BEFRIEND.value
-        ).select_related('addressee')
+        ).select_related('addressee', 'addressee__account')
 
-        donors = [f.addressee for f in friends]
-        serializer = DonorSerializer(donors, many=True)
+        donors = Donor.objects.filter(
+            id__in=[f.addressee.id for f in friends],
+            is_active=True
+        ).select_related('account')
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        search = request.query_params.get('search')
+
+        if search:
+            keywords = search.strip().split()
+
+            query = Q()
+            for word in keywords:
+                query &= (
+                        Q(account__first_name__icontains=word) |
+                        Q(account__last_name__icontains=word)
+                )
+
+            donors = donors.filter(query)
+
+        paginator = Pagination()
+        page = paginator.paginate_queryset(donors, request)
+
+        serializer = DonorSerializer(page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
 
     @action(methods=['post'], url_path='unfriend', detail=True)
     def unfriend(self, request, pk=None):
@@ -414,19 +461,104 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
 
         return Response({"message": "Unfriended"}, status=status.HTTP_200_OK)
 
+    @action(methods=['post'], url_path='cancel-request', detail=True)
+    def cancel_request(self, request, pk=None):
+        donor = request.user.donor
+        addressee_id = pk
+
+        try:
+            addressee_id = int(addressee_id)
+        except (TypeError, ValueError):
+            return Response({"error": "Invalid donor_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if donor.id == addressee_id:
+            return Response({"error": "Can't cancel yourself"}, status=status.HTTP_400_BAD_REQUEST)
+
+        get_object_or_404(
+            Friend,
+            requester=donor,
+            addressee_id=addressee_id,
+            status=FriendStatus.ADD_FRIEND.value
+        )
+
+        with transaction.atomic():
+            Friend.objects.filter(
+                requester=donor,
+                addressee_id=addressee_id,
+                status=FriendStatus.ADD_FRIEND.value
+            ).delete()
+
+            Friend.objects.filter(
+                requester_id=addressee_id,
+                addressee=donor,
+                status=FriendStatus.PENDING.value
+            ).delete()
+
+        return Response({"message": "Friend request cancelled"}, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='friend-status', detail=False)
+    def get_friend_status(self, request):
+        donor = request.user.donor
+        donor_ids = request.query_params.get('donor_ids', '')
+
+        if not donor_ids:
+            return Response({}, status=status.HTTP_200_OK)
+
+        try:
+            donor_ids = [int(id.strip()) for id in donor_ids.split(',') if id.strip()]
+        except ValueError:
+            return Response({"error": "Invalid donor_ids"}, status=status.HTTP_400_BAD_REQUEST)
+
+        donor_ids = [id for id in donor_ids if id != donor.id]
+
+        if not donor_ids:
+            return Response({}, status=status.HTTP_200_OK)
+
+        friend_relations = Friend.objects.filter(
+            Q(requester=donor, addressee_id__in=donor_ids) |
+            Q(addressee=donor, requester_id__in=donor_ids)
+        ).select_related('requester', 'addressee')
+
+        status_map = {}
+
+        for donor_id in donor_ids:
+            status_map[donor_id] = 'none'
+
+        for rel in friend_relations:
+            other_id = rel.addressee_id if rel.requester_id == donor.id else rel.requester_id
+
+            if rel.status == FriendStatus.BEFRIEND.value:
+                status_map[other_id] = 'friend'
+            elif rel.status == FriendStatus.ADD_FRIEND.value:
+                if rel.requester_id == donor.id:
+                    status_map[other_id] = 'pending_sent'
+                else:
+                    status_map[other_id] = 'pending_received'
+            elif rel.status == FriendStatus.PENDING.value:
+                if rel.addressee_id == donor.id:
+                    status_map[other_id] = 'pending_received'
+
+        return Response(status_map, status=status.HTTP_200_OK)
+
 
 class StaffViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Staff.objects.filter(is_active=True)
     serializer_class = StaffSerializer
 
     def get_permissions(self):
-        if self.action in ['staff_update']:
+        if self.action in ['staff_update', 'get_my_staff']:
             return [OwnedStaffPermission()]
         if self.action in ['donation_event', 'emergency_request']:
             return [StaffPermission()]
         return [IsAuthenticated()]
 
-    @action(methods=['patch'], url_path='staff-update', detail=False)
+    @action(methods=['get'], url_path='me', detail=False)
+    def get_my_staff(self, request):
+        staff = request.user.staff
+        serializer = StaffSerializer(staff)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['patch'], url_path='update', detail=False)
     def staff_update(self, request):
         staff = request.user.staff
         serializer = StaffSerializer(staff, data=request.data, partial=True)
@@ -453,6 +585,22 @@ class StaffViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
 class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = DonationEvent.objects.filter(is_active=True, is_expire=False)
     serializer_class = DonationEventSerializer
+    pagination_class = Pagination
+
+    def get_queryset(self):
+        queryset = DonationEvent.objects.filter(is_active=True, is_expire=False)
+
+        province = self.request.query_params.get('province')
+        if province:
+            queryset = queryset.filter(province=province)
+
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(title__icontains=search)
+
+        queryset = queryset.order_by('-created_at')
+
+        return queryset
 
     def get_permissions(self):
         if self.action in ['create']:
@@ -1339,11 +1487,20 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
 class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = RewardCategory.objects.filter(is_active=True)
     serializer_class = RewardCategorySerializer
+    pagination_class = Pagination
+
+    def get_queryset(self):
+        queryset = RewardCategory.objects.filter(is_active=True)
+
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+
+        return queryset
 
     @action(methods=['get'], url_path='reward', detail=True)
     def get_reward_by_category(self, request, pk=None):
         category = self.get_object()
-
         rewards = Reward.objects.filter(reward_category=category, is_active=True)
 
         serializer = RewardSerializer(rewards, many=True)
@@ -1373,11 +1530,23 @@ class RewardViewSet(viewsets.ViewSet):
         donor = request.user.donor
         reward = get_object_or_404(Reward, pk=pk, is_active=True)
 
-        if reward.remaining_stock <= 0:
-            return Response({"error": "This reward is gone"}, status=status.HTTP_400_BAD_REQUEST)
+        quantity = request.data.get("quantity")
 
-        if donor.points < reward.points_required:
-            return Response({"error": "Not enough points"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            quantity = int(quantity)
+        except (TypeError, ValueError):
+            return Response({"error": "Số lượng không hợp lệ"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if quantity <= 0:
+            return Response({"error": "Số lượng phải lớn hơn 0"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if reward.remaining_stock < quantity:
+            return Response({"error": "Không đủ số lượng"}, status=status.HTTP_400_BAD_REQUEST)
+
+        total_points = reward.points_required * quantity
+
+        if donor.points < total_points:
+            return Response({"error": "Không đủ điểm"}, status=status.HTTP_400_BAD_REQUEST)
 
         recipient_serializer = RecipientInformationSerializer(data=request.data)
         recipient_serializer.is_valid(raise_exception=True)
@@ -1385,16 +1554,17 @@ class RewardViewSet(viewsets.ViewSet):
         with transaction.atomic():
             recipient = recipient_serializer.save()
 
-            donor.points -= reward.points_required
+            donor.points -= total_points
             donor.save(update_fields=['points'])
 
-            reward.remaining_stock -= 1
+            reward.remaining_stock -= quantity
             reward.save(update_fields=['remaining_stock'])
 
             history = RewardHistory.objects.create(
                 reward=reward,
                 donor=donor,
-                points_used=reward.points_required,
+                points_used=total_points,
+                quantity=quantity,
                 recipient_information=recipient
             )
 

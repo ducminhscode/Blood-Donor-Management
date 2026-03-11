@@ -58,7 +58,6 @@ const Register = () => {
         hospital_id: ""
     });
 
-    // Fetch provinces on component mount
     useEffect(() => {
         fetchProvinces();
     }, []);
@@ -67,7 +66,6 @@ const Register = () => {
         fetchHospitals();
     }, []);
 
-    // Fetch districts when province changes for donor form
     useEffect(() => {
         if (userType === 'donor' && donorForm.province) {
             fetchDistricts(donorForm.province);
@@ -159,7 +157,6 @@ const Register = () => {
         setSuccess("");
         setLoading(true);
 
-        // Validate passwords match
         const password = userType === 'donor' ? donorForm.password : staffForm.password;
         const confirmPassword = userType === 'donor' ? donorForm.confirmPassword : staffForm.confirmPassword;
 
@@ -174,7 +171,6 @@ const Register = () => {
             let registrationData = {};
 
             if (userType === 'donor') {
-                // Tạo object account cho donor
                 const accountData = {
                     username: donorForm.username,
                     password: donorForm.password,
@@ -186,30 +182,25 @@ const Register = () => {
                     gender: donorForm.gender || null
                 };
 
-                // Lưu thông tin đăng ký để dùng cho resend OTP
                 registrationData = {
                     ...donorForm,
                     userType: 'donor',
                     accountData: accountData
                 };
 
-                // Append account fields
                 Object.keys(accountData).forEach(key => {
                     if (accountData[key] !== null && accountData[key] !== '') {
                         if (key === 'avatar') {
-                            // Avatar sẽ được xử lý riêng
                         } else {
                             formData.append(`account.${key}`, accountData[key]);
                         }
                     }
                 });
 
-                // Append avatar riêng
                 if (donorForm.avatar) {
                     formData.append('account.avatar', donorForm.avatar);
                 }
 
-                // Append các trường còn lại của donor
                 if (donorForm.province) {
                     formData.append('province', donorForm.province);
                 }
@@ -229,7 +220,6 @@ const Register = () => {
                     formData.append('organization', donorForm.organization);
                 }
 
-                // Log để debug
                 console.log("=== Donor FormData Contents ===");
                 for (let pair of formData.entries()) {
                     if (pair[0] === 'account.avatar') {
@@ -243,18 +233,16 @@ const Register = () => {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
-                // Kiểm tra response status
                 if (response.status === 201 || response.status === 200) {
-                    // Lưu thông tin đăng ký vào localStorage (chỉ lưu các trường cần thiết, không lưu password)
                     const safeRegistrationData = {
                         ...registrationData,
-                        password: undefined, // Không lưu password
-                        confirmPassword: undefined, // Không lưu confirmPassword
-                        avatar: registrationData.avatar ? 'uploaded' : null // Chỉ lưu trạng thái đã upload avatar
+                        password: undefined, 
+                        confirmPassword: undefined,
+                        avatar: registrationData.avatar ? 'uploaded' : null 
                     };
                     localStorage.setItem('tempRegistration', JSON.stringify(safeRegistrationData));
 
-                    setSuccess("Đăng ký thành công! Đang chuyển đến trang xác thực...");
+                    setSuccess("Đăng ký thành công. Đang chuyển đến trang xác thực...");
                     setTimeout(() => {
                         navigate('/verify-otp', {
                             state: {
@@ -266,7 +254,6 @@ const Register = () => {
                 }
 
             } else {
-                // Tạo object account cho staff
                 const accountData = {
                     username: staffForm.username,
                     password: staffForm.password,
@@ -278,30 +265,25 @@ const Register = () => {
                     gender: staffForm.gender || null
                 };
 
-                // Lưu thông tin đăng ký để dùng cho resend OTP
                 registrationData = {
                     ...staffForm,
                     userType: 'staff',
                     accountData: accountData
                 };
 
-                // Append account fields
                 Object.keys(accountData).forEach(key => {
                     if (accountData[key] !== null && accountData[key] !== '') {
                         if (key === 'avatar') {
-                            // Avatar sẽ được xử lý riêng
                         } else {
                             formData.append(`account.${key}`, accountData[key]);
                         }
                     }
                 });
 
-                // Append avatar riêng
                 if (staffForm.avatar) {
                     formData.append('account.avatar', staffForm.avatar);
                 }
 
-                // Append các trường còn lại của staff
                 if (staffForm.department) {
                     formData.append('department', staffForm.department);
                 }
@@ -325,18 +307,16 @@ const Register = () => {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
-                // Kiểm tra response status
                 if (response.status === 201 || response.status === 200) {
-                    // Lưu thông tin đăng ký vào localStorage (chỉ lưu các trường cần thiết, không lưu password)
                     const safeRegistrationData = {
                         ...registrationData,
-                        password: undefined, // Không lưu password
-                        confirmPassword: undefined, // Không lưu confirmPassword
-                        avatar: staffForm.avatar ? 'uploaded' : null // Chỉ lưu trạng thái đã upload avatar
+                        password: undefined, 
+                        confirmPassword: undefined, 
+                        avatar: staffForm.avatar ? 'uploaded' : null 
                     };
                     localStorage.setItem('tempRegistration', JSON.stringify(safeRegistrationData));
 
-                    setSuccess("Đăng ký thành công! Đang chuyển đến trang xác thực...");
+                    setSuccess("Đăng ký thành công. Đang chuyển đến trang xác thực...");
                     setTimeout(() => {
                         navigate('/verify-otp', {
                             state: {
@@ -351,7 +331,6 @@ const Register = () => {
         } catch (err) {
             console.error("Register error:", err);
             if (err.response?.status === 400) {
-                // Xử lý lỗi validation từ server
                 const errorData = err.response.data;
                 if (errorData.email) {
                     setError(`Email: ${errorData.email.join(', ')}`);
@@ -360,10 +339,10 @@ const Register = () => {
                 } else if (errorData.phone) {
                     setError(`Số điện thoại: ${errorData.phone.join(', ')}`);
                 } else {
-                    setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+                    setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
                 }
             } else {
-                setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+                setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
             }
         } finally {
             setLoading(false);
@@ -376,13 +355,11 @@ const Register = () => {
         <div className="min-h-screen bg-gradient-to-b from-red-50 to-white py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl p-8">
-                    {/* Back to Home */}
                     <Link to="/" className="inline-flex items-center text-gray-600 hover:text-red-600 transition mb-6">
                         <ArrowLeft className="h-4 w-4 mr-2" />
-                        Quay lại trang chủ
+                        Trang chủ
                     </Link>
 
-                    {/* Header */}
                     <div className="text-center mb-8">
                         <div className="flex justify-center">
                             <Droplet className="h-12 w-12 text-red-600" />
@@ -393,7 +370,6 @@ const Register = () => {
                         </p>
                     </div>
 
-                    {/* User Type Selection */}
                     <div className="flex justify-center gap-4 mb-8">
                         <button
                             onClick={() => setUserType('donor')}
@@ -417,7 +393,6 @@ const Register = () => {
                         </button>
                     </div>
 
-                    {/* Error & Success Messages */}
                     {error && (
                         <div className="mb-6 bg-red-50 border-l-4 border-red-600 p-4 rounded-lg">
                             <div className="flex">
@@ -436,9 +411,7 @@ const Register = () => {
                         </div>
                     )}
 
-                    {/* Register Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Avatar Upload */}
                         <div className="flex flex-col items-center mb-6">
                             <div className="relative group">
                                 <div className="w-24 h-24 rounded-full bg-red-100 border-4 border-white shadow-lg flex items-center justify-center overflow-hidden">
@@ -461,9 +434,7 @@ const Register = () => {
                             <p className="text-xs text-gray-500 mt-2">Chọn ảnh đại diện (tối đa 5MB)</p>
                         </div>
 
-                        {/* Common Fields for both Donor and Staff */}
                         <div className="grid md:grid-cols-2 gap-4">
-                            {/* Username */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Tên đăng nhập <span className="text-red-600">*</span>
@@ -482,7 +453,6 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            {/* Email */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Email <span className="text-red-600">*</span>
@@ -501,7 +471,6 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            {/* Password */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Mật khẩu <span className="text-red-600">*</span>
@@ -527,7 +496,6 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            {/* Confirm Password */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Xác nhận mật khẩu <span className="text-red-600">*</span>
@@ -553,7 +521,6 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            {/* First Name */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Tên <span className="text-red-600">*</span>
@@ -569,7 +536,6 @@ const Register = () => {
                                 />
                             </div>
 
-                            {/* Last Name */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Họ và tên đệm <span className="text-red-600">*</span>
@@ -585,7 +551,6 @@ const Register = () => {
                                 />
                             </div>
 
-                            {/* Phone */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Số điện thoại
@@ -604,7 +569,6 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            {/* Birth Date */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Ngày sinh
@@ -622,7 +586,6 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            {/* Gender */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Giới tính
@@ -639,7 +602,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* Donor Specific Fields */}
                         {userType === 'donor' && (
                             <div className="space-y-4 border-t pt-6 mt-4">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -648,7 +610,6 @@ const Register = () => {
                                 </h3>
 
                                 <div className="grid md:grid-cols-2 gap-4">
-                                    {/* Province */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
                                         <select
@@ -670,7 +631,6 @@ const Register = () => {
                                         </select>
                                     </div>
 
-                                    {/* Sub District */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
                                         <select
@@ -693,7 +653,6 @@ const Register = () => {
                                         </select>
                                     </div>
 
-                                    {/* Permanent Address */}
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ thường trú</label>
                                         <textarea
@@ -706,7 +665,6 @@ const Register = () => {
                                         />
                                     </div>
 
-                                    {/* Identification */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">CCCD/CMND</label>
                                         <div className="relative">
@@ -722,7 +680,6 @@ const Register = () => {
                                         </div>
                                     </div>
 
-                                    {/* Career */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Nghề nghiệp</label>
                                         <div className="relative">
@@ -738,7 +695,6 @@ const Register = () => {
                                         </div>
                                     </div>
 
-                                    {/* Organization */}
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Đơn vị công tác</label>
                                         <div className="relative">
@@ -757,7 +713,6 @@ const Register = () => {
                             </div>
                         )}
 
-                        {/* Staff Specific Fields */}
                         {userType === 'staff' && (
                             <div className="space-y-4 border-t pt-6 mt-4">
                                 <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -766,7 +721,6 @@ const Register = () => {
                                 </h3>
 
                                 <div className="grid md:grid-cols-2 gap-4">
-                                    {/* Hospital */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Bệnh viện <span className="text-red-600">*</span>
@@ -794,7 +748,6 @@ const Register = () => {
                                         )}
                                     </div>
 
-                                    {/* Department */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Khoa <span className="text-red-600">*</span>
@@ -811,7 +764,6 @@ const Register = () => {
 
                                     </div>
 
-                                    {/* Degree */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Học vị/Chứng chỉ <span className="text-red-600">*</span>
@@ -833,7 +785,6 @@ const Register = () => {
                                         </div>
                                     </div>
 
-                                    {/* License Number */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Số chứng chỉ hành nghề <span className="text-red-600">*</span>
@@ -897,8 +848,7 @@ const Register = () => {
                                 </div>
                             </div>
                         )}
-
-                        {/* Submit Button */}
+                        
                         <div className="pt-4">
                             <button
                                 type="submit"
@@ -919,7 +869,6 @@ const Register = () => {
                             </button>
                         </div>
 
-                        {/* Login Link */}
                         <div className="text-center">
                             <p className="text-sm text-gray-600">
                                 Đã có tài khoản?{' '}

@@ -1,5 +1,5 @@
 import { Droplet, LogIn, User, ChevronDown } from 'lucide-react';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useContext } from 'react';
 import { UserContexts, UserDispatchContext } from '../../../configs/UserContexts';
 import cookie from 'react-cookies';
@@ -10,6 +10,7 @@ const Header = () => {
     const user = useContext(UserContexts);
     const dispatch = useContext(UserDispatchContext);
     const navigate = useNavigate();
+    const location = useLocation();
     const isLoggedIn = user !== null;
 
     const handleLogout = () => {
@@ -18,6 +19,20 @@ const Header = () => {
         dispatch({ type: "logout" });
         navigate("/");
         setIsDropdownOpen(false);
+    };
+
+    const isActiveTab = (path) => {
+        if (path === '/') {
+            return location.pathname === '/';
+        }
+        return location.pathname.startsWith(path);
+    };
+
+    const getTabClass = (path) => {
+        const baseClass = "transition px-4 py-2 rounded-full";
+        return isActiveTab(path)
+            ? `${baseClass} bg-red-100 text-red-600 font-medium` // Tab active nhẹ nhàng hơn
+            : `${baseClass} text-gray-700 hover:text-red-600 hover:bg-red-50`;
     };
 
     return (
@@ -31,12 +46,25 @@ const Header = () => {
                         </Link>
                     </div>
 
-                    <div className="hidden md:flex items-center space-x-8">
-                        <Link to="/" className="text-gray-700 hover:text-red-600 transition">Trang chủ</Link>
-                        <Link to="/" className="text-gray-700 hover:text-red-600 transition">Về chúng tôi</Link>
-                        <Link to="/" className="text-gray-700 hover:text-red-600 transition">Sự kiện</Link>
-                        <Link to="/" className="text-gray-700 hover:text-red-600 transition">Tin tức</Link>
-                        <Link to="/" className="text-gray-700 hover:text-red-600 transition">Liên hệ</Link>
+                    <div className="hidden md:flex items-center space-x-2">
+                        <Link 
+                            to="/" 
+                            className={getTabClass('/')}
+                        >
+                            Trang chủ
+                        </Link>
+                        <Link 
+                            to="/list-event" 
+                            className={getTabClass('/list-event')}
+                        >
+                            Sự kiện
+                        </Link>
+                        <Link 
+                            to="/reward-category" 
+                            className={getTabClass('/reward-category')}
+                        >
+                            Đổi thưởng
+                        </Link>
                     </div>
 
                     <div className="flex items-center space-x-4">
@@ -44,11 +72,14 @@ const Header = () => {
                             <>
                                 <Link
                                     to="/login"
-                                    className="flex items-center space-x-2 text-gray-700 hover:text-red-600 transition px-4 py-2 rounded-full hover:bg-red-50"
+                                    className="text-gray-700 hover:text-red-600 transition px-4 py-2 rounded-full hover:bg-red-50"
                                 >
-                                    <span>Đăng nhập</span>
+                                    Đăng nhập
                                 </Link>
-                                <Link to="/register" className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition transform hover:scale-105">
+                                <Link 
+                                    to="/register" 
+                                    className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-2 rounded-full hover:from-red-700 hover:to-red-600 transition transform hover:scale-105 shadow-lg hover:shadow-xl font-medium"
+                                >
                                     Đăng ký
                                 </Link>
                             </>
@@ -79,7 +110,6 @@ const Header = () => {
                                         <ChevronDown className={`h-4 w-4 text-gray-600 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
-                                    {/* Dropdown Menu */}
                                     {isDropdownOpen && (
                                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-100">
                                             <Link
@@ -87,24 +117,26 @@ const Header = () => {
                                                 className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
                                                 onClick={() => setIsDropdownOpen(false)}
                                             >
-                                                Thiết lập tài khoản
+                                                Thông tin cá nhân
                                             </Link>
                                             <Link
-                                                to="/profile"
-                                                className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
-                                                onClick={() => setIsDropdownOpen(false)}
-                                            >
-                                                Thông tin hiến máu
-                                            </Link>
-                                            <Link
-                                                to="/my-donations"
+                                                to="/donation-history"
                                                 className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
                                                 onClick={() => setIsDropdownOpen(false)}
                                             >
                                                 Lịch sử hiến máu
                                             </Link>
+                                            {user?.role === 1 && (
+                                                <Link
+                                                    to="/friend-list"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
+                                                    onClick={() => setIsDropdownOpen(false)}
+                                                >
+                                                    Danh sách bạn bè
+                                                </Link>
+                                            )}
                                             <Link
-                                                to="/my-events"
+                                                to="/registered-events"
                                                 className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
                                                 onClick={() => setIsDropdownOpen(false)}
                                             >

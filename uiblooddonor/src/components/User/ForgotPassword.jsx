@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Droplet, ArrowLeft, Mail, Lock, Eye, EyeOff, Key, CheckCircle, AlertCircle, User } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import APIs, { endpoints } from "../../configs/APIs";
 
 const ForgotPassword = () => {
@@ -12,7 +12,7 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -21,32 +21,46 @@ const ForgotPassword = () => {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const handleSendEmail = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     if (!username || !email) {
-      setError("Vui lòng nhập đầy đủ tên đăng nhập và email!");
+      setError("Vui lòng nhập đầy đủ tên tài khoản và email.");
       setLoading(false);
       return;
     }
 
     try {
-      await APIs.post(endpoints['forgot_password'], { 
+      await APIs.post(endpoints['forgot_password'], {
         username: username,
-        email: email 
+        email: email
       });
-      
-      setSuccess("Mã OTP đã được gửi đến email của bạn!");
+
+      setSuccess("Mã OTP đã được gửi đến email của bạn.");
       setStep(2);
       startCountdown();
     } catch (err) {
       console.error("Send email error:", err);
       if (err.response?.status === 404) {
-        setError("Tên đăng nhập hoặc email không tồn tại trong hệ thống!");
+        setError("Tên tài khoản hoặc email không tồn tại trong hệ thống.");
       } else {
-        setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
       }
     } finally {
       setLoading(false);
@@ -60,22 +74,22 @@ const ForgotPassword = () => {
 
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      setError("Vui lòng nhập đầy đủ mã OTP!");
+      setError("Vui lòng nhập đầy đủ mã OTP.");
       setLoading(false);
       return;
     }
 
     try {
-      await APIs.post(endpoints['verify_otp'], { 
-        email: email, 
-        otp: otpCode 
+      await APIs.post(endpoints['verify_otp'], {
+        email: email,
+        otp: otpCode
       });
-      
-      setSuccess("Xác nhận OTP thành công!");
+
+      setSuccess("Xác nhận OTP thành công.");
       setStep(3);
     } catch (err) {
       console.error("Verify OTP error:", err);
-      setError(err.response?.data?.message || "Mã OTP không chính xác hoặc đã hết hạn!");
+      setError(err.response?.data?.message || "Mã OTP không chính xác hoặc đã hết hạn.");
     } finally {
       setLoading(false);
     }
@@ -87,7 +101,7 @@ const ForgotPassword = () => {
     setLoading(true);
 
     if (newPassword !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp!");
+      setError("Mật khẩu xác nhận không khớp.");
       setLoading(false);
       return;
     }
@@ -98,16 +112,16 @@ const ForgotPassword = () => {
         email: email,
         new_password: newPassword
       });
-      
-      setSuccess("Đặt lại mật khẩu thành công!");
+
+      setSuccess("Đặt lại mật khẩu thành công.");
       setTimeout(() => {
-        navigate('/login', { 
-          state: { success: "Mật khẩu đã được đặt lại thành công! Vui lòng đăng nhập." }
+        navigate('/login', {
+          state: { success: "Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập." }
         });
       }, 2000);
     } catch (err) {
       console.error("Reset password error:", err);
-      setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+      setError(err.response?.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
@@ -130,20 +144,20 @@ const ForgotPassword = () => {
 
   const handleResendOTP = async () => {
     if (!canResend) return;
-    
+
     setError("");
     setLoading(true);
 
     try {
-      await APIs.post(endpoints['forgot_password'], { 
+      await APIs.post(endpoints['forgot_password'], {
         username: username,
-        email: email 
+        email: email
       });
-      setSuccess("Mã OTP mới đã được gửi đến email của bạn!");
+      setSuccess("Mã OTP mới đã được gửi đến email của bạn.");
       startCountdown();
     } catch (err) {
       console.error("Resend OTP error:", err);
-      setError(err.response?.data?.message || "Không thể gửi lại mã OTP!");
+      setError(err.response?.data?.message || "Không thể gửi lại mã OTP.");
     } finally {
       setLoading(false);
     }
@@ -151,7 +165,7 @@ const ForgotPassword = () => {
 
   const handleOtpChange = (index, value) => {
     if (isNaN(value)) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -182,13 +196,13 @@ const ForgotPassword = () => {
                 Quên mật khẩu?
               </h3>
               <p className="text-sm text-gray-600">
-                Nhập tên đăng nhập và email để nhận mã xác nhận
+                Nhập tên tài khoản và email để nhận mã xác nhận
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tên đăng nhập <span className="text-red-600">*</span>
+                Tên tài khoản <span className="text-red-600">*</span>
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -198,7 +212,7 @@ const ForgotPassword = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder="Nhập tên đăng nhập"
+                  placeholder="Tên tài khoản"
                 />
               </div>
             </div>
@@ -215,7 +229,7 @@ const ForgotPassword = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder="Nhập email của bạn"
+                  placeholder="Email của bạn"
                 />
               </div>
             </div>
@@ -251,16 +265,17 @@ const ForgotPassword = () => {
                 Xác nhận mã OTP
               </h3>
               <p className="text-sm text-gray-600">
-                Nhập mã 6 số đã được gửi đến email <span className="font-medium text-red-600">{email}</span>
+                Nhập mã 6 số đã được gửi đến email<br />
+                <span className="font-medium text-red-600">{email}</span>
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                Tài khoản: <span className="font-medium">{username}</span>
+                Tên tài khoản: <span className="font-medium">{username}</span>
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
-                Mã xác nhận <span className="text-red-600">*</span>
+                Mã xác nhận
               </label>
               <div className="flex justify-center gap-2">
                 {otp.map((digit, index) => (
@@ -336,15 +351,15 @@ const ForgotPassword = () => {
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                   className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder="Nhập mật khẩu mới"
+                  placeholder="Mật khẩu mới"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  {showNewPassword ? 
-                    <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                  {showNewPassword ?
+                    <EyeOff className="h-5 w-5 text-gray-400" /> :
                     <Eye className="h-5 w-5 text-gray-400" />
                   }
                 </button>
@@ -370,8 +385,8 @@ const ForgotPassword = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  {showConfirmPassword ? 
-                    <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                  {showConfirmPassword ?
+                    <EyeOff className="h-5 w-5 text-gray-400" /> :
                     <Eye className="h-5 w-5 text-gray-400" />
                   }
                 </button>
@@ -406,35 +421,30 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        <Link 
+        <Link
           to="/login"
           className="inline-flex items-center text-gray-600 hover:text-red-600 transition mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Quay lại đăng nhập
+          Đăng nhập
         </Link>
 
         <div className="flex justify-center mb-8">
           <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              step >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
+              }`}>
               1
             </div>
-            <div className={`w-16 h-1 ${
-              step >= 2 ? 'bg-red-600' : 'bg-gray-200'
-            }`}></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              step >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
-            }`}>
+            <div className={`w-16 h-1 ${step >= 2 ? 'bg-red-600' : 'bg-gray-200'
+              }`}></div>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
+              }`}>
               2
             </div>
-            <div className={`w-16 h-1 ${
-              step >= 3 ? 'bg-red-600' : 'bg-gray-200'
-            }`}></div>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              step >= 3 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
-            }`}>
+            <div className={`w-16 h-1 ${step >= 3 ? 'bg-red-600' : 'bg-gray-200'
+              }`}></div>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
+              }`}>
               3
             </div>
           </div>

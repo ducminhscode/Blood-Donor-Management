@@ -69,14 +69,14 @@ const Login = () => {
       console.error("Login error:", err);
       if (err.response) {
         if (err.response.status === 401) {
-          setError("Sai tên đăng nhập hoặc mật khẩu!");
+          setError("Sai tên đăng nhập hoặc mật khẩu.");
         } else {
-          setError(err.response.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+          setError(err.response.data?.message || "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
         }
       } else if (err.request) {
-        setError("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!");
+        setError("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.");
       } else {
-        setError("Đã có lỗi xảy ra. Vui lòng thử lại sau!");
+        setError("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
       }
     } finally {
       setLoading(false);
@@ -86,13 +86,11 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl">
-        {/* Back to Home */}
         <Link to="/" className="inline-flex items-center text-gray-600 hover:text-red-600 transition mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Quay lại trang chủ
+          Trang chủ
         </Link>
 
-        {/* Header */}
         <div className="text-center">
           <div className="flex justify-center">
             <Droplet className="h-12 w-12 text-red-600" />
@@ -103,7 +101,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-lg">
             <div className="flex">
@@ -119,7 +116,6 @@ const Login = () => {
           </div>
         )}
 
-        {/* Success Message */}
         {success && (
           <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded-lg">
             <div className="flex">
@@ -135,10 +131,8 @@ const Login = () => {
           </div>
         )}
 
-        {/* Login Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Username Field */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
                 Tên tài khoản
@@ -162,7 +156,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Mật khẩu
@@ -199,7 +192,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Remember me & Forgot password */}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
@@ -220,12 +212,11 @@ const Login = () => {
             </Link>
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition transform hover:scale-105 disabled:bg-red-400 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="bg-gradient-to-r from-red-600 to-red-500 group relative w-full flex justify-center hover:from-red-700 hover:to-red-600 py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition transform hover:scale-105 disabled:bg-red-400 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {loading ? (
                 <div className="flex items-center">
@@ -241,7 +232,6 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Register link */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Chưa có tài khoản?{' '}
@@ -251,7 +241,6 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Demo Login */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
@@ -261,7 +250,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Social Login */}
           <div className="grid grid-cols-1 gap-3">
             <button
               type="button"

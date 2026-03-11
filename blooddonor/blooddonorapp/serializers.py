@@ -97,8 +97,7 @@ class StaffSerializer(ModelSerializer):
         fields = ['id', 'account', 'department', 'degree', 'license_number', 'experience_years', 'emergency_phone',
                   'current_status', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at', 'updated_at']
 
-        read_only_fields = ['id', 'is_verified', 'hospital', 'hospital_id', 'is_active', 'created_at',
-                            'updated_at']
+        read_only_fields = ['id', 'is_verified', 'hospital', 'is_active', 'created_at', 'updated_at']
 
 
 class DonationEventSerializer(ModelSerializer):
@@ -106,7 +105,7 @@ class DonationEventSerializer(ModelSerializer):
 
     class Meta:
         model = DonationEvent
-        fields = ['id', 'title', 'description', 'image_url', 'province', 'sub_district', 'time_start',
+        fields = ['id', 'title', 'description', 'image_url', 'province', 'sub_district', 'location', 'time_start',
                   'is_expire', 'is_active', 'created_at', 'updated_at', 'staff']
 
         read_only_fields = ['id', 'staff', 'created_at', 'updated_at', 'is_active']
@@ -175,8 +174,8 @@ class EventRegistrationSerializer(ModelSerializer):
 
 
 class FriendSerializer(ModelSerializer):
-    # requester = DonorSerializer(read_only=True)
-    # addressee = DonorSerializer(read_only=True)
+    requester = DonorSerializer(read_only=True)
+    addressee = DonorSerializer(read_only=True)
 
     class Meta:
         model = Friend

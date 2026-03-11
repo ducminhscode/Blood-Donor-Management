@@ -20,7 +20,7 @@ const VerifyOTP = () => {
 
     useEffect(() => {
         if (otpExpiryTime <= 0) {
-            setError("Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã mới!");
+            setError("Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã mới.");
             return;
         }
 
@@ -110,7 +110,7 @@ const VerifyOTP = () => {
         const otpCode = otp.join('');
 
         if (otpExpiryTime <= 0) {
-            setError("Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã mới!");
+            setError("Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã mới.");
             return;
         }
 
@@ -125,19 +125,19 @@ const VerifyOTP = () => {
         setSuccess("");
 
         try {
-            const endpoint = userType === 'donor' ? endpoints['verify_donor_otp'] : endpoints['verify_staff_otp'];
+            const endpoint = userType === 'donor' ? endpoints['verify_otp'] : endpoints['verify_otp'];
 
             await APIs.post(endpoint, {
                 email: email,
                 otp: otpCode
             });
 
-            setSuccess("Xác thực thành công! Đang chuyển hướng...");
+            setSuccess("Xác thực thành công. Đang chuyển hướng...");
 
             setTimeout(() => {
                 navigate('/login', {
                     state: {
-                        success: "Xác thực tài khoản thành công! Vui lòng đăng nhập."
+                        success: "Xác thực tài khoản thành công. Vui lòng đăng nhập."
                     }
                 });
             }, 2000);
@@ -163,19 +163,17 @@ const VerifyOTP = () => {
         setSuccess("");
 
         try {
-            // Lấy thông tin từ localStorage
             const tempData = localStorage.getItem('tempRegistration');
             if (!tempData) {
-                setError("Không tìm thấy thông tin đăng ký. Vui lòng đăng ký lại!");
+                setError("Không tìm thấy thông tin đăng ký. Vui lòng đăng ký lại.");
                 setLoading(false);
                 return;
             }
 
             const registrationData = JSON.parse(tempData);
 
-            // Kiểm tra email có khớp không
             if (registrationData.email !== email) {
-                setError("Thông tin không hợp lệ. Vui lòng đăng ký lại!");
+                setError("Thông tin không hợp lệ. Vui lòng đăng ký lại.");
                 setLoading(false);
                 return;
             }
@@ -183,10 +181,9 @@ const VerifyOTP = () => {
             const formData = new FormData();
 
             if (userType === 'donor') {
-                // Tạo object account từ dữ liệu đã lưu
                 const accountData = {
                     username: registrationData.username || '',
-                    password: registrationData.accountData?.password || '', // Cần lấy password từ đâu đó? 
+                    password: registrationData.accountData?.password || '', 
                     first_name: registrationData.first_name || '',
                     last_name: registrationData.last_name || '',
                     email: registrationData.email || '',
@@ -195,14 +192,12 @@ const VerifyOTP = () => {
                     gender: registrationData.gender || ''
                 };
 
-                // Append account fields
                 Object.keys(accountData).forEach(key => {
                     if (accountData[key] && accountData[key] !== '') {
                         formData.append(`account.${key}`, accountData[key]);
                     }
                 });
 
-                // Append các trường donor
                 if (registrationData.province) {
                     formData.append('province', registrationData.province);
                 }
@@ -232,14 +227,12 @@ const VerifyOTP = () => {
                 });
 
                 if (response.status === 201 || response.status === 200) {
-                    // Reset timers
                     setOtpExpiryTime(300);
                     setResendCooldown(60);
                     setCanResend(false);
 
-                    setSuccess("Mã OTP mới đã được gửi đến email của bạn!");
+                    setSuccess("Mã OTP mới đã được gửi đến email của bạn.");
 
-                    // Clear OTP inputs
                     setOtp(['', '', '', '', '', '']);
                     if (inputRefs.current[0]) {
                         inputRefs.current[0].focus();
@@ -247,10 +240,9 @@ const VerifyOTP = () => {
                 }
 
             } else {
-                // Tạo object account cho staff
                 const accountData = {
                     username: registrationData.username || '',
-                    password: registrationData.accountData?.password || '', // Cần lấy password từ đâu đó?
+                    password: registrationData.accountData?.password || '',
                     first_name: registrationData.first_name || '',
                     last_name: registrationData.last_name || '',
                     email: registrationData.email || '',
@@ -259,14 +251,12 @@ const VerifyOTP = () => {
                     gender: registrationData.gender || ''
                 };
 
-                // Append account fields
                 Object.keys(accountData).forEach(key => {
                     if (accountData[key] && accountData[key] !== '') {
                         formData.append(`account.${key}`, accountData[key]);
                     }
                 });
 
-                // Append các trường staff
                 if (registrationData.department) {
                     formData.append('department', registrationData.department);
                 }
@@ -296,14 +286,13 @@ const VerifyOTP = () => {
                 });
 
                 if (response.status === 201 || response.status === 200) {
-                    // Reset timers
+                  
                     setOtpExpiryTime(300);
                     setResendCooldown(60);
                     setCanResend(false);
 
-                    setSuccess("Mã OTP mới đã được gửi đến email của bạn!");
+                    setSuccess("Mã OTP mới đã được gửi đến email của bạn.");
 
-                    // Clear OTP inputs
                     setOtp(['', '', '', '', '', '']);
                     if (inputRefs.current[0]) {
                         inputRefs.current[0].focus();
@@ -311,13 +300,11 @@ const VerifyOTP = () => {
                 }
             }
 
-            // Auto hide success message after 3 seconds
             setTimeout(() => setSuccess(""), 3000);
 
         } catch (err) {
             console.error("Resend OTP error:", err);
 
-            // Xử lý lỗi chi tiết từ server
             if (err.response?.status === 400) {
                 const errorData = err.response.data;
                 if (errorData.email) {
@@ -329,18 +316,17 @@ const VerifyOTP = () => {
                 } else if (errorData.message) {
                     setError(errorData.message);
                 } else {
-                    setError("Thông tin đăng ký không hợp lệ. Vui lòng đăng ký lại!");
+                    setError("Thông tin đăng ký không hợp lệ. Vui lòng đăng ký lại.");
                 }
             } else if (err.response?.status === 409) {
-                setError("Tài khoản đã được xác thực. Vui lòng đăng nhập!");
-                // Clear localStorage vì tài khoản đã được xác thực
+                setError("Tài khoản đã được xác thực. Vui lòng đăng nhập.");
                 localStorage.removeItem('tempRegistration');
 
                 setTimeout(() => {
                     navigate('/login');
                 }, 2000);
             } else {
-                setError(err.response?.data?.message || "Không thể gửi lại mã OTP. Vui lòng thử lại sau!");
+                setError(err.response?.data?.message || "Không thể gửi lại mã OTP. Vui lòng thử lại sau.");
             }
         } finally {
             setLoading(false);
@@ -354,10 +340,9 @@ const VerifyOTP = () => {
 
                     <Link to="/register" className="inline-flex items-center text-gray-600 hover:text-red-600 transition mb-6">
                         <ArrowLeft className="h-4 w-4 mr-2" />
-                        Quay lại đăng ký
+                        Đăng ký
                     </Link>
 
-                    {/* Header */}
                     <div className="text-center mb-8">
                         <div className="flex justify-center mb-4">
                             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
@@ -366,13 +351,11 @@ const VerifyOTP = () => {
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900">Xác thực tài khoản</h2>
                         <div className="mt-2 flex items-center justify-center text-sm text-gray-600">
-                            <Mail className="h-4 w-4 mr-1" />
                             <span>Mã xác thực đã được gửi đến</span>
                         </div>
                         <p className="font-medium text-red-600">{email || "email của bạn"}</p>
                     </div>
 
-                    {/* Error & Success Messages */}
                     {error && (
                         <div className="mb-6 bg-red-50 border-l-4 border-red-600 p-4 rounded-lg">
                             <div className="flex">
@@ -391,20 +374,17 @@ const VerifyOTP = () => {
                         </div>
                     )}
 
-                    {/* Timers */}
                     <div className="space-y-2 mb-6">
                         <div className="flex items-center justify-center gap-2 text-sm">
-                            <Clock className="h-4 w-4 text-gray-400" />
                             <span className="text-gray-600">Mã có hiệu lực trong:</span>
+                            <Clock className="h-4 w-4 text-gray-400" />
                             <span className={`font-mono font-bold ${otpExpiryTime < 60 ? 'text-red-600' : 'text-gray-900'}`}>
                                 {formatTime(otpExpiryTime)}
                             </span>
                         </div>
                     </div>
 
-                    {/* OTP Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* OTP Inputs */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
                                 Nhập mã xác thực 6 số
@@ -428,7 +408,6 @@ const VerifyOTP = () => {
                             </div>
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading || otp.some(d => !d) || otpExpiryTime <= 0}
@@ -447,7 +426,6 @@ const VerifyOTP = () => {
                             )}
                         </button>
 
-                        {/* Resend OTP */}
                         <div className="text-center">
                             {canResend ? (
                                 <button
@@ -456,7 +434,6 @@ const VerifyOTP = () => {
                                     disabled={loading}
                                     className="inline-flex items-center text-red-600 hover:text-red-700 font-medium disabled:text-red-300"
                                 >
-                                    <RefreshCw className="h-4 w-4 mr-1" />
                                     Gửi lại mã xác thực
                                 </button>
                             ) : (
@@ -467,7 +444,6 @@ const VerifyOTP = () => {
                         </div>
                     </form>
 
-                    {/* Note */}
                     <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                         <p className="text-xs text-gray-500 text-center">
                             Mã xác thực gồm 6 số được gửi đến email của bạn và có hiệu lực trong 5 phút.

@@ -197,6 +197,7 @@ class RewardHistory(BaseModel):
     reward = models.ForeignKey(Reward, on_delete=models.CASCADE, related_name='rewards_reward_history')
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE, related_name='donors_reward_history')
     points_used = models.IntegerField()
+    quantity = models.IntegerField()
     recipient_information = models.OneToOneField(RecipientInformation, on_delete=models.CASCADE)
 
 

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, Mail, Phone, Calendar, Droplet, Edit2, Save, X, Settings, Shield, VenusAndMars, Eye, EyeOff, Key, Stethoscope } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Mail, Phone, Calendar, Droplet, Edit2, Save, X, Settings, Shield, VenusAndMars, Eye, EyeOff, Key, Stethoscope, MapPin, Briefcase, Award, Heart, Activity, Weight, Ruler, CreditCard, Building2, Hospital, GraduationCap, BadgeAlert, Home, Map, MapPinned, FileText, Building, BadgeCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { UserContexts, UserDispatchContext } from '../../configs/UserContexts';
@@ -10,9 +10,10 @@ import { authApis, endpoints } from '../../configs/APIs';
 const Profile = () => {
     const user = useContext(UserContexts);
     const dispatch = useContext(UserDispatchContext);
-    const navigate = useNavigate();
 
     const [isEditing, setIsEditing] = useState(false);
+    const [isEditingDonor, setIsEditingDonor] = useState(false);
+    const [isEditingStaff, setIsEditingStaff] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(false);
@@ -22,6 +23,13 @@ const Profile = () => {
         new: false,
         confirm: false
     });
+
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [selectedProvince, setSelectedProvince] = useState('');
+
+    const [donorInfo, setDonorInfo] = useState(null);
+    const [staffInfo, setStaffInfo] = useState(null);
 
     const [editForm, setEditForm] = useState({
         last_name: user?.last_name || '',
@@ -33,6 +41,22 @@ const Profile = () => {
         avatar: null
     });
 
+    const [donorEditForm, setDonorEditForm] = useState({
+        province: '',
+        sub_district: '',
+        permanent_address: '',
+        identification: '',
+        career: '',
+        organization: '',
+    });
+
+    const [staffEditForm, setStaffEditForm] = useState({
+        department: '',
+        degree: '',
+        experience_years: '',
+        emergency_phone: ''
+    });
+
     const [passwordForm, setPasswordForm] = useState({
         current_password: '',
         new_password: '',
@@ -41,11 +65,92 @@ const Profile = () => {
 
     const [avatarPreview, setAvatarPreview] = useState(user?.avatar ? getImageUrl(user.avatar) : '');
 
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            try {
+                const response = await fetch('https://provinces.open-api.vn/api/p/');
+                const data = await response.json();
+                setProvinces(data);
+            } catch (error) {
+                console.error("Error fetching provinces:", error);
+            }
+        };
+        fetchProvinces();
+    }, []);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (!selectedProvince) return;
+            try {
+                const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`);
+                const data = await response.json();
+                setDistricts(data.districts || []);
+            } catch (error) {
+                console.error("Error fetching districts:", error);
+            }
+        };
+        fetchDistricts();
+    }, [selectedProvince]);
+
+    useEffect(() => {
+        const fetchAdditionalInfo = async () => {
+            try {
+                if (user?.role === 1) {
+                    const response = await authApis().get(endpoints["donor_me"]);
+                    setDonorInfo(response.data);
+                    setDonorEditForm({
+                        province: response.data.province || '',
+                        sub_district: response.data.sub_district || '',
+                        permanent_address: response.data.permanent_address || '',
+                        identification: response.data.identification || '',
+                        career: response.data.career || '',
+                        organization: response.data.organization || ''
+                    });
+                } else if (user?.role === 2) {
+                    const response = await authApis().get(endpoints["staff_me"]);
+                    setStaffInfo(response.data);
+                    setStaffEditForm({
+                        department: response.data.department || '',
+                        degree: response.data.degree || '',
+                        experience_years: response.data.experience_years || '',
+                        emergency_phone: response.data.emergency_phone || ''
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching additional info:", error);
+            }
+        };
+
+        if (user) {
+            fetchAdditionalInfo();
+        }
+    }, [user]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setEditForm(prev => ({
             ...prev,
             [name]: value
+        }));
+    };
+
+    const handleDonorInputChange = (e) => {
+        const { name, value } = e.target;
+        setDonorEditForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleStaffInputChange = (e) => {
+        let value = Number(e.target.value);
+
+        if (value > 50) value = 50;
+        if (value < 0) value = 0;
+
+        setStaffEditForm(prev => ({
+            ...prev,
+            experience_years: value
         }));
     };
 
@@ -74,6 +179,7 @@ const Profile = () => {
             setAvatarPreview(URL.createObjectURL(file));
         }
     };
+
 
     const handleSaveProfile = async (e) => {
         e?.preventDefault();
@@ -109,6 +215,54 @@ const Profile = () => {
             setIsEditing(false);
         } catch (error) {
             console.error("Update profile error:", error);
+            setMessage({
+                text: error.response?.data?.message || "Có lỗi xảy ra khi cập nhật thông tin",
+                type: "error"
+            });
+            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSaveDonorInfo = async (e) => {
+        e?.preventDefault();
+        setLoading(true);
+        setMessage({ text: "", type: "" });
+
+        try {
+
+            const response = await authApis().patch(endpoints["donor_update"], donorEditForm);
+
+            setDonorInfo(response.data);
+            setMessage({ text: "Cập nhật thông tin người hiến máu thành công!", type: "success" });
+            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+            setIsEditingDonor(false);
+        } catch (error) {
+            console.error("Update donor info error:", error);
+            setMessage({
+                text: error.response?.data?.message || "Có lỗi xảy ra khi cập nhật thông tin",
+                type: "error"
+            });
+            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSaveStaffInfo = async (e) => {
+        e?.preventDefault();
+        setLoading(true);
+        setMessage({ text: "", type: "" });
+
+        try {
+            const response = await authApis().patch(endpoints["staff_update"], staffEditForm);
+            setStaffInfo(response.data);
+            setMessage({ text: "Cập nhật thông tin nhân viên thành công!", type: "success" });
+            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+            setIsEditingStaff(false);
+        } catch (error) {
+            console.error("Update staff info error:", error);
             setMessage({
                 text: error.response?.data?.message || "Có lỗi xảy ra khi cập nhật thông tin",
                 type: "error"
@@ -159,11 +313,36 @@ const Profile = () => {
         }
     };
 
-    const handleLogout = () => {
-        cookie.remove("access_token", { path: "/" });
-        cookie.remove("refresh_token", { path: "/" });
-        dispatch({ type: "logout" });
-        navigate("/");
+    const fetchDonorInfo = async () => {
+        try {
+            const response = await authApis().get(endpoints["donor_me"]);
+            setDonorInfo(response.data);
+            setDonorEditForm({
+                province: response.data.province || '',
+                sub_district: response.data.sub_district || '',
+                permanent_address: response.data.permanent_address || '',
+                identification: response.data.identification || '',
+                career: response.data.career || '',
+                organization: response.data.organization || ''
+            });
+        } catch (error) {
+            console.error("Error fetching donor info:", error);
+        }
+    };
+
+    const fetchStaffInfo = async () => {
+        try {
+            const response = await authApis().get(endpoints["staff_me"]);
+            setStaffInfo(response.data);
+            setStaffEditForm({
+                department: response.data.department || '',
+                degree: response.data.degree || '',
+                experience_years: response.data.experience_years || '',
+                emergency_phone: response.data.emergency_phone || ''
+            });
+        } catch (error) {
+            console.error("Error fetching staff info:", error);
+        }
     };
 
     const handleCancelEdit = () => {
@@ -178,6 +357,34 @@ const Profile = () => {
         });
         setAvatarPreview(user?.avatar ? getImageUrl(user.avatar) : '');
         setIsEditing(false);
+        setMessage({ text: "", type: "" });
+    };
+
+    const handleCancelDonorEdit = () => {
+        if (donorInfo) {
+            setDonorEditForm({
+                province: donorInfo.province || '',
+                sub_district: donorInfo.sub_district || '',
+                permanent_address: donorInfo.permanent_address || '',
+                identification: donorInfo.identification || '',
+                career: donorInfo.career || '',
+                organization: donorInfo.organization || ''
+            });
+        }
+        setIsEditingDonor(false);
+        setMessage({ text: "", type: "" });
+    };
+
+    const handleCancelStaffEdit = () => {
+        if (staffInfo) {
+            setStaffEditForm({
+                department: staffInfo.department || '',
+                degree: staffInfo.degree || '',
+                experience_years: staffInfo.experience_years || '',
+                emergency_phone: staffInfo.emergency_phone || ''
+            });
+        }
+        setIsEditingStaff(false);
         setMessage({ text: "", type: "" });
     };
 
@@ -197,6 +404,22 @@ const Profile = () => {
             [field]: !prev[field]
         }));
     };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "Chưa cập nhật";
+        return new Date(dateString).toLocaleDateString("vi-VN");
+    };
+
+    const formatBloodType = (bloodType, rhFactor) => {
+        if (!bloodType) return "Chưa cập nhật";
+        return `${bloodType}${rhFactor === 'positive' ? '+' : rhFactor === 'negative' ? '-' : ''}`;
+    };
+
+    const bloodTypes = ['A', 'B', 'AB', 'O'];
+    const rhFactors = [
+        { value: 'positive', label: 'Rh+' },
+        { value: 'negative', label: 'Rh-' }
+    ];
 
     const tabs = [
         { id: 'overview', label: 'Tổng quan', icon: User },
@@ -241,13 +464,26 @@ const Profile = () => {
                             <div className="flex-1">
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div>
-                                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                                            {editForm.last_name + " " + editForm.first_name || 'Người dùng'}
-                                        </h1>
+                                        <div className="flex items-center gap-2">
+                                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                                                {editForm.last_name + " " + editForm.first_name || 'Người dùng'}
+                                            </h1>
+                                            {user?.role === 2 && staffInfo?.is_verified && (
+                                                <BadgeCheck className="w-6 h-6 text-blue-500" title="Đã xác thực" />
+                                            )}
+                                            {user?.role === 2 && staffInfo?.is_verified === false && (
+                                                <BadgeAlert className="w-6 h-6 text-yellow-500" title="Chưa xác thực" />
+                                            )}
+                                        </div>
                                         <div className="flex flex-wrap items-center gap-3 mt-2">
                                             <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                                                 Tên tài khoản: {user?.username || 'Người dùng'}
                                             </span>
+                                            {user?.role === 1 && donorInfo && (
+                                                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                                                    Điểm: {donorInfo.points || 0}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -277,8 +513,10 @@ const Profile = () => {
                                     onClick={() => {
                                         setActiveTab(tab.id);
                                         setIsEditing(false);
+                                        setIsEditingDonor(false);
                                         setIsChangingPassword(false);
                                         handleCancelEdit();
+                                        handleCancelDonorEdit();
                                     }}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition whitespace-nowrap ${activeTab === tab.id
                                         ? 'bg-red-600 text-white'
@@ -420,9 +658,7 @@ const Profile = () => {
                                                     <div className="flex items-center gap-3">
                                                         <Calendar className="w-5 h-5 text-gray-400" />
                                                         <span className="text-gray-600">
-                                                            {user?.birth_date
-                                                                ? new Date(user.birth_date).toLocaleDateString("vi-VN")
-                                                                : "Chưa cập nhật"}
+                                                            {formatDate(user?.birth_date)}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -477,6 +713,438 @@ const Profile = () => {
                                             )}
                                         </div>
                                     </div>
+
+                                    {user?.role === 1 && donorInfo && (
+                                        <div className="mt-6 border-t pt-6">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+                                                    <Heart className="w-5 h-5 text-red-600" />
+                                                    Thông tin người hiến máu
+                                                </h3>
+                                                {!isEditingDonor ? (
+                                                    <button
+                                                        onClick={() => setIsEditingDonor(true)}
+                                                        className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                        Chỉnh sửa
+                                                    </button>
+                                                ) : (
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={handleSaveDonorInfo}
+                                                            disabled={loading}
+                                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                                                        >
+                                                            {loading ? (
+                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                            ) : (
+                                                                <Save className="w-4 h-4" />
+                                                            )}
+                                                            Lưu
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCancelDonorEdit}
+                                                            disabled={loading}
+                                                            className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                            Hủy
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {isEditingDonor ? (
+                                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <CreditCard className="w-4 h-4 text-orange-500" />
+                                                                CMND/CCCD
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="identification"
+                                                            value={donorEditForm.identification}
+                                                            onChange={handleDonorInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Briefcase className="w-4 h-4 text-indigo-500" />
+                                                                Nghề nghiệp
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="career"
+                                                            value={donorEditForm.career}
+                                                            onChange={handleDonorInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Building className="w-4 h-4 text-cyan-500" />
+                                                                Tổ chức/Công ty
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="organization"
+                                                            value={donorEditForm.organization}
+                                                            onChange={handleDonorInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <MapPinned className="w-4 h-4 text-red-500" />
+                                                                Tỉnh/Thành phố
+                                                            </div>
+                                                        </label>
+                                                        <select
+                                                            name="province"
+                                                            value={donorEditForm.province}
+                                                            onChange={(e) => {
+                                                                handleDonorInputChange(e);
+                                                                const selected = provinces.find(p => p.name === e.target.value);
+                                                                setSelectedProvince(selected?.code || '');
+                                                                setDonorEditForm(prev => ({ ...prev, sub_district: '' }));
+                                                            }}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                        >
+                                                            <option value="">Chọn Tỉnh/Thành phố</option>
+                                                            {provinces.map(p => (
+                                                                <option key={p.code} value={p.name}>{p.name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Map className="w-4 h-4 text-purple-500" />
+                                                                Quận/Huyện
+                                                            </div>
+                                                        </label>
+                                                        <select
+                                                            name="sub_district"
+                                                            value={donorEditForm.sub_district}
+                                                            onChange={handleDonorInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:cursor-not-allowed disabled:bg-gray-100"
+                                                            disabled={!selectedProvince}
+                                                        >
+                                                            <option value="">Chọn Quận/Huyện</option>
+                                                            {districts.map(d => (
+                                                                <option key={d.code} value={d.name}>{d.name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Home className="w-4 h-4 text-green-500" />
+                                                                Địa chỉ thường trú
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="permanent_address"
+                                                            value={donorEditForm.permanent_address}
+                                                            onChange={handleDonorInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Droplet className="w-5 h-5 text-red-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Nhóm máu</p>
+                                                                <p className="font-medium">{formatBloodType(donorInfo.blood_type, donorInfo.rh_factor)}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Weight className="w-5 h-5 text-green-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Cân nặng</p>
+                                                                <p className="font-medium">{donorInfo.weight ? `${donorInfo.weight} kg` : 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Ruler className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Chiều cao</p>
+                                                                <p className="font-medium">{donorInfo.height ? `${donorInfo.height} cm` : 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Activity className="w-5 h-5 text-purple-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">BMI</p>
+                                                                <p className="font-medium">{donorInfo.bmi ? donorInfo.bmi.toFixed(2) : 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <CreditCard className="w-5 h-5 text-orange-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">CMND/CCCD</p>
+                                                                <p className="font-medium">{donorInfo.identification || 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Briefcase className="w-5 h-5 text-indigo-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Nghề nghiệp</p>
+                                                                <p className="font-medium">{donorInfo.career || 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Building2 className="w-5 h-5 text-cyan-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Tổ chức</p>
+                                                                <p className="font-medium">{donorInfo.organization || 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <MapPin className="w-5 h-5 text-red-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Địa chỉ</p>
+                                                                <p className="font-medium">
+                                                                    {donorInfo.permanent_address || 'Chưa cập nhật'}
+                                                                    {donorInfo.sub_district && donorInfo.province &&
+                                                                        `, ${donorInfo.sub_district}, ${donorInfo.province}`}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Award className="w-5 h-5 text-yellow-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Lần hiến cuối</p>
+                                                                <p className="font-medium">{formatDate(donorInfo.last_donation)}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                        <div className="text-center p-3 bg-red-50 rounded-lg">
+                                                            <p className="text-2xl font-bold text-red-600">{donorInfo.donation_count || 0}</p>
+                                                            <p className="text-sm text-gray-600">Lần hiến máu</p>
+                                                        </div>
+                                                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                                                            <p className="text-2xl font-bold text-green-600">{donorInfo.points || 0}</p>
+                                                            <p className="text-sm text-gray-600">Điểm tích lũy</p>
+                                                        </div>
+                                                        <div className="text-center p-5 bg-blue-50 rounded-lg">
+                                                            <p className={`text-sm font-medium ${donorInfo.can_donation ? 'text-green-600' : 'text-red-600'}`}>
+                                                                {donorInfo.can_donation ? 'Có thể hiến' : 'Chưa thể hiến'}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">Trạng thái</p>
+                                                        </div>
+                                                        <div className="text-center p-5 bg-purple-50 rounded-lg">
+                                                            <p className={`text-sm font-medium ${donorInfo.is_private ? 'text-orange-600' : 'text-green-600'}`}>
+                                                                {donorInfo.is_private ? 'Riêng tư' : 'Công khai'}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">Quyền riêng tư</p>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {user?.role === 2 && staffInfo && (
+                                        <div className="mt-6 border-t pt-6">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+                                                    <Stethoscope className="w-5 h-5 text-red-600" />
+                                                    Thông tin nhân viên y tế
+                                                </h3>
+                                                {!isEditingStaff ? (
+                                                    <button
+                                                        onClick={() => setIsEditingStaff(true)}
+                                                        className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                        Chỉnh sửa
+                                                    </button>
+                                                ) : (
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={handleSaveStaffInfo}
+                                                            disabled={loading}
+                                                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                                                        >
+                                                            {loading ? (
+                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                            ) : (
+                                                                <Save className="w-4 h-4" />
+                                                            )}
+                                                            Lưu
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCancelStaffEdit}
+                                                            disabled={loading}
+                                                            className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                            Hủy
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {isEditingStaff ? (
+                                                <div className="grid md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Building2 className="w-4 h-4 text-green-500" />
+                                                                Khoa/Phòng
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="department"
+                                                            value={staffEditForm.department}
+                                                            onChange={handleStaffInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <GraduationCap className="w-4 h-4 text-purple-500" />
+                                                                Học vị/Chứng chỉ
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="degree"
+                                                            value={staffEditForm.degree}
+                                                            onChange={handleStaffInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Briefcase className="w-4 h-4 text-indigo-500" />
+                                                                Số năm kinh nghiệm
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            name="experience_years"
+                                                            value={staffEditForm.experience_years}
+                                                            onChange={handleStaffInputChange}
+                                                            min="0"
+                                                            max="50"
+                                                            step="0.5"
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Phone className="w-4 h-4 text-red-500" />
+                                                                Điện thoại khẩn cấp
+                                                            </div>
+                                                        </label>
+                                                        <input
+                                                            type="tel"
+                                                            name="emergency_phone"
+                                                            value={staffEditForm.emergency_phone}
+                                                            onChange={handleStaffInputChange}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="grid md:grid-cols-2 gap-4">
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Hospital className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Bệnh viện</p>
+                                                                <p className="font-medium">{staffInfo.hospital?.name || 'Chưa cập nhật'}</p>
+                                                                {staffInfo.hospital && (
+                                                                    <p className="text-xs text-gray-400">
+                                                                        {staffInfo.hospital.hospital_address}, {staffInfo.hospital.sub_district}, {staffInfo.hospital.province}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Building2 className="w-5 h-5 text-green-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Khoa/Phòng</p>
+                                                                <p className="font-medium">{staffInfo.department || 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <GraduationCap className="w-5 h-5 text-purple-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Học vị/Chứng chỉ</p>
+                                                                <p className="font-medium">{staffInfo.degree || 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <BadgeAlert className="w-5 h-5 text-orange-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Số giấy phép</p>
+                                                                <p className="font-medium">{staffInfo.license_number || 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Briefcase className="w-5 h-5 text-indigo-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Số năm kinh nghiệm</p>
+                                                                <p className="font-medium">{staffInfo.experience_years ? `${staffInfo.experience_years} năm` : 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                            <Phone className="w-5 h-5 text-red-500 mt-0.5" />
+                                                            <div>
+                                                                <p className="text-sm text-gray-500">Điện thoại khẩn cấp</p>
+                                                                <p className="font-medium">{staffInfo.emergency_phone || 'Chưa cập nhật'}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-4 grid grid-cols-2 gap-4">
+                                                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                                                            <p className={`text-sm font-medium ${staffInfo.is_verified ? 'text-green-600' : 'text-orange-600'}`}>
+                                                                {staffInfo.is_verified ? 'Đã xác thực' : 'Chưa xác thực'}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">Trạng thái xác thực</p>
+                                                        </div>
+                                                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                                                            <p className={`text-sm font-medium ${staffInfo.current_status ? 'text-green-600' : 'text-red-600'}`}>
+                                                                {staffInfo.current_status ? 'Đang làm việc' : 'Nghỉ việc'}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">Trạng thái công việc</p>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                 </>
                             ) : (
                                 <div className="space-y-6">
@@ -692,6 +1360,89 @@ const Profile = () => {
                                     )}
                                 </div>
 
+                                {user?.role === 1 && donorInfo && (
+                                    <div className="border rounded-lg p-4">
+                                        <h3 className="font-semibold mb-2">Quyền riêng tư</h3>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-700">Hiển thị thông tin cá nhân</span>
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded text-red-600"
+                                                    checked={!donorInfo.is_private}
+                                                    onChange={async (e) => {
+                                                        try {
+                                                            await authApis().patch(endpoints["donor_update"], {
+                                                                is_private: !e.target.checked
+                                                            });
+                                                            await fetchDonorInfo();
+                                                            setMessage({ text: "Cập nhật quyền riêng tư thành công!", type: "success" });
+                                                            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+                                                        } catch (error) {
+                                                            setMessage({ text: "Có lỗi xảy ra", type: "error" });
+                                                            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <label className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-700">
+                                                    Sẵn sàng hiến máu
+                                                </span>
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded text-red-600"
+                                                    checked={donorInfo.can_donation}
+                                                    onChange={async (e) => {
+                                                        try {
+                                                            await authApis().patch(endpoints["donor_update"], {
+                                                                can_donation: e.target.checked
+                                                            });
+                                                            await fetchDonorInfo();
+                                                            setMessage({ text: "Cập nhật trạng thái sẵn sàng hiến máu thành công!", type: "success" });
+                                                            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+                                                        } catch (error) {
+                                                            setMessage({ text: "Có lỗi xảy ra", type: "error" });
+                                                            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {user?.role === 2 && staffInfo && (
+                                    <div className="border rounded-lg p-4">
+                                        <h3 className="font-semibold mb-2">Trạng thái công việc</h3>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-700">
+                                                    {staffInfo.current_status ? 'Đang làm việc' : 'Không làm việc'}
+                                                </span>
+                                                <input
+                                                    type="checkbox"
+                                                    className="rounded text-red-600"
+                                                    checked={staffInfo.current_status}
+                                                    onChange={async (e) => {
+                                                        try {
+                                                            await authApis().patch(endpoints["staff_update"], {
+                                                                current_status: e.target.checked
+                                                            });
+                                                            await fetchStaffInfo();
+                                                            setMessage({ text: "Cập nhật trạng thái công việc thành công!", type: "success" });
+                                                            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+                                                        } catch (error) {
+                                                            setMessage({ text: "Có lỗi xảy ra", type: "error" });
+                                                            setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="border rounded-lg p-4">
                                     <h3 className="font-semibold mb-2">Thông báo</h3>
                                     <div className="space-y-2">
@@ -705,20 +1456,6 @@ const Profile = () => {
                                         </label>
                                         <label className="flex items-center justify-between">
                                             <span className="text-sm text-gray-700">Nhận thông báo qua SMS</span>
-                                            <input type="checkbox" className="rounded text-red-600" />
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div className="border rounded-lg p-4">
-                                    <h3 className="font-semibold mb-2">Quyền riêng tư</h3>
-                                    <div className="space-y-2">
-                                        <label className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-700">Hiển thị thông tin cá nhân</span>
-                                            <input type="checkbox" className="rounded text-red-600" />
-                                        </label>
-                                        <label className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-700">Chia sẻ lịch sử hiến máu</span>
                                             <input type="checkbox" className="rounded text-red-600" />
                                         </label>
                                     </div>
