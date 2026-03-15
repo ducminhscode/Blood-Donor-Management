@@ -101,7 +101,7 @@ class StaffSerializer(ModelSerializer):
 
 
 class DonationEventSerializer(ModelSerializer):
-    # staff = StaffSerializer(read_only=True)
+    staff = StaffSerializer(read_only=True)
 
     class Meta:
         model = DonationEvent
@@ -137,6 +137,7 @@ class RewardCategorySerializer(ModelSerializer):
 
 
 class RewardSerializer(ModelSerializer):
+    reward_category = RewardCategorySerializer(read_only=True)
     class Meta:
         model = Reward
         fields = '__all__'
@@ -151,8 +152,8 @@ class RecipientInformationSerializer(ModelSerializer):
 
 class RewardHistorySerializer(ModelSerializer):
     # donor = DonorSerializer(read_only=True)
-    # recipient_information = RecipientInformationSerializer(read_only=True)
-    # reward = RewardSerializer(read_only=True)
+    recipient_information = RecipientInformationSerializer(read_only=True)
+    reward = RewardSerializer(read_only=True)
 
     class Meta:
         model = RewardHistory
@@ -170,7 +171,7 @@ class EventRegistrationSerializer(ModelSerializer):
     class Meta:
         model = EventRegistration
         fields = '__all__'
-        read_only_fields = ['id', 'donor', 'created_at', 'donation_event', 'updated_at', 'is_active', 'status']
+        read_only_fields = ['id', 'donor', 'created_at', 'donation_event', 'updated_at', 'is_active']
 
 
 class FriendSerializer(ModelSerializer):

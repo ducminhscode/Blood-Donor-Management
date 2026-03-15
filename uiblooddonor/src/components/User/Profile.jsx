@@ -210,7 +210,7 @@ const Profile = () => {
                 payload: res.data,
             });
 
-            setMessage({ text: "Cập nhật thông tin thành công!", type: "success" });
+            setMessage({ text: "Cập nhật thông tin thành công.", type: "success" });
             setTimeout(() => setMessage({ text: "", type: "" }), 3000);
             setIsEditing(false);
         } catch (error) {
@@ -235,7 +235,7 @@ const Profile = () => {
             const response = await authApis().patch(endpoints["donor_update"], donorEditForm);
 
             setDonorInfo(response.data);
-            setMessage({ text: "Cập nhật thông tin người hiến máu thành công!", type: "success" });
+            setMessage({ text: "Cập nhật thông tin người hiến máu thành công.", type: "success" });
             setTimeout(() => setMessage({ text: "", type: "" }), 3000);
             setIsEditingDonor(false);
         } catch (error) {
@@ -258,7 +258,7 @@ const Profile = () => {
         try {
             const response = await authApis().patch(endpoints["staff_update"], staffEditForm);
             setStaffInfo(response.data);
-            setMessage({ text: "Cập nhật thông tin nhân viên thành công!", type: "success" });
+            setMessage({ text: "Cập nhật thông tin nhân viên thành công.", type: "success" });
             setTimeout(() => setMessage({ text: "", type: "" }), 3000);
             setIsEditingStaff(false);
         } catch (error) {
@@ -292,7 +292,7 @@ const Profile = () => {
                 confirm_password: passwordForm.confirm_password
             });
 
-            setMessage({ text: "Đổi mật khẩu thành công!", type: "success" });
+            setMessage({ text: "Đổi mật khẩu thành công.", type: "success" });
             setTimeout(() => setMessage({ text: "", type: "" }), 3000);
 
             setPasswordForm({
@@ -427,17 +427,17 @@ const Profile = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="relative h-48 bg-gradient-to-r from-red-600 to-red-400">
-                <div className="absolute inset-0 bg-black opacity-10"></div>
+        <div className="min-h-screen bg-slate-100 text-slate-800">
+            <div className="relative h-52 bg-gradient-to-r from-rose-500 via-red-500 to-orange-400">
+                <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="relative -mt-24 mb-8">
-                    <div className="bg-white rounded-2xl shadow-xl p-6">
+                    <div className="bg-white border border-slate-200/80 rounded-3xl shadow-[0_20px_50px_rgba(15,23,42,0.15)] p-6">
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                             <div className="relative group">
-                                <div className="w-28 h-28 rounded-full bg-red-100 border-4 border-white shadow-lg flex items-center justify-center overflow-hidden">
+                                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-rose-100 to-red-100 border-4 border-white shadow-xl flex items-center justify-center overflow-hidden transition transform hover:-translate-y-1">
                                     {avatarPreview ? (
                                         <img
                                             src={avatarPreview}
@@ -445,12 +445,12 @@ const Profile = () => {
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <User className="w-14 h-14 text-red-600" />
+                                        <User className="w-14 h-14 text-rose-600" />
                                     )}
                                 </div>
                                 {isEditing && (
-                                    <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md hover:bg-gray-50 transition cursor-pointer">
-                                        <Edit2 className="w-4 h-4 text-gray-600" />
+                                    <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 border border-slate-200 shadow-sm hover:bg-slate-50 transition cursor-pointer">
+                                        <Edit2 className="w-4 h-4 text-rose-600" />
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -506,7 +506,7 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        <div className="flex overflow-x-auto mt-6 border-t pt-4 gap-4">
+                        <div className="flex overflow-x-auto mt-6 border-t border-slate-200 pt-4 gap-3">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
@@ -518,9 +518,9 @@ const Profile = () => {
                                         handleCancelEdit();
                                         handleCancelDonorEdit();
                                     }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition whitespace-nowrap ${activeTab === tab.id
-                                        ? 'bg-red-600 text-white'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition whitespace-nowrap ${activeTab === tab.id
+                                        ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white shadow-md'
+                                        : 'text-slate-600 bg-slate-100 hover:bg-slate-200'
                                         }`}>
                                     <tab.icon className="w-4 h-4" />
                                     {tab.label}
@@ -531,9 +531,9 @@ const Profile = () => {
                 </div>
 
                 {message.text && (
-                    <div className={`mb-4 p-4 rounded-lg ${message.type === 'success'
-                        ? 'bg-green-50 border border-green-200 text-green-700'
-                        : 'bg-red-50 border border-red-200 text-red-700'
+                    <div className={`mb-4 p-4 rounded-xl border text-sm shadow-sm ${message.type === 'success'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                        : 'bg-rose-50 border-rose-200 text-rose-700'
                         }`}>
                         {message.text}
                     </div>
@@ -582,7 +582,7 @@ const Profile = () => {
 
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
-                                            <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+                                            <h3 className="font-semibold mb-6 text-gray-700 flex items-center gap-2">
                                                 <User className="w-5 h-5 text-red-600" />
                                                 Thông tin cơ bản
                                             </h3>
@@ -591,8 +591,12 @@ const Profile = () => {
                                                 <div className="space-y-3">
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Họ và tên đệm
+                                                            <div className="flex items-center gap-1">
+                                                                <User className="w-4 h-4 text-red-500" />
+                                                                Họ và tên đệm
+                                                            </div>
                                                         </label>
+
                                                         <input
                                                             type="text"
                                                             name="last_name"
@@ -603,7 +607,10 @@ const Profile = () => {
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Tên
+                                                            <div className="flex items-center gap-1">
+                                                                <User className="w-4 h-4 text-red-500" />
+                                                                Tên
+                                                            </div>
                                                         </label>
                                                         <input
                                                             type="text"
@@ -615,7 +622,10 @@ const Profile = () => {
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Giới tính
+                                                            <div className="flex items-center gap-1">
+                                                                <VenusAndMars className="w-4 h-4 text-purple-500" />
+                                                                Giới tính
+                                                            </div>
                                                         </label>
                                                         <select
                                                             name="gender"
@@ -629,7 +639,10 @@ const Profile = () => {
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                            Ngày sinh
+                                                            <div className="flex items-center gap-1">
+                                                                <Calendar className="w-4 h-4 text-orange-500" />
+                                                                Ngày sinh
+                                                            </div>
                                                         </label>
                                                         <input
                                                             type="date"
@@ -643,30 +656,39 @@ const Profile = () => {
                                                 </div>
                                             ) : (
                                                 <div className="space-y-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <User className="w-5 h-5 text-gray-400" />
-                                                        <span className="text-gray-600">
-                                                            {user?.last_name + " " + user?.first_name || 'Chưa cập nhật'}
-                                                        </span>
+
+                                                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <User className="w-5 h-5 text-red-500 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Họ và tên</p>
+                                                            <p className="font-medium">{user?.last_name + " " + user?.first_name || 'Chưa cập nhật'}</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <VenusAndMars className="w-5 h-5 text-gray-400" />
-                                                        <span className="text-gray-600">
-                                                            {user?.gender === 0 ? 'Nam' : user?.gender === 1 ? 'Nữ' : 'Chưa cập nhật'}
-                                                        </span>
+
+                                                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <VenusAndMars className="w-5 h-5 text-purple-500 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Giới tính</p>
+                                                            <p className="font-medium">
+                                                                {user?.gender === 0 ? 'Nam' : user?.gender === 1 ? 'Nữ' : 'Chưa cập nhật'}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <Calendar className="w-5 h-5 text-gray-400" />
-                                                        <span className="text-gray-600">
-                                                            {formatDate(user?.birth_date)}
-                                                        </span>
+                                                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <Calendar className="w-5 h-5 text-orange-500 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Ngày sinh</p>
+                                                            <p className="font-medium">
+                                                                {formatDate(user?.birth_date) || 'Chưa cập nhật'}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
 
                                         <div className="space-y-4">
-                                            <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+                                            <h3 className="font-semibold mb-6 text-gray-700 flex items-center gap-2">
                                                 <Mail className="w-5 h-5 text-red-600" />
                                                 Thông tin liên hệ
                                             </h3>
@@ -675,7 +697,10 @@ const Profile = () => {
                                                 <div className="space-y-3">
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Mail className="w-4 h-4 text-blue-500" />
                                                             Email
+                                                            </div>
                                                         </label>
                                                         <input
                                                             type="email"
@@ -688,7 +713,10 @@ const Profile = () => {
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                            <div className="flex items-center gap-1">
+                                                                <Phone className="w-4 h-4 text-green-500" />
                                                             Số điện thoại
+                                                            </div>
                                                         </label>
                                                         <input
                                                             type="tel"
@@ -701,13 +729,19 @@ const Profile = () => {
                                                 </div>
                                             ) : (
                                                 <div className="space-y-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <Mail className="w-5 h-5 text-gray-400" />
-                                                        <span className="text-gray-600">{user?.email || 'Chưa cập nhật'}</span>
+                                                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <Mail className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Email</p>
+                                                            <p className="font-medium">{user?.email || 'Chưa cập nhật'}</p>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <Phone className="w-5 h-5 text-gray-400" />
-                                                        <span className="text-gray-600">{user?.phone || 'Chưa cập nhật'}</span>
+                                                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                                        <Phone className="w-5 h-5 text-green-500 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Số điện thoại</p>
+                                                            <p className="font-medium">{user?.phone || 'Chưa cập nhật'}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
@@ -718,7 +752,7 @@ const Profile = () => {
                                         <div className="mt-6 border-t pt-6">
                                             <div className="flex justify-between items-center mb-4">
                                                 <h3 className="font-semibold text-gray-700 flex items-center gap-2">
-                                                    <Heart className="w-5 h-5 text-red-600" />
+                                                    <Droplet className="w-5 h-5 text-red-600" />
                                                     Thông tin người hiến máu
                                                 </h3>
                                                 {!isEditingDonor ? (
@@ -950,9 +984,9 @@ const Profile = () => {
                                                         </div>
                                                         <div className="text-center p-5 bg-blue-50 rounded-lg">
                                                             <p className={`text-sm font-medium ${donorInfo.can_donation ? 'text-green-600' : 'text-red-600'}`}>
-                                                                {donorInfo.can_donation ? 'Có thể hiến' : 'Chưa thể hiến'}
+                                                                {donorInfo.can_donation ? 'Sẵn sàng' : 'Không sẵn sàng'}
                                                             </p>
-                                                            <p className="text-xs text-gray-500">Trạng thái</p>
+                                                            <p className="text-xs text-gray-500">Trạng thái hiến máu</p>
                                                         </div>
                                                         <div className="text-center p-5 bg-purple-50 rounded-lg">
                                                             <p className={`text-sm font-medium ${donorInfo.is_private ? 'text-orange-600' : 'text-green-600'}`}>
@@ -1064,7 +1098,7 @@ const Profile = () => {
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
                                                                 <Phone className="w-4 h-4 text-red-500" />
-                                                                Điện thoại khẩn cấp
+                                                                Hotline
                                                             </div>
                                                         </label>
                                                         <input
@@ -1122,7 +1156,7 @@ const Profile = () => {
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                                                             <Phone className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
-                                                                <p className="text-sm text-gray-500">Điện thoại khẩn cấp</p>
+                                                                <p className="text-sm text-gray-500">Hotline</p>
                                                                 <p className="font-medium">{staffInfo.emergency_phone || 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
@@ -1376,7 +1410,7 @@ const Profile = () => {
                                                                 is_private: !e.target.checked
                                                             });
                                                             await fetchDonorInfo();
-                                                            setMessage({ text: "Cập nhật quyền riêng tư thành công!", type: "success" });
+                                                            setMessage({ text: "Cập nhật quyền riêng tư thành công.", type: "success" });
                                                             setTimeout(() => setMessage({ text: "", type: "" }), 3000);
                                                         } catch (error) {
                                                             setMessage({ text: "Có lỗi xảy ra", type: "error" });
@@ -1399,7 +1433,7 @@ const Profile = () => {
                                                                 can_donation: e.target.checked
                                                             });
                                                             await fetchDonorInfo();
-                                                            setMessage({ text: "Cập nhật trạng thái sẵn sàng hiến máu thành công!", type: "success" });
+                                                            setMessage({ text: "Cập nhật trạng thái sẵn sàng hiến máu thành công.", type: "success" });
                                                             setTimeout(() => setMessage({ text: "", type: "" }), 3000);
                                                         } catch (error) {
                                                             setMessage({ text: "Có lỗi xảy ra", type: "error" });
@@ -1430,7 +1464,7 @@ const Profile = () => {
                                                                 current_status: e.target.checked
                                                             });
                                                             await fetchStaffInfo();
-                                                            setMessage({ text: "Cập nhật trạng thái công việc thành công!", type: "success" });
+                                                            setMessage({ text: "Cập nhật trạng thái công việc thành công.", type: "success" });
                                                             setTimeout(() => setMessage({ text: "", type: "" }), 3000);
                                                         } catch (error) {
                                                             setMessage({ text: "Có lỗi xảy ra", type: "error" });

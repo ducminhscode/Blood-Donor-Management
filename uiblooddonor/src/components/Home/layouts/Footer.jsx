@@ -1,6 +1,7 @@
 import { Droplet, Phone, ArrowUp, ChevronUp, Heart, Mail, MapPinned, MessageCircle, Headphones, X } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { useState, useEffect } from 'react';
+import '../../../styles/Footer.css';
 
 const Footer = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -42,7 +43,7 @@ const Footer = () => {
     if (message.trim()) {
       console.log('Message:', message);
       setMessage('');
-      alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất.');
+      alert('Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm nhất.');
       setShowChatBox(false);
     }
   };
@@ -264,22 +265,6 @@ const Footer = () => {
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-      `}</style>
     </footer>
   );
 };

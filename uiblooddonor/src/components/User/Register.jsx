@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Droplet, Lock, Eye, EyeOff, ArrowLeft, User, Mail, Phone, Calendar, MapPin, Building, Briefcase, CreditCard, Stethoscope, GraduationCap, PhoneCall, AlertCircle, Heart, Users, Camera } from 'lucide-react';
+import { Droplet, Lock, Eye, EyeOff, ArrowLeft, User, Mail, Phone, Calendar, MapPin, Building, Briefcase, CreditCard, Stethoscope, GraduationCap, PhoneCall, AlertCircle, Heart, Users, Camera, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import APIs, { endpoints } from "../../configs/APIs";
 
@@ -356,7 +356,7 @@ const Register = () => {
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <Link to="/" className="inline-flex items-center text-gray-600 hover:text-red-600 transition mb-6">
-                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <ChevronLeft className="h-4 w-4 mr-2" />
                         Trang chủ
                     </Link>
 

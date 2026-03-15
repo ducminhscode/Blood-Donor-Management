@@ -1489,6 +1489,12 @@ class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Ret
     serializer_class = RewardCategorySerializer
     pagination_class = Pagination
 
+    def get_permissions(self):
+        if self.action in ['get_queryset', 'get_reward_by_category', 'get_reward_retrieve_by_category',
+                           'get_reward_retrieve_by_category']:
+            return [DonorPermission()]
+        return [IsAuthenticated()]
+
     def get_queryset(self):
         queryset = RewardCategory.objects.filter(is_active=True)
 
@@ -1516,7 +1522,7 @@ class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Ret
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RewardViewSet(viewsets.ViewSet):
+class RewardViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Reward.objects.filter(is_active=True)
     serializer_class = RewardSerializer
 
@@ -1571,8 +1577,10 @@ class RewardViewSet(viewsets.ViewSet):
         return Response(RewardHistorySerializer(history).data, status=status.HTTP_201_CREATED)
 
 
-class RewardHistoryViewSet(viewsets.ViewSet):
+class RewardHistoryViewSet(viewsets.ViewSet, generics.ListAPIView):
     permission_classes = [IsAuthenticated, OwnedDonorPermission]
+    pagination_class = Pagination
+    serializer_class = RewardHistorySerializer
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):
@@ -1583,19 +1591,33 @@ class RewardHistoryViewSet(viewsets.ViewSet):
         if user.is_anonymous:
             return RewardHistory.objects.none()
 
-        return RewardHistory.objects.filter(
+        queryset = RewardHistory.objects.filter(
             is_active=True,
             donor__account=user
-        )
+        ).select_related('reward', 'recipient_information')
+
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(Q(reward__name__icontains=search))
+
+        queryset = queryset.order_by('-created_at')
+
+        return queryset
 
     def list(self, request):
         queryset = self.get_queryset()
-        serializer = RewardHistorySerializer(queryset, many=True)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
         reward_history = get_object_or_404(RewardHistory, pk=pk, is_active=True, donor__account=request.user)
         self.check_object_permissions(request, reward_history)
 
-        serializer = RewardHistorySerializer(reward_history)
+        serializer = self.get_serializer(reward_history)
         return Response(serializer.data, status=status.HTTP_200_OK)

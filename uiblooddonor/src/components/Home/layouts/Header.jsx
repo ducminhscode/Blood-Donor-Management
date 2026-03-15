@@ -47,24 +47,28 @@ const Header = () => {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-2">
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             className={getTabClass('/')}
                         >
                             Trang chủ
                         </Link>
-                        <Link 
-                            to="/list-event" 
+                        <Link
+                            to="/list-event"
                             className={getTabClass('/list-event')}
                         >
                             Sự kiện
                         </Link>
-                        <Link 
-                            to="/reward-category" 
-                            className={getTabClass('/reward-category')}
-                        >
-                            Đổi thưởng
-                        </Link>
+
+                        {user?.role === 1 && (
+                            <Link
+                                to="/reward-category"
+                                className={getTabClass('/reward-category')}
+                            >
+                                Đổi thưởng
+                            </Link>
+                        )}
+
                     </div>
 
                     <div className="flex items-center space-x-4">
@@ -76,8 +80,8 @@ const Header = () => {
                                 >
                                     Đăng nhập
                                 </Link>
-                                <Link 
-                                    to="/register" 
+                                <Link
+                                    to="/register"
                                     className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-2 rounded-full hover:from-red-700 hover:to-red-600 transition transform hover:scale-105 shadow-lg hover:shadow-xl font-medium"
                                 >
                                     Đăng ký
@@ -120,11 +124,11 @@ const Header = () => {
                                                 Thông tin cá nhân
                                             </Link>
                                             <Link
-                                                to="/donation-history"
+                                                to="/reward-history"
                                                 className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
                                                 onClick={() => setIsDropdownOpen(false)}
                                             >
-                                                Lịch sử hiến máu
+                                                Lịch sử đổi quà
                                             </Link>
                                             {user?.role === 1 && (
                                                 <Link

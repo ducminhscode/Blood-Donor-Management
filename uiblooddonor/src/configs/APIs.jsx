@@ -15,6 +15,8 @@ export const endpoints = {
     'forgot_password': '/account/forgot-password/',
     'reset_password': '/account/reset-password/',
     'list_donation_event': '/donation-event/',
+    'donation_event_detail': '/donation-event/${id}/',
+    'donation_register': '/donation-event/${id}/register/',
     'donor_me': '/donor/me/',
     'staff_me': '/staff/me/',
     'donor_update': '/donor/update/',
@@ -33,6 +35,9 @@ export const endpoints = {
     'friend_status': '/donor/friend-status/',
     'donor_detail': '/donor/${id}/',
     'donor': '/donor/',
+    'reward': '/reward/',
+    'reward_history': '/reward-history/',
+    'reward_history_detail': '/reward-history/${id}/',
 }
 
 export const authApis = () => {

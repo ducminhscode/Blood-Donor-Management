@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Droplet, ArrowLeft, Mail, Lock, Eye, EyeOff, Key, CheckCircle, AlertCircle, User } from 'lucide-react';
+import { Droplet, ArrowLeft, Mail, Lock, Eye, EyeOff, Key, CheckCircle, AlertCircle, User, ChevronLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import APIs, { endpoints } from "../../configs/APIs";
 
@@ -425,7 +425,7 @@ const ForgotPassword = () => {
           to="/login"
           className="inline-flex items-center text-gray-600 hover:text-red-600 transition mb-6"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ChevronLeft className="h-4 w-4 mr-2" />
           Đăng nhập
         </Link>
 

@@ -19,6 +19,8 @@ import RewardDetail from "./components/Reward/RewardDetail";
 import FriendList from "./components/User/Friend/FriendList";
 import PendingList from "./components/User/Friend/PendingList";
 import DonorList from "./components/User/Friend/DonorList";
+import EventDetail from "./components/DonationEvent/EventDetail";
+import RewardHistory from "./components/Reward/RewardHistory";
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -60,9 +62,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
 
             <Route path="/list-event" element={<EventList />} />
-            <Route path="/reward-category" element={<Category />} />
-            <Route path="/reward-category/:id" element={<Reward />} />
-            <Route path="/reward-category/:id/reward/:reward_id" element={<RewardDetail />} />
+            <Route path="/event/:id" element={<EventDetail />} />
 
             <Route path="*" element={
               <>
@@ -70,9 +70,13 @@ function App() {
                 <div>
                   <Routes>
                     <Route path="/profile" element={user ? <Profile /> : <Login />} />
-                    <Route path="/friend-list" element={user ? (user.role === 1 && <FriendList />) : <Login />}/>
-                    <Route path="/pending-list" element={user ? (user.role === 1 && <PendingList />) : <Login />}/>
-                    <Route path="/search-donor" element={user ? (user.role === 1 && <DonorList />) : <Login />}/>
+                    <Route path="/friend-list" element={user ? (user.role === 1 && <FriendList />) : <Login />} />
+                    <Route path="/pending-list" element={user ? (user.role === 1 && <PendingList />) : <Login />} />
+                    <Route path="/search-donor" element={user ? (user.role === 1 && <DonorList />) : <Login />} />
+                    <Route path="/reward-category" element={user ? (user.role === 1 && <Category />) : <Login />} />
+                    <Route path="/reward-category/:id" element={user ? (user.role === 1 && <Reward />) : <Login />} />
+                    <Route path="/reward-category/:id/reward/:reward_id" element={user ? (user.role === 1 && <RewardDetail />) : <Login />} />
+                    <Route path="/reward-history" element={user ? (user.role === 1 && <RewardHistory />) : <Login />} />
                     {/* <Route path="/list-event" element={user ? (user.role === 1 ? <ListEvent /> : <Navigate to="/" />) : <Navigate to="/" />} /> */}
                   </Routes>
                 </div>
