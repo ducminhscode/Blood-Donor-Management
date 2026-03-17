@@ -22,6 +22,7 @@ const Category = () => {
     const [viewMode, setViewMode] = useState('grid');
     const [showFilters, setShowFilters] = useState(false);
     const [sortBy, setSortBy] = useState('name');
+    const [nameOrder, setNameOrder] = useState('asc');
 
     const [page, setPage] = useState(1);
     const [hasNextPage, setHasNextPage] = useState(true);
@@ -45,7 +46,13 @@ const Category = () => {
         const sorted = [...categories];
 
         if (sortBy === 'name') {
-            sorted.sort((a, b) => a.name.localeCompare(b.name));
+            sorted.sort((a, b) => {
+                if (nameOrder === 'asc') {
+                    return a.name.localeCompare(b.name);
+                } else {
+                    return b.name.localeCompare(a.name);
+                }
+            });
         } else if (sortBy === 'rewards') {
             sorted.sort((a, b) => {
                 if (rewardsOrder === 'desc') {
@@ -62,6 +69,11 @@ const Category = () => {
     const toggleRewardsSort = () => {
         setSortBy('rewards');
         setRewardsOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    };
+
+    const toggleNameSort = () => {
+        setSortBy('name');
+        setNameOrder(prev => prev === 'asc' ? 'desc' : 'asc');
     };
 
     const sortedCategories = getSortedCategories();
@@ -366,15 +378,21 @@ const Category = () => {
                             {/* Sort Dropdown */}
                             <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
-                                    onClick={() => setSortBy('name')}
+                                    onClick={toggleNameSort}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${sortBy === 'name'
                                         ? 'bg-white text-red-600 shadow-sm'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                 >
                                     <Tag className="w-4 h-4" />
-                                    <span>Tên A-Z</span>
+                                    <span>
+                                        {sortBy === 'name'
+                                            ? (nameOrder === 'asc' ? 'A-Z' : 'Z-A')
+                                            : 'Tên'
+                                        }
+                                    </span>
                                 </button>
+
                                 <button
                                     onClick={toggleRewardsSort}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${sortBy === 'rewards'
@@ -385,13 +403,12 @@ const Category = () => {
                                     {sortBy === 'rewards' && rewardsOrder === 'desc' ? (
                                         <>
                                             <TrendingUp className='w-4 h-4' />
-                                            <span>Tăng dần</span>
+                                            <span>Giảm dần</span>
                                         </>
                                     ) : sortBy === 'rewards' && rewardsOrder === 'asc' ? (
-
                                         <>
                                             <TrendingDown className='w-4 h-4' />
-                                            <span>Giảm dần</span>
+                                            <span>Tăng dần</span>
                                         </>
                                     ) : (
                                         <>
@@ -401,7 +418,6 @@ const Category = () => {
                                     )}
                                 </button>
                             </div>
-
                             <div className="hidden md:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
@@ -441,13 +457,19 @@ const Category = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 <button
-                                    onClick={() => setSortBy('name')}
+                                    onClick={toggleNameSort}
                                     className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${sortBy === 'name'
                                         ? 'border-red-500 bg-red-50 text-red-600'
                                         : 'border-gray-200 hover:border-gray-300'
                                         }`}
                                 >
-                                    <span>Tên A-Z</span>
+                                    <Tag className="w-4 h-4" />
+                                    <span>
+                                        {sortBy === 'name'
+                                            ? (nameOrder === 'asc' ? 'A-Z' : 'Z-A')
+                                            : 'Tên'
+                                        }
+                                    </span>
                                 </button>
                                 <button
                                     onClick={toggleRewardsSort}

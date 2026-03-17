@@ -3,6 +3,8 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from oauth2_provider.models import AccessToken
+from oauth2_provider.views import TokenView
 
 # Create your views here.
 from rest_framework import viewsets, status, generics
@@ -12,6 +14,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 import random
+import json
 
 from blooddonor import settings
 from .models import Account, Role, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, Friend, FriendStatus, \
@@ -24,6 +27,33 @@ from .serializers import AccountSerializer, ResetPasswordSerializer, \
     HospitalSerializer, EmergencyRequestSerializer, RewardCategorySerializer, RewardSerializer, \
     FriendSerializer, RecipientInformationSerializer, RewardHistorySerializer, EmergencyResponseSerializer, \
     EventRegistrationSerializer, MedicalCheckUpSerializer, BloodDonationSerializer
+
+
+class CustomTokenView(TokenView):
+    def post(self, request, *args, **kwargs):
+
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            try:
+                if hasattr(response, 'content') and response.content:
+                    content = json.loads(response.content)
+                    token = content.get('access_token')
+
+                    if token:
+                        access_token = AccessToken.objects.select_related('user').get(token=token)
+                        user = access_token.user
+
+                        user.last_login = timezone.now()
+                        user.save(update_fields=['last_login'])
+
+            except AccessToken.DoesNotExist:
+                print("Không tìm thấy AccessToken")
+            except json.JSONDecodeError as e:
+                print(f"Lỗi parse JSON: {e}")
+            except Exception as e:
+                print(f"Lỗi không xác định: {e}")
+
+        return response
 
 
 class AccountViewSet(viewsets.ViewSet):
@@ -419,7 +449,9 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
             for word in keywords:
                 query &= (
                         Q(account__first_name__icontains=word) |
-                        Q(account__last_name__icontains=word)
+                        Q(account__last_name__icontains=word) |
+                        Q(account__email__icontains=word) |
+                        Q(account__phone__icontains=word)
                 )
 
             donors = donors.filter(query)

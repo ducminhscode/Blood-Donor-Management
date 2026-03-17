@@ -13,7 +13,8 @@ class AccountSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = ['id', 'username', 'password', 'avatar', 'first_name', 'last_name', 'email', 'phone',
-                  'birth_date', 'gender', 'role', 'is_active', 'date_joined']  # Cac thuoc tinh response JSON
+                  'birth_date', 'gender', 'role', 'is_active', 'date_joined',
+                  'last_login']  # Cac thuoc tinh response JSON
         extra_kwargs = {
             'password': {
                 'write_only': True  # Chi request client -> server, khong response lai
@@ -65,6 +66,7 @@ class ProfileUpdateSerializer(ModelSerializer):
 
 class DonorSerializer(ModelSerializer):
     account = AccountSerializer()
+
     class Meta:
         model = Donor
         fields = ['id', 'account', 'blood_type', 'rh_factor', 'province', 'sub_district', 'permanent_address', 'weight',
@@ -138,6 +140,7 @@ class RewardCategorySerializer(ModelSerializer):
 
 class RewardSerializer(ModelSerializer):
     reward_category = RewardCategorySerializer(read_only=True)
+
     class Meta:
         model = Reward
         fields = '__all__'

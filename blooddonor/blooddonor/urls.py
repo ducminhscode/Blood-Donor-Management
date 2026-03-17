@@ -25,6 +25,7 @@ import debug_toolbar
 from dotenv import load_dotenv
 
 from blooddonorapp.admin import my_admin_site
+from blooddonorapp.views import CustomTokenView
 
 load_dotenv()
 
@@ -43,6 +44,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', my_admin_site.urls),
     path('', include('blooddonorapp.urls')),
+    path('o/token/', CustomTokenView.as_view(), name='custom_token'),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),

@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
     Gift, Package, ArrowLeft, Star, Search, ShoppingBag, Clock,
     Sparkles, Filter, X, Heart, TrendingUp, Award, Zap,
-    ChevronRight, Tag, AlertCircle,
+    ChevronRight, Tag, AlertCircle, ArrowUpAZ, ArrowDownZA,
     TrendingDown
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
@@ -20,6 +20,7 @@ const Reward = () => {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('name');
+    const [sortOrder, setSortOrder] = useState('asc'); 
     const [filterStock, setFilterStock] = useState('all');
     const [showFilters, setShowFilters] = useState(false);
     const [hoveredReward, setHoveredReward] = useState(null);
@@ -50,7 +51,14 @@ const Reward = () => {
         setSearchTerm('');
     };
 
-    // Filter và sort rewards
+    // Tính toán thống kê tổng thể từ rewards (không filter)
+    const totalRewards = rewards.length;
+    const inStockRewards = rewards.filter(r => r.remaining_stock > 0).length;
+    const totalPoints = rewards
+        .filter(r => r.remaining_stock > 0)
+        .reduce((sum, reward) => sum + reward.points_required * reward.remaining_stock, 0);
+
+    // Filter và sort rewards (chỉ dùng để hiển thị danh sách)
     const filteredRewards = rewards
         .filter(reward => {
             const matchesSearch = searchTerm === '' ||
@@ -69,9 +77,18 @@ const Reward = () => {
                     ? a.points_required - b.points_required
                     : b.points_required - a.points_required;
             }
-            if (sortBy === 'name') return a.name.localeCompare(b.name);
+            if (sortBy === 'name') {
+                return sortOrder === 'asc'
+                    ? a.name.localeCompare(b.name)
+                    : b.name.localeCompare(a.name);
+            }
             return 0;
         });
+
+    const toggleNameSort = () => {
+        setSortBy('name');
+        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    };
 
     const togglePointsSort = () => {
         setSortBy('points');
@@ -133,13 +150,13 @@ const Reward = () => {
                         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
                             <div className="flex items-center gap-6">
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold">{filteredRewards.length}</div>
+                                    <div className="text-2xl font-bold">{totalRewards}</div>
                                     <div className="text-sm text-white/80">Quà tặng</div>
                                 </div>
                                 <div className="w-px h-10 bg-white/20"></div>
                                 <div className="text-center">
                                     <div className="text-2xl font-bold">
-                                        {filteredRewards.filter(r => r.remaining_stock > 0).length}
+                                        {inStockRewards}
                                     </div>
                                     <div className="text-sm text-white/80">Còn hàng</div>
                                 </div>
@@ -147,9 +164,7 @@ const Reward = () => {
                                 <div className="text-center">
                                     <div className="text-2xl font-bold flex items-center gap-1">
                                         <Award className="w-5 h-5" />
-                                        <span>{(rewards
-                                            .filter(r => r.remaining_stock > 0)
-                                            .reduce((sum, reward) => sum + reward.points_required * reward.remaining_stock, 0) / 1000).toFixed(2)}K</span>
+                                        <span>{(totalPoints / 1000).toFixed(2)}K</span>
                                     </div>
                                     <div className="text-sm text-white/80">Tổng điểm</div>
                                 </div>
@@ -203,14 +218,26 @@ const Reward = () => {
                             {/* Filter Options - Desktop */}
                             <div className="hidden lg:flex items-center gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
-                                    onClick={() => setSortBy('name')}
+                                    onClick={toggleNameSort}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${sortBy === 'name'
                                         ? 'bg-white text-red-600 shadow-sm'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                 >
                                     <Tag className="w-4 h-4" />
-                                    <span>Tên A-Z</span>
+                                    {sortBy === 'name' && sortOrder === 'asc' ? (
+                                        <>
+                                            <span>A-Z</span>
+                                        </>
+                                    ) : sortBy === 'name' && sortOrder === 'desc' ? (
+                                        <>
+                                            <span>Z-A</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Tên</span>
+                                        </>
+                                    )}
                                 </button>
                                 <button
                                     onClick={togglePointsSort}
@@ -271,13 +298,26 @@ const Reward = () => {
                                     </label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
-                                            onClick={() => setSortBy('name')}
+                                            onClick={toggleNameSort}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${sortBy === 'name'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
-                                            <span>Tên A-Z</span>
+                                            <Tag className="w-4 h-4" />
+                                            {sortBy === 'name' && sortOrder === 'asc' ? (
+                                                <>
+                                                    <span>A-Z</span>
+                                                </>
+                                            ) : sortBy === 'name' && sortOrder === 'desc' ? (
+                                                <>
+                                                    <span>Z-A</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>Tên</span>
+                                                </>
+                                            )}
                                         </button>
                                         <button
                                             onClick={togglePointsSort}
@@ -288,14 +328,17 @@ const Reward = () => {
                                         >
                                             {sortBy === 'points' && pointsOrder === 'asc' ? (
                                                 <>
+                                                    <TrendingUp className="w-4 h-4" />
                                                     <span>Tăng dần</span>
                                                 </>
                                             ) : sortBy === 'points' && pointsOrder === 'desc' ? (
                                                 <>
+                                                    <TrendingDown className="w-4 h-4" />
                                                     <span>Giảm dần</span>
                                                 </>
                                             ) : (
                                                 <>
+                                                    <Award className="w-4 h-4" />
                                                     <span>Điểm</span>
                                                 </>
                                             )}
@@ -353,6 +396,9 @@ const Reward = () => {
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
+                            </span>
+                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm">
+                                Tìm thấy {filteredRewards.length} kết quả
                             </span>
                         </div>
                     )}

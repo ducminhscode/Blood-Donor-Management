@@ -1,17 +1,32 @@
 import { Droplet, LogIn, User, ChevronDown } from 'lucide-react';
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef, useEffect } from 'react';
 import { UserContexts, UserDispatchContext } from '../../../configs/UserContexts';
 import cookie from 'react-cookies';
 import { getImageUrl } from '../../../utils/Image';
 
 const Header = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
     const user = useContext(UserContexts);
     const dispatch = useContext(UserDispatchContext);
     const navigate = useNavigate();
     const location = useLocation();
     const isLoggedIn = user !== null;
+
+    // Đóng dropdown khi click ra ngoài
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleLogout = () => {
         cookie.remove("access_token", { path: "/" });
@@ -31,7 +46,7 @@ const Header = () => {
     const getTabClass = (path) => {
         const baseClass = "transition px-4 py-2 rounded-full";
         return isActiveTab(path)
-            ? `${baseClass} bg-red-100 text-red-600 font-medium` // Tab active nhẹ nhàng hơn
+            ? `${baseClass} bg-red-100 text-red-600 font-medium`
             : `${baseClass} text-gray-700 hover:text-red-600 hover:bg-red-50`;
     };
 
@@ -89,7 +104,7 @@ const Header = () => {
                             </>
                         ) : (
                             <>
-                                <div className="relative">
+                                <div className="relative" ref={dropdownRef}>
                                     <button
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                         className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 rounded-full pl-3 pr-4 py-2 transition"
