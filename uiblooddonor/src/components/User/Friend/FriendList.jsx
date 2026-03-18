@@ -25,8 +25,6 @@ const FriendList = () => {
     const [page, setPage] = useState(1);
     const [hasNextPage, setHasNextPage] = useState(true);
     const [totalFriends, setTotalFriends] = useState(0);
-    const [sortBy, setSortBy] = useState('name');
-    const [filterBy, setFilterBy] = useState('all');
     const [showFilters, setShowFilters] = useState(false);
     const [viewMode, setViewMode] = useState('grid');
 
@@ -75,7 +73,7 @@ const FriendList = () => {
             const params = new URLSearchParams();
 
             if (searchTerm) {
-                params.append('search', searchTerm); // API sẽ tìm kiếm trên nhiều trường (name, email, phone)
+                params.append('search', searchTerm);
             }
 
             params.append('page', currentPage);
@@ -186,7 +184,7 @@ const FriendList = () => {
             setPage(1);
             fetchFriends(false);
         }, searchTerm ? 500 : 10),
-        [searchTerm, sortBy, filterBy]
+        [searchTerm]
     );
 
     useEffect(() => {
@@ -196,7 +194,7 @@ const FriendList = () => {
     useEffect(() => {
         debouncedSearch();
         return () => debouncedSearch.cancel();
-    }, [searchTerm, sortBy, filterBy, debouncedSearch]);
+    }, [searchTerm, debouncedSearch]);
 
     useEffect(() => {
         if (page > 1) {
@@ -296,7 +294,7 @@ const FriendList = () => {
                                 className="group flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all backdrop-blur-sm"
                             >
                                 <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                <span>Tìm kiếm bạn bè</span>
+                                <span>Tìm kiếm người hiến máu</span>
                             </button>
 
                             <button
@@ -669,10 +667,12 @@ const FriendList = () => {
                                                                 <Droplet className="w-3 h-3 text-red-500 fill-current" />
                                                                 {getBloodTypeDisplay(friend.blood_type, friend.rh_factor)}
                                                             </span>
-                                                        ) : (<span className="flex items-center gap-1">
-                                                            <Droplet className="w-3 h-3 text-red-500 fill-current" />
-                                                            Chưa cập nhật
-                                                        </span>)}
+                                                        ) : (
+                                                            <span className="flex items-center gap-1">
+                                                                <Droplet className="w-3 h-3 text-red-500 fill-current" />
+                                                                Chưa cập nhật
+                                                            </span>
+                                                        )}
                                                         {friend.points >= 0 && (
                                                             <span className="flex items-center gap-1">
                                                                 <Award className="w-3 h-3 text-yellow-500 fill-current" />
@@ -780,7 +780,7 @@ const FriendList = () => {
                                 onClick={() => navigate('/search-donor')}
                                 className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
                             >
-                                Tìm kiếm bạn bè
+                                Tìm kiếm người hiến máu
                             </button>
                         )}
                     </div>
@@ -805,9 +805,9 @@ const FriendList = () => {
 
                             <button
                                 onClick={handleCloseDialog}
-                                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="absolute top-4 right-4 z-50 p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
-                                <XCircle className="w-6 h-6" />
+                                <XCircle className="w-5 h-5" />
                             </button>
 
                             <div className="relative flex items-center gap-6">
@@ -918,7 +918,7 @@ const FriendList = () => {
                                                             <span className="text-sm">Ngày sinh</span>
                                                         </div>
                                                         <span className="text-sm font-medium text-gray-900">
-                                                            {formatDate(selectedDonor.account?.birth_date)}
+                                                            {formatDate(selectedDonor.account?.birth_date) || 'Chưa cập nhật'}
                                                         </span>
                                                     </div>
 
@@ -927,13 +927,13 @@ const FriendList = () => {
                                                             <span className="text-sm">Giới tính</span>
                                                         </div>
                                                         <span className="text-sm font-medium text-gray-900">
-                                                            {getGenderText(selectedDonor.account?.gender)}
+                                                            {getGenderText(selectedDonor.account?.gender) || 'Chưa cập nhật'}
                                                         </span>
                                                     </div>
 
 
                                                     {/* Address */}
-                                                    {(selectedDonor.permanent_address || selectedDonor.province) && (
+                                                    {(selectedDonor.permanent_address || selectedDonor.province) ? (
                                                         <div className="pt-2 justify-between items-center flex py-2">
                                                             <div className="flex items-start gap-2 text-gray-500 mb-1">
                                                                 <span className="text-sm">Địa chỉ</span>
@@ -944,10 +944,19 @@ const FriendList = () => {
                                                                 {selectedDonor.province && `, ${selectedDonor.province}`}
                                                             </p>
                                                         </div>
+                                                    ) : (
+                                                        <div className="pt-2 justify-between items-center flex py-2">
+                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
+                                                                <span className="text-sm">Địa chỉ</span>
+                                                            </div>
+                                                            <p className="text-sm font-medium text-gray-900">
+                                                                Chưa cập nhật
+                                                            </p>
+                                                        </div>
                                                     )}
 
                                                     {/* Work */}
-                                                    {(selectedDonor.career || selectedDonor.organization) && (
+                                                    {(selectedDonor.career || selectedDonor.organization) ? (
                                                         <div className="pt-2 justify-between items-center flex py-2">
                                                             <div className="flex items-start gap-2 text-gray-500 mb-1">
                                                                 <span className="text-sm">Công việc</span>
@@ -955,6 +964,35 @@ const FriendList = () => {
                                                             <p className="text-sm font-medium text-gray-900">
                                                                 {selectedDonor.career}
                                                                 {selectedDonor.organization && ` tại ${selectedDonor.organization}`}
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="pt-2 justify-between items-center flex py-2">
+                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
+                                                                <span className="text-sm">Công việc</span>
+                                                            </div>
+                                                            <p className="text-sm font-medium text-gray-900">
+                                                                Chưa cập nhật
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {(selectedDonor.last_donation) ? (
+                                                        <div className="pt-2 justify-between items-center flex py-2">
+                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
+                                                                <span className="text-sm">Lần cuối hiến máu</span>
+                                                            </div>
+                                                            <p className="text-sm font-medium text-gray-900">
+                                                                {formatDate(selectedDonor.last_donation)}
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="pt-2 justify-between items-center flex py-2">
+                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
+                                                                <span className="text-sm">Lần cuối hiến máu</span>
+                                                            </div>
+                                                            <p className="text-sm font-medium text-gray-900">
+                                                                Chưa cập nhật
                                                             </p>
                                                         </div>
                                                     )}
@@ -980,46 +1018,56 @@ const FriendList = () => {
                                                     </div>
                                                     <p className="text-sm text-red-700">
                                                         {selectedDonor.can_donation
-                                                            ? 'Có thể hiến máu'
-                                                            : 'Chưa đủ điều kiện hiến máu'}
+                                                            ? 'Sẵn sàng hiến máu'
+                                                            : 'Không sẵn sàng'}
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* Physical Info */}
-                                            {(selectedDonor.weight || selectedDonor.height || selectedDonor.bmi) && (
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                        <div className="p-1.5 bg-red-100 rounded-lg">
-                                                            <Activity className="w-4 h-4 text-red-600" />
-                                                        </div>
-                                                        Thông số cơ thể
-                                                    </h3>
-                                                    <div className="grid grid-cols-3 gap-4">
-                                                        {selectedDonor.weight && (
-                                                            <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                                <Weight className="w-5 h-5 text-gray-500 mx-auto mb-2" />
-                                                                <div className="text-lg font-bold text-gray-900">{selectedDonor.weight}</div>
-                                                                <div className="text-xs text-gray-500">kg</div>
-                                                            </div>
-                                                        )}
-                                                        {selectedDonor.height && (
-                                                            <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                                <Ruler className="w-5 h-5 text-gray-500 mx-auto mb-2" />
-                                                                <div className="text-lg font-bold text-gray-900">{selectedDonor.height}</div>
-                                                                <div className="text-xs text-gray-500">cm</div>
-                                                            </div>
-                                                        )}
-                                                        {selectedDonor.bmi && (
-                                                            <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                                <Activity className="w-5 h-5 text-gray-500 mx-auto mb-2" />
-                                                                <div className="text-lg font-bold text-gray-900">{selectedDonor.bmi.toFixed(1)}</div>
-                                                                <div className="text-xs text-gray-500">BMI</div>
-                                                            </div>
-                                                        )}
+                                            <div>
+                                                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                                    <div className="p-1.5 bg-red-100 rounded-lg">
+                                                        <Activity className="w-4 h-4 text-red-600" />
                                                     </div>
+                                                    Thông số cơ thể
+                                                </h3>
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    {selectedDonor.weight ? (
+                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                            <div className="text-xm text-gray-500">Cân nặng</div>
+                                                            <div className="text-lg font-bold text-gray-900">{selectedDonor.weight} kg</div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                            <div className="text-xm text-gray-500">Cân nặng</div>
+                                                            <div className="text-xs font-bold text-gray-900 mt-2">Chưa cập nhật</div>
+                                                        </div>
+                                                    )}
+                                                    {selectedDonor.height ? (
+                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                            <div className="text-xm text-gray-500">Chiều cao</div>
+                                                            <div className="text-lg font-bold text-gray-900">{selectedDonor.height} cm</div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                            <div className="text-xm text-gray-500">Chiều cao</div>
+                                                            <div className="text-xs font-bold text-gray-900 mt-2">Chưa cập nhật</div>
+                                                        </div>
+                                                    )}
+                                                    {selectedDonor.bmi ? (
+                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                            <div className="text-xm text-gray-500">Chỉ số BMI</div>
+                                                            <div className="text-lg font-bold text-gray-900">{selectedDonor.bmi.toFixed(1)}</div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                            <div className="text-xm text-gray-500">Chỉ số BMI</div>
+                                                            <div className="text-xs font-bold text-gray-900 mt-2">Chưa cập nhật</div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
                                     )}
                                 </>
@@ -1028,7 +1076,7 @@ const FriendList = () => {
 
                         {/* Action Buttons - Fixed */}
                         {!loadingDetail && (
-                            <div className="border-t border-gray-200 p-6 flex gap-3 mt-2 flex-shrink-0"> {/* Thay đổi ở đây */}
+                            <div className="border-t border-gray-200 p-6 flex gap-3 mt-1 flex-shrink-0">
                                 <button
                                     className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 flex items-center justify-center gap-2"
                                     onClick={() => { }}

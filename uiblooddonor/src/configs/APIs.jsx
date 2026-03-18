@@ -28,7 +28,7 @@ export const endpoints = {
     'friend_list': '/donor/friend-list/',
     'pending_list': '/donor/pending-list/',
     'accept_friend': '/donor/${id}/accept-friend/',
-    'reject_friend': '/donor/${id}/reject_friend/',
+    'reject_friend': '/donor/${id}/reject-friend/',
     'request_friend': '/donor/${id}/request-friend/',
     'unfriend': '/donor/${id}/unfriend/',
     'cancel_request': '/donor/${id}/cancel-request/',

@@ -475,12 +475,12 @@ const Profile = () => {
                                                 <BadgeAlert className="w-6 h-6 text-yellow-500" title="Chưa xác thực" />
                                             )}
                                         </div>
-                                        <div className="flex flex-wrap items-center gap-3 mt-2">
-                                            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                                        <div className="flex flex-wrap items-center gap-3 mt-4">
+                                            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
                                                 Tên tài khoản: {user?.username || 'Người dùng'}
                                             </span>
                                             {user?.role === 1 && donorInfo && (
-                                                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                                                <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
                                                     Điểm: {donorInfo.points || 0}
                                                 </span>
                                             )}
@@ -583,7 +583,6 @@ const Profile = () => {
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
                                             <h3 className="font-semibold mb-6 text-gray-700 flex items-center gap-2">
-                                                <User className="w-5 h-5 text-red-600" />
                                                 Thông tin cơ bản
                                             </h3>
 
@@ -623,7 +622,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <VenusAndMars className="w-4 h-4 text-purple-500" />
+                                                                <VenusAndMars className="w-4 h-4 text-red-500" />
                                                                 Giới tính
                                                             </div>
                                                         </label>
@@ -640,7 +639,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Calendar className="w-4 h-4 text-orange-500" />
+                                                                <Calendar className="w-4 h-4 text-red-500" />
                                                                 Ngày sinh
                                                             </div>
                                                         </label>
@@ -666,7 +665,7 @@ const Profile = () => {
                                                     </div>
 
                                                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <VenusAndMars className="w-5 h-5 text-purple-500 mt-0.5" />
+                                                        <VenusAndMars className="w-5 h-5 text-red-500 mt-0.5" />
                                                         <div>
                                                             <p className="text-sm text-gray-500">Giới tính</p>
                                                             <p className="font-medium">
@@ -675,7 +674,7 @@ const Profile = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <Calendar className="w-5 h-5 text-orange-500 mt-0.5" />
+                                                        <Calendar className="w-5 h-5 text-red-500 mt-0.5" />
                                                         <div>
                                                             <p className="text-sm text-gray-500">Ngày sinh</p>
                                                             <p className="font-medium">
@@ -689,7 +688,6 @@ const Profile = () => {
 
                                         <div className="space-y-4">
                                             <h3 className="font-semibold mb-6 text-gray-700 flex items-center gap-2">
-                                                <Mail className="w-5 h-5 text-red-600" />
                                                 Thông tin liên hệ
                                             </h3>
 
@@ -698,7 +696,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Mail className="w-4 h-4 text-blue-500" />
+                                                                <Mail className="w-4 h-4 text-red-500" />
                                                             Email
                                                             </div>
                                                         </label>
@@ -714,7 +712,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Phone className="w-4 h-4 text-green-500" />
+                                                                <Phone className="w-4 h-4 text-red-500" />
                                                             Số điện thoại
                                                             </div>
                                                         </label>
@@ -730,14 +728,14 @@ const Profile = () => {
                                             ) : (
                                                 <div className="space-y-3">
                                                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <Mail className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                        <Mail className="w-5 h-5 text-red-500 mt-0.5" />
                                                         <div>
                                                             <p className="text-sm text-gray-500">Email</p>
                                                             <p className="font-medium">{user?.email || 'Chưa cập nhật'}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <Phone className="w-5 h-5 text-green-500 mt-0.5" />
+                                                        <Phone className="w-5 h-5 text-red-500 mt-0.5" />
                                                         <div>
                                                             <p className="text-sm text-gray-500">Số điện thoại</p>
                                                             <p className="font-medium">{user?.phone || 'Chưa cập nhật'}</p>
@@ -752,7 +750,6 @@ const Profile = () => {
                                         <div className="mt-6 border-t pt-6">
                                             <div className="flex justify-between items-center mb-4">
                                                 <h3 className="font-semibold text-gray-700 flex items-center gap-2">
-                                                    <Droplet className="w-5 h-5 text-red-600" />
                                                     Thông tin người hiến máu
                                                 </h3>
                                                 {!isEditingDonor ? (
@@ -795,7 +792,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <CreditCard className="w-4 h-4 text-orange-500" />
+                                                                <CreditCard className="w-4 h-4 text-red-500" />
                                                                 CMND/CCCD
                                                             </div>
                                                         </label>
@@ -811,7 +808,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Briefcase className="w-4 h-4 text-indigo-500" />
+                                                                <Briefcase className="w-4 h-4 text-red-500" />
                                                                 Nghề nghiệp
                                                             </div>
                                                         </label>
@@ -827,7 +824,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Building className="w-4 h-4 text-cyan-500" />
+                                                                <Building className="w-4 h-4 text-red-500" />
                                                                 Tổ chức/Công ty
                                                             </div>
                                                         </label>
@@ -868,7 +865,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Map className="w-4 h-4 text-purple-500" />
+                                                                <Map className="w-4 h-4 text-red-500" />
                                                                 Quận/Huyện
                                                             </div>
                                                         </label>
@@ -889,7 +886,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Home className="w-4 h-4 text-green-500" />
+                                                                <Home className="w-4 h-4 text-red-500" />
                                                                 Địa chỉ thường trú
                                                             </div>
                                                         </label>
@@ -913,42 +910,42 @@ const Profile = () => {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Weight className="w-5 h-5 text-green-500 mt-0.5" />
+                                                            <Weight className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Cân nặng</p>
                                                                 <p className="font-medium">{donorInfo.weight ? `${donorInfo.weight} kg` : 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Ruler className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                            <Ruler className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Chiều cao</p>
                                                                 <p className="font-medium">{donorInfo.height ? `${donorInfo.height} cm` : 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Activity className="w-5 h-5 text-purple-500 mt-0.5" />
+                                                            <Activity className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">BMI</p>
                                                                 <p className="font-medium">{donorInfo.bmi ? donorInfo.bmi.toFixed(2) : 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <CreditCard className="w-5 h-5 text-orange-500 mt-0.5" />
+                                                            <CreditCard className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">CMND/CCCD</p>
                                                                 <p className="font-medium">{donorInfo.identification || 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Briefcase className="w-5 h-5 text-indigo-500 mt-0.5" />
+                                                            <Briefcase className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Nghề nghiệp</p>
                                                                 <p className="font-medium">{donorInfo.career || 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Building2 className="w-5 h-5 text-cyan-500 mt-0.5" />
+                                                            <Building2 className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Tổ chức</p>
                                                                 <p className="font-medium">{donorInfo.organization || 'Chưa cập nhật'}</p>
@@ -966,33 +963,27 @@ const Profile = () => {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Award className="w-5 h-5 text-yellow-500 mt-0.5" />
+                                                            <Award className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Lần hiến cuối</p>
                                                                 <p className="font-medium">{formatDate(donorInfo.last_donation)}</p>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                                                         <div className="text-center p-3 bg-red-50 rounded-lg">
                                                             <p className="text-2xl font-bold text-red-600">{donorInfo.donation_count || 0}</p>
                                                             <p className="text-sm text-gray-600">Lần hiến máu</p>
                                                         </div>
-                                                        <div className="text-center p-3 bg-green-50 rounded-lg">
-                                                            <p className="text-2xl font-bold text-green-600">{donorInfo.points || 0}</p>
+                                                        <div className="text-center p-3 bg-red-50 rounded-lg">
+                                                            <p className="text-2xl font-bold text-red-600">{donorInfo.points || 0}</p>
                                                             <p className="text-sm text-gray-600">Điểm tích lũy</p>
                                                         </div>
-                                                        <div className="text-center p-5 bg-blue-50 rounded-lg">
+                                                        <div className={`text-center p-5 ${donorInfo.can_donation ? 'bg-green-50' : 'bg-red-50'} rounded-lg`}>
                                                             <p className={`text-sm font-medium ${donorInfo.can_donation ? 'text-green-600' : 'text-red-600'}`}>
                                                                 {donorInfo.can_donation ? 'Sẵn sàng' : 'Không sẵn sàng'}
                                                             </p>
                                                             <p className="text-xs text-gray-500">Trạng thái hiến máu</p>
-                                                        </div>
-                                                        <div className="text-center p-5 bg-purple-50 rounded-lg">
-                                                            <p className={`text-sm font-medium ${donorInfo.is_private ? 'text-orange-600' : 'text-green-600'}`}>
-                                                                {donorInfo.is_private ? 'Riêng tư' : 'Công khai'}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500">Quyền riêng tư</p>
                                                         </div>
                                                     </div>
                                                 </>

@@ -22,7 +22,7 @@ const PendingList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [processingId, setProcessingId] = useState(null);
     const [message, setMessage] = useState({ text: "", type: "" });
-    const [selectedFilter, setSelectedFilter] = useState('all'); // all, recent, oldest
+    const [selectedFilter, setSelectedFilter] = useState('all');
 
     const [selectedDonor, setSelectedDonor] = useState(null);
     const [showDialog, setShowDialog] = useState(false);

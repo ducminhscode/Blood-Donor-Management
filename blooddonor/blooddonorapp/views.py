@@ -296,7 +296,9 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
             for word in keywords:
                 query &= (
                         Q(account__first_name__icontains=word) |
-                        Q(account__last_name__icontains=word)
+                        Q(account__last_name__icontains=word) |
+                        Q(account__email__icontains=word) |
+                        Q(account__phone__icontains=word)
                 )
 
             queryset = queryset.filter(query)
