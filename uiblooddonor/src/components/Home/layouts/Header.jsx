@@ -186,6 +186,15 @@ const Header = () => {
                                                     Quản lý sự kiện
                                                 </Link>
                                             )}
+                                            {user?.role===2 &&(
+                                                <Link
+                                                    to="/staff-emergency-request"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
+                                                    onClick={() => setIsDropdownOpen(false)}
+                                                >
+                                                    Hiến máu khẩn cấp
+                                                </Link>
+                                            )}
                                             <hr className="my-2 border-gray-100" />
                                             <button
                                                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"

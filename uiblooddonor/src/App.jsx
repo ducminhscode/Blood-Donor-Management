@@ -30,6 +30,8 @@ import StaffEventListDetail from "./components/DonationEvent/StaffEventListDetai
 import StaffRegistrationDetail from "./components/DonationEvent/StaffRegistrationDetail";
 import StaffMedicalCheckUpDetail from "./components/DonationEvent/StaffMedicalCheckUpDetail";
 import StaffBloodDonationDetail from "./components/DonationEvent/StaffBloodDonationDetail";
+import StaffEmergencyRequest from "./components/DonationEvent/StaffEmergencyRequest";
+import StaffEmergencyRequestDetail from "./components/DonationEvent/StaffEmergencyRequestDetail";
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -95,6 +97,8 @@ function App() {
                     <Route path="/staff-donation-event/:id/registrations/:registration_id" element={user ? (user.role === 2 && <StaffRegistrationDetail />) : <Login />} />
                     <Route path="/staff-donation-event/:id/registrations/:registration_id/medical-checkup" element={user ? (user.role === 2 && <StaffMedicalCheckUpDetail />) : <Login />} />
                     <Route path="/staff-donation-event/:id/registrations/:registration_id/medical-checkup/:medical_check_up_id/blood-donation" element={user ? (user.role === 2 && <StaffBloodDonationDetail />) : <Login />} />
+                    <Route path="/staff-emergency-request" element={user ? (user.role === 2 && <StaffEmergencyRequest />) : <Login />} />
+                    <Route path="/staff-emergency-request/:id/responses" element={user ? (user.role === 2 && <StaffEmergencyRequestDetail />) : <Login />} />
                     {/* <Route path="/list-event" element={user ? (user.role === 1 ? <ListEvent /> : <Navigate to="/" />) : <Navigate to="/" />} /> */}
                   </Routes>
                 </div>

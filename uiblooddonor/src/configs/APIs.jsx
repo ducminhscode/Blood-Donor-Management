@@ -45,7 +45,14 @@ export const endpoints = {
     'staff_donation_event': '/staff/donation-event/',
     'staff_donation_event_detail': '/donation-event/${id}/staff/',
     'staff_registrations_event': '/donation-event/${id}/registrations/',
-    'staff_registrations_event_detail':'/donation-event/${id}/registrations/${registration_id}/',
+    'staff_registrations_event_detail': '/donation-event/${id}/registrations/${registration_id}/',
+    'staff_emergency_request': '/staff/emergency-request/',
+    'emergency_request': '/emergency-request/',
+    'staff_emergency_request_detail': '/emergency-request/${id}/staff/',
+    'staff_responses_request': '/emergency-request/${id}/responses/',
+    'staff_responses_request_detail': '/emergency-request/${id}/responses/${response_id}/',
+    'emergency_response': '/emergency-request/${id}/response/',
+    'emergency_request_detail': '/emergency-request/${id}/',
 }
 
 export const authApis = () => {
