@@ -14,7 +14,7 @@ export const endpoints = {
     'verify_otp': '/account/verify-otp/',
     'forgot_password': '/account/forgot-password/',
     'reset_password': '/account/reset-password/',
-    'list_donation_event': '/donation-event/',
+    'donation_event': '/donation-event/',
     'donation_event_detail': '/donation-event/${id}/',
     'donation_register': '/donation-event/${id}/register/',
     'donor_me': '/donor/me/',
@@ -38,6 +38,14 @@ export const endpoints = {
     'reward': '/reward/',
     'reward_history': '/reward-history/',
     'reward_history_detail': '/reward-history/${id}/',
+    'event_registration': '/event-registration/',
+    'event_registration_detail': '/event-registration/${id}',
+    'medical_checkup': '/donation-event/${id}/registrations/${registration_id}/medical-checkup/',
+    'blood_donation': '/donation-event/${id}/registrations/${registration_id}/medical-checkup/${medical_check_up_id}/blood-donation/',
+    'staff_donation_event': '/staff/donation-event/',
+    'staff_donation_event_detail': '/donation-event/${id}/staff/',
+    'staff_registrations_event': '/donation-event/${id}/registrations/',
+    'staff_registrations_event_detail':'/donation-event/${id}/registrations/${registration_id}/',
 }
 
 export const authApis = () => {

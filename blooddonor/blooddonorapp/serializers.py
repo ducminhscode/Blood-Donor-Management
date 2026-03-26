@@ -164,6 +164,7 @@ class RewardHistorySerializer(ModelSerializer):
 
 
 class EmergencyResponseSerializer(ModelSerializer):
+    emergency_request = EmergencyRequestSerializer(read_only=True)
     class Meta:
         model = EmergencyResponse
         fields = ['id', 'status_response', 'emergency_request', 'donor', 'created_at', 'status_registration']
@@ -171,6 +172,7 @@ class EmergencyResponseSerializer(ModelSerializer):
 
 
 class EventRegistrationSerializer(ModelSerializer):
+    donation_event = DonationEventSerializer(read_only=True)
     class Meta:
         model = EventRegistration
         fields = '__all__'
@@ -187,6 +189,9 @@ class FriendSerializer(ModelSerializer):
 
 
 class MedicalCheckUpSerializer(ModelSerializer):
+    staff = StaffSerializer(read_only=True)
+    # event_registration = EventRegistrationSerializer(read_only=True)
+    # emergency_response = EmergencyResponseSerializer(read_only=True)
     class Meta:
         model = MedicalCheckUp
         fields = '__all__'
@@ -194,6 +199,7 @@ class MedicalCheckUpSerializer(ModelSerializer):
 
 
 class BloodDonationSerializer(ModelSerializer):
+    staff = StaffSerializer(read_only=True)
     class Meta:
         model = BloodDonation
         fields = '__all__'

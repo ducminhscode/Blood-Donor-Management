@@ -73,7 +73,7 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
         } else {
             setProvinceName(province);
         }
-        
+
         if (subDistrict && !isNaN(subDistrict)) {
             fetchDistrictName(subDistrict);
         } else {
@@ -367,7 +367,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
         gender: '0'
     });
     const [loading, setLoading] = useState(false);
-    
+
     // API tỉnh/thành
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
@@ -443,12 +443,12 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                 province: donorInfo.province || '',
                 sub_district: donorInfo.sub_district || ''
             }));
-            
+
             if (donorInfo.province && !isNaN(donorInfo.province)) {
                 setSelectedProvince(donorInfo.province);
                 fetchProvinceName(donorInfo.province);
             }
-            
+
             if (donorInfo.sub_district && !isNaN(donorInfo.sub_district)) {
                 setSelectedDistrict(donorInfo.sub_district);
                 fetchDistrictName(donorInfo.sub_district);
@@ -487,18 +487,24 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                 province: donorInfo.province || '',
                 sub_district: donorInfo.sub_district || ''
             }));
-            
+
             if (donorInfo.province && !isNaN(donorInfo.province)) {
                 setSelectedProvince(donorInfo.province);
                 fetchProvinceName(donorInfo.province);
             }
-            
+
             if (donorInfo.sub_district && !isNaN(donorInfo.sub_district)) {
                 setSelectedDistrict(donorInfo.sub_district);
                 fetchDistrictName(donorInfo.sub_district);
             }
         }
     }, [formData.is_proxy, donorInfo]);
+
+    const toUTCISOString = (localDateTime) => {
+        if (!localDateTime) return null;
+        const date = new Date(localDateTime);
+        return date.toISOString(); // convert sang UTC
+    };
 
     const fetchProvinces = async () => {
         setLoadingProvinces(true);
@@ -562,9 +568,9 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
     // Xử lý khi checkbox thay đổi
     const handleProxyChange = (e) => {
         const isChecked = e.target.checked;
-        setFormData(prev => ({ 
-            ...prev, 
-            is_proxy: isChecked 
+        setFormData(prev => ({
+            ...prev,
+            is_proxy: isChecked
         }));
         // Không cần set lại gì thêm vì useEffect ở trên sẽ xử lý
     };
@@ -580,7 +586,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
             if (formData.is_proxy) {
                 // Proxy registration - use all entered data
                 submitData = {
-                    expected_arrive: formData.expected_arrive,
+                    expected_arrive: toUTCISOString(formData.expected_arrive),
                     permanent_address: formData.permanent_address,
                     career: formData.career,
                     organization: formData.organization,
@@ -598,7 +604,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
             } else {
                 // Self registration - use user and donor info
                 submitData = {
-                    expected_arrive: formData.expected_arrive,
+                    expected_arrive: toUTCISOString(formData.expected_arrive),
                     permanent_address: donorInfo?.permanent_address || formData.permanent_address,
                     career: donorInfo?.career || formData.career,
                     organization: donorInfo?.organization || formData.organization,
@@ -1168,7 +1174,7 @@ const EventDetail = () => {
         setLoadingRelated(true);
         try {
             // Gọi API lấy danh sách sự kiện theo tỉnh/thành phố
-            const response = await authApis().get(endpoints.list_donation_event, {
+            const response = await authApis().get(endpoints.donation_event, {
                 params: {
                     province: province,
                     limit: 4, // Lấy nhiều hơn để sau khi filter còn 3
@@ -1240,7 +1246,6 @@ const EventDetail = () => {
         try {
             console.log("Registration data:", formData);
 
-            // Gửi trực tiếp formData đã được xử lý từ RegistrationDialog
             const url = endpoints.donation_register.replace('${id}', id);
             const response = await authApis().post(url, formData);
 
@@ -1255,7 +1260,7 @@ const EventDetail = () => {
             if (error.response) {
                 switch (error.response.status) {
                     case 400:
-                        showMessage('Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra lại.', 'error');
+                        showMessage('Vui lòng kiểm tra lại thông tin.', 'error');
                         break;
                     case 401:
                         showMessage('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.', 'error');
@@ -1495,11 +1500,11 @@ const EventDetail = () => {
                                     {!user ? (
                                         <button
                                             onClick={() => navigate('/login')}
-                                            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg bg-gray-600 text-white hover:bg-gray-700 shadow-gray-500/25"
+                                            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg bg-red-600 text-white hover:bg-red-700 shadow-red-500/25"
                                         >
                                             <span>Đăng nhập để tham gia</span>
                                         </button>
-                                    ) : (
+                                    ) : user.role === 1 && (
                                         <button
                                             onClick={handleRegisterClick}
                                             disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}

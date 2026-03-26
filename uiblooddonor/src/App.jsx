@@ -21,6 +21,15 @@ import PendingList from "./components/User/Friend/PendingList";
 import DonorList from "./components/User/Friend/DonorList";
 import EventDetail from "./components/DonationEvent/EventDetail";
 import RewardHistory from "./components/Reward/RewardHistory";
+import EventRegistration from "./components/DonationEvent/EventRegistration";
+import EventRegistrationDetail from "./components/DonationEvent/EventRegistrationDetail";
+import MedicalCheckUpDetail from "./components/DonationEvent/MedicalCheckUpDetail";
+import BloodDonationDetail from "./components/DonationEvent/BloodDonationDetail";
+import StaffEventList from "./components/DonationEvent/StaffEventList";
+import StaffEventListDetail from "./components/DonationEvent/StaffEventListDetail";
+import StaffRegistrationDetail from "./components/DonationEvent/StaffRegistrationDetail";
+import StaffMedicalCheckUpDetail from "./components/DonationEvent/StaffMedicalCheckUpDetail";
+import StaffBloodDonationDetail from "./components/DonationEvent/StaffBloodDonationDetail";
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -77,6 +86,15 @@ function App() {
                     <Route path="/reward-category/:id" element={user ? (user.role === 1 && <Reward />) : <Login />} />
                     <Route path="/reward-category/:id/reward/:reward_id" element={user ? (user.role === 1 && <RewardDetail />) : <Login />} />
                     <Route path="/reward-history" element={user ? (user.role === 1 && <RewardHistory />) : <Login />} />
+                    <Route path="/event-registration" element={user ? (user.role === 1 && <EventRegistration />) : <Login />} />
+                    <Route path="/event-registration/:id" element={user ? (user.role === 1 && <EventRegistrationDetail />) : <Login />} />
+                    <Route path="/event/:id/registrations/:registration_id/medical-checkup" element={user ? <MedicalCheckUpDetail /> : <Login />} />
+                    <Route path="/event/:id/registrations/:registration_id/medical-checkup/:medical_check_up_id/blood-donation" element={user ? <BloodDonationDetail /> : <Login />} />
+                    <Route path="/staff-donation-event" element={user ? (user.role === 2 && <StaffEventList />) : <Login />} />
+                    <Route path="/staff-donation-event/:id/registrations" element={user ? (user.role === 2 && <StaffEventListDetail />) : <Login />} />
+                    <Route path="/staff-donation-event/:id/registrations/:registration_id" element={user ? (user.role === 2 && <StaffRegistrationDetail />) : <Login />} />
+                    <Route path="/staff-donation-event/:id/registrations/:registration_id/medical-checkup" element={user ? (user.role === 2 && <StaffMedicalCheckUpDetail />) : <Login />} />
+                    <Route path="/staff-donation-event/:id/registrations/:registration_id/medical-checkup/:medical_check_up_id/blood-donation" element={user ? (user.role === 2 && <StaffBloodDonationDetail />) : <Login />} />
                     {/* <Route path="/list-event" element={user ? (user.role === 1 ? <ListEvent /> : <Navigate to="/" />) : <Navigate to="/" />} /> */}
                   </Routes>
                 </div>

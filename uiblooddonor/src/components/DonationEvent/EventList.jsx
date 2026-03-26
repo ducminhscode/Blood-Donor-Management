@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
     Calendar, MapPin, Clock, Droplet, Heart, Search, Filter,
     AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell,
@@ -35,6 +35,7 @@ const EventList = () => {
     const [hasNextPage, setHasNextPage] = useState(true);
     const [totalEvents, setTotalEvents] = useState(0);
     const [originalTotalEvents, setOriginalTotalEvents] = useState(0);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchProvinces();
@@ -68,7 +69,7 @@ const EventList = () => {
         setError("");
 
         try {
-            let url = endpoints['list_donation_event'];
+            let url = endpoints['donation_event'];
             const params = new URLSearchParams();
 
             if (searchTerm) {
@@ -179,6 +180,18 @@ const EventList = () => {
             loadEvents(true);
         }
     }, [page]);
+
+    const handleFeatureCard = () => {
+        if (!user) {
+            navigate('/login', {
+                state: { from: '/login' }
+            });
+        } else if (user.role === 1) {
+            navigate('/event-registration');
+        } else if (user.role === 2) {
+            navigate('/staff-donation-event')
+        }
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -305,10 +318,14 @@ const EventList = () => {
                                         <Calendar className="w-10 h-10" />
                                     </div>
                                     <h3 className="text-xl font-bold mb-2">Sự kiện sắp tới</h3>
-                                    <p className="text-white/80 text-sm">Đăng ký ngay để nhận thông báo</p>
+                                    {!user || user.role === 1 ? (
+                                        <p className="text-white/80 text-sm">Đăng ký ngay để nhận thông báo</p>
+                                    ) : user.role === 2 && (
+                                        <p className="text-white/80 text-sm">Xem những sự kiện hiến máu mà bạn đã tạo</p>
+                                    )}
                                 </div>
-                                <button className="w-full bg-white text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition-colors">
-                                    {user ? 'Sự kiện đã đăng ký' : 'Đăng nhập để đăng ký'}
+                                <button onClick={handleFeatureCard} className="w-full bg-white text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition-colors">
+                                    {!user ? 'Đăng nhập để đăng ký' : (user.role === 2 ? 'Quản lý sự kiện hiến máu' : 'Sự kiện đã đăng ký')}
                                 </button>
                             </div>
                         </div>
@@ -559,7 +576,7 @@ const EventList = () => {
                     {(selectedProvince || searchTerm || filterType !== 'all') && (
                         <div className="mt-4 flex flex-wrap gap-2">
                             {filterType !== 'all' && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
+                                <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Trạng thái: {
                                         filterType === 'ongoing' ? 'Đang diễn ra' :
                                             filterType === 'upcoming' ? 'Sắp diễn ra' :
@@ -567,15 +584,14 @@ const EventList = () => {
                                     }</span>
                                     <button
                                         onClick={() => setFilterType('all')}
-                                        className="p-1 hover:bg-red-200 rounded-full transition-colors"
+                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
                                     >
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
                             )}
                             {selectedProvince && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-                                    <MapPinned className="h-3 w-3" />
+                                <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>{
                                         provinces.find(p => p.code === parseInt(selectedProvince))?.name || selectedProvince
                                     }</span>
@@ -585,7 +601,7 @@ const EventList = () => {
                                             setPage(1);
                                             loadEvents(false);
                                         }}
-                                        className="p-1 hover:bg-red-200 rounded-full transition-colors"
+                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
                                     >
                                         <X className="h-3 w-3" />
                                     </button>
@@ -601,7 +617,7 @@ const EventList = () => {
                                             setPage(1);
                                             loadEvents(false);
                                         }}
-                                        className="p-1 hover:bg-red-200 rounded-full transition-colors"
+                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
                                     >
                                         <X className="h-3 w-3" />
                                     </button>
@@ -884,9 +900,9 @@ const EventList = () => {
                                                     <Link
                                                         to={`/event/${event.id}`}
                                                         className={`items-center justify-between px-4 py-3 rounded-xl inline-flex transition-all group/btn ${event.is_expire
-                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                        : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25'
-                                                        }`}
+                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25'
+                                                            }`}
                                                         onClick={(e) => event.is_expire && e.preventDefault()}
                                                     >
                                                         <span>Xem chi tiết</span>

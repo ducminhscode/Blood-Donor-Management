@@ -300,7 +300,7 @@ const DonorList = () => {
 
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
         if (!bloodType || !rhFactor) return 'Chưa cập nhật';
-        return `${bloodType === 0 ? 'O' : bloodType === 1 ? 'A' : bloodType === 2 ? 'B' : 'AB'}${rhFactor === 0 ? '+' : '-'}`;
+        return `${bloodType === 0 ? 'O' : bloodType === 1 ? 'A' : bloodType === 2 ? 'B' : 'AB'}${rhFactor === 0 ? '-' : '+'}`;
     };
 
     const getDonationLevel = (count) => {
@@ -674,11 +674,13 @@ const DonorList = () => {
                                             className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
                                         >
                                             {/* Status Badge */}
-                                            <div className="absolute top-4 left-4 z-10">
-                                                <span className="bg-green-500 text-white px-2 py-1 rounded-lg text-xs">
-                                                    {formatRelativeTime(donor.last_login)}
-                                                </span>
-                                            </div>
+                                            {status === 'friend' && (
+                                                <div className="absolute top-4 left-4 z-10">
+                                                    <span className="bg-green-500 text-white px-2 py-1 rounded-lg text-xs">
+                                                        Online {formatRelativeTime(donor.last_login)}
+                                                    </span>
+                                                </div>
+                                            )}
 
                                             {/* Content */}
                                             <div className="p-6">
@@ -796,9 +798,9 @@ const DonorList = () => {
                                                             )}
                                                         </div>
 
-                                                        {donor.last_login && (
-                                                            <span className="absolute -bottom-1 -right-1 bg-green-500 text-white px-1.5 py-[3px] rounded text-[5px] shadow">
-                                                                {formatRelativeTime(donor.last_login)}
+                                                        {donor.last_login && status === 'friend' && (
+                                                            <span className="absolute -bottom-1 -right-1 bg-green-500 text-white px-1.5 py-[3px] rounded text-[4px] shadow">
+                                                                Online {formatRelativeTime(donor.last_login)}
                                                             </span>
                                                         )}
                                                     </div>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { 
+import { useState, useEffect, useCallback, useContext } from 'react';
+import {
     User, Search, Loader, ChevronRight, X, Mail, Phone,
     Calendar, MapPin, Droplet, Award, Star, Briefcase,
     Heart, XCircle, UserCheck, UserX, Clock, ArrowLeft,
@@ -8,32 +8,68 @@ import {
     Sparkles, Users, BadgeCheck, ThumbsUp, Shield,
     Clock as ClockIcon, CalendarDays, UserCog,
     MoreHorizontal, Share2, Copy, Facebook, MessageSquare,
-    Gift, Target, Medal, Trophy, Bell, BellRing
+    Gift, Target, Medal, Trophy, Bell, BellRing,
+    VenusAndMars
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authApis, endpoints } from '../../../configs/APIs';
 import { getImageUrl } from '../../../utils/Image';
+import debounce from 'lodash.debounce';
+import { UserContexts } from '../../../configs/UserContexts';
 import '../../../styles/PendingList.css';
+import { formatDate } from '../../../utils/Format';
 
 const PendingList = () => {
     const navigate = useNavigate();
+    const currentUser = useContext(UserContexts);
+
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(1);
+    const [hasNextPage, setHasNextPage] = useState(true);
+    const [totalRequests, setTotalRequests] = useState(0);
+    const [sortBy, setSortBy] = useState('recent');
     const [processingId, setProcessingId] = useState(null);
     const [message, setMessage] = useState({ text: "", type: "" });
-    const [selectedFilter, setSelectedFilter] = useState('all');
 
     const [selectedDonor, setSelectedDonor] = useState(null);
-    const [showDialog, setShowDialog] = useState(false);
-    const [loadingDetail, setLoadingDetail] = useState(false);
-    const [activeTab, setActiveTab] = useState('info');
+    const [totalPendingRequests, setTotalPendingRequests] = useState(0);
 
-    const fetchPendingRequests = async () => {
-        setLoading(true);
+    const showMessage = (text, type) => {
+        setMessage({ text, type });
+        setTimeout(() => setMessage({ text: "", type: "" }), 3000);
+    };
+
+    const fetchPendingRequests = async (isLoadMore = false) => {
+        const currentPage = isLoadMore ? page : 1;
+
+        if (!isLoadMore) {
+            setLoading(true);
+            setRequests([]);
+        } else {
+            if (!hasNextPage || loadingMore) return;
+            setLoadingMore(true);
+        }
+
         try {
-            const response = await authApis().get(endpoints.pending_list);
-            const formattedRequests = response.data.map(donor => ({
+            let url = endpoints.pending_list;
+            const params = new URLSearchParams();
+
+            if (searchTerm) {
+                params.append('search', searchTerm);
+            }
+
+            params.append('page', currentPage);
+
+            if (params.toString()) {
+                url += `?${params.toString()}`;
+            }
+
+            const response = await authApis().get(url);
+
+            const formattedRequests = response.data.results.map(donor => ({
                 id: donor.id,
                 username: donor.account.username,
                 last_name: donor.account.last_name,
@@ -58,46 +94,51 @@ const PendingList = () => {
                 identification: donor.identification,
                 last_donation: donor.last_donation,
                 can_donation: donor.can_donation,
-                requested_at: donor.created_at,
-                is_online: Math.random() > 0.5 // Mock data
+                requested_at: donor.friend_request_created_at,
+                last_login: donor.account.last_login
             }));
 
-            // Sort by requested_at
-            const sorted = [...formattedRequests].sort((a, b) => {
-                if (selectedFilter === 'recent') {
-                    return new Date(b.requested_at) - new Date(a.requested_at);
-                }
-                if (selectedFilter === 'oldest') {
-                    return new Date(a.requested_at) - new Date(b.requested_at);
-                }
-                return 0;
-            });
+            let sortedRequests = [...formattedRequests];
+            if (sortBy === 'recent') {
+                sortedRequests.sort((a, b) => new Date(b.requested_at) - new Date(a.requested_at));
+            } else if (sortBy === 'oldest') {
+                sortedRequests.sort((a, b) => new Date(a.requested_at) - new Date(b.requested_at));
+            }
 
-            setRequests(sorted);
+            if (isLoadMore) {
+                setRequests(prev => [...prev, ...sortedRequests]);
+            } else {
+                setRequests(sortedRequests);
+            }
+
+            setHasNextPage(response.data.next !== null);
+            setTotalRequests(response.data.count);
+
         } catch (error) {
             console.error("Error fetching pending requests:", error);
             showMessage("Không thể tải danh sách lời mời", "error");
         } finally {
-            setLoading(false);
+            if (isLoadMore) {
+                setLoadingMore(false);
+            } else {
+                setLoading(false);
+            }
         }
     };
 
     useEffect(() => {
         fetchPendingRequests();
-    }, [selectedFilter]);
+    }, [sortBy]);
 
     const fetchDonorDetail = async (donorId) => {
-        setLoadingDetail(true);
         try {
             const url = endpoints.donor_detail.replace('${id}', donorId);
             const response = await authApis().get(url);
             setSelectedDonor(response.data);
-            setShowDialog(true);
         } catch (error) {
             console.error("Error fetching donor detail:", error);
             showMessage("Không thể tải thông tin chi tiết", "error");
         } finally {
-            setLoadingDetail(false);
         }
     };
 
@@ -105,23 +146,17 @@ const PendingList = () => {
         fetchDonorDetail(donorId);
     };
 
-    const handleCloseDialog = () => {
-        setShowDialog(false);
-        setSelectedDonor(null);
-        setActiveTab('info');
-    };
-
-    const showMessage = (text, type) => {
-        setMessage({ text, type });
-        setTimeout(() => setMessage({ text: "", type: "" }), 3000);
-    };
-
     const handleAccept = async (donorId) => {
         setProcessingId(donorId);
         try {
             await authApis().post(endpoints.accept_friend.replace('${id}', donorId));
             setRequests(prev => prev.filter(r => r.id !== donorId));
+            setTotalRequests(prev => prev - 1);
             showMessage("Đã chấp nhận lời mời kết bạn", "success");
+
+            if (selectedDonor?.id === donorId) {
+                setSelectedDonor(null);
+            }
         } catch (error) {
             console.error("Error accepting friend request:", error);
             showMessage("Có lỗi xảy ra, vui lòng thử lại", "error");
@@ -132,12 +167,17 @@ const PendingList = () => {
 
     const handleReject = async (donorId) => {
         if (!window.confirm('Bạn có chắc muốn từ chối lời mời này?')) return;
-        
+
         setProcessingId(donorId);
         try {
             await authApis().post(endpoints.reject_friend.replace('${id}', donorId));
             setRequests(prev => prev.filter(r => r.id !== donorId));
+            setTotalRequests(prev => prev - 1);
             showMessage("Đã từ chối lời mời kết bạn", "success");
+
+            if (selectedDonor?.id === donorId) {
+                setSelectedDonor(null);
+            }
         } catch (error) {
             console.error("Error rejecting friend request:", error);
             showMessage("Có lỗi xảy ra, vui lòng thử lại", "error");
@@ -146,32 +186,80 @@ const PendingList = () => {
         }
     };
 
+    const debouncedSearch = useCallback(
+        debounce(() => {
+            setPage(1);
+            fetchPendingRequests(false);
+        }, searchTerm ? 500 : 10),
+        [searchTerm, sortBy]
+    );
+
+    useEffect(() => {
+        const fetchTotal = async () => {
+            const response = await authApis().get(endpoints.pending_list);
+            setTotalPendingRequests(response.data.count);
+        };
+        fetchTotal();
+    }, []);
+
+    useEffect(() => {
+        debouncedSearch();
+        return () => debouncedSearch.cancel();
+    }, [searchTerm, sortBy, debouncedSearch]);
+
+    useEffect(() => {
+        if (page > 1) {
+            fetchPendingRequests(true);
+        }
+    }, [page]);
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        setPage(1);
+        fetchPendingRequests(false);
+    };
+
+    const handleLoadMore = () => {
+        if (hasNextPage && !loadingMore && !loading) {
+            setPage(prev => prev + 1);
+        }
+    };
+
+    const handleSortChange = (value) => {
+        setSortBy(value);
+        setPage(1);
+    };
+
     const getFullName = (donor) => {
         return `${donor.last_name || ''} ${donor.first_name || ''}`.trim() || 'Chưa cập nhật';
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'Không rõ';
+    const formatDateInvite = (dateString) => {
+        if (!dateString) return '';
         const date = new Date(dateString);
         const now = new Date();
-        const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
-        
-        if (diffHours < 1) return 'Vừa xong';
-        if (diffHours < 24) return `${diffHours} giờ trước`;
-        if (diffHours < 48) return 'Hôm qua';
-        return `${Math.floor(diffHours / 24)} ngày trước`;
+        const diffSeconds = Math.floor((now - date) / 1000);
+
+        if (diffSeconds < 60) return 'Vừa xong';
+        if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)} phút trước`;
+        if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)} giờ trước`;
+        return `${Math.floor(diffSeconds / 86400)} ngày trước`;
     };
 
-    const formatDateTime = (dateString) => {
-        if (!dateString) return 'Không rõ';
+    const formatRelativeTime = (dateString) => {
+        if (!dateString) return '';
         const date = new Date(dateString);
-        return date.toLocaleString('vi-VN', {
-            hour: '2-digit',
-            minute: '2-digit',
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+        const now = new Date();
+        const diffSeconds = Math.floor((now - date) / 1000);
+
+        if (diffSeconds < 60) return 'Vừa xong';
+        if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)} phút trước`;
+        if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)} giờ trước`;
+        return `${Math.floor(diffSeconds / 86400)} ngày trước`;
     };
 
     const getGenderText = (gender) => {
@@ -179,24 +267,6 @@ const PendingList = () => {
         if (gender === 1) return 'Nữ';
         return 'Khác';
     };
-
-    const getBloodTypeDisplay = (bloodType, rhFactor) => {
-        if (!bloodType) return 'Chưa cập nhật';
-        return `${bloodType}${rhFactor === 'positive' ? '+' : rhFactor === 'negative' ? '-' : ''}`;
-    };
-
-    const getDonationLevel = (count) => {
-        if (count >= 20) return { label: 'Huy chương vàng', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-50' };
-        if (count >= 10) return { label: 'Huy chương bạc', icon: Medal, color: 'text-gray-400', bg: 'bg-gray-50' };
-        if (count >= 5) return { label: 'Huy chương đồng', icon: Medal, color: 'text-amber-600', bg: 'bg-amber-50' };
-        return { label: 'Người hiến máu', icon: Target, color: 'text-blue-500', bg: 'bg-blue-50' };
-    };
-
-    const filteredRequests = requests.filter(request => {
-        const fullName = getFullName(request).toLowerCase();
-        return fullName.includes(searchTerm.toLowerCase()) ||
-               request.username.toLowerCase().includes(searchTerm.toLowerCase());
-    });
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -219,65 +289,53 @@ const PendingList = () => {
                                 animationDuration: '15s'
                             }}
                         >
-                            <Bell className="w-8 h-8 text-white opacity-10" />
+                            <UserPlus className="w-8 h-8 text-white opacity-10" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => navigate(-1)}
-                                className="p-3 hover:bg-white/20 rounded-xl transition-all backdrop-blur-sm group"
-                            >
-                                <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
-                            </button>
-                            <div>
-                                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
-                                    <UserPlus className="w-4 h-4" />
-                                    <span className="text-sm font-medium">Kết nối bạn bè</span>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-26">
+                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
+                        <span>Danh sách bạn bè</span>
+                        <span>/</span>
+                        <span className='text-white'>Lời mời kết bạn</span>
+                    </nav>
+                    <button
+                        onClick={() => navigate("/friend-list")}
+                        className="flex p-2 mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
+                    >
+                        <ChevronRight className="w-6 h-6 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Danh sách bạn bè</span>
+                    </button>
+
+                    {/* Flex container for title and stat card */}
+                    <div className="flex items-start justify-between gap-8">
+                        {/* Left side - Title */}
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                                    <UserPlus className="w-8 h-8" />
                                 </div>
-                                <h1 className="text-3xl md:text-4xl font-bold mb-2">Lời mời kết bạn</h1>
-                                <p className="text-red-100 text-lg">
-                                    Kết nối với những người muốn làm bạn với bạn
-                                </p>
+                                <h1 className="text-3xl md:text-4xl font-bold">Lời mời kết bạn</h1>
                             </div>
+                            <p className="text-red-100 text-lg">
+                                Kết nối với những người muốn làm bạn với bạn
+                            </p>
                         </div>
 
-                        {/* Stats Card */}
-                        <div className="hidden md:block">
-                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                        {/* Right side - Stats Card */}
+                        <div className="hidden md:block flex-shrink-0">
+                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-white/20 rounded-xl">
                                         <BellRing className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <div className="text-3xl font-bold">{requests.length}</div>
+                                        <div className="text-3xl font-bold">{totalPendingRequests}</div>
                                         <div className="text-sm text-white/80">Lời mời đang chờ</div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Stats Cards Mobile */}
-                    <div className="grid grid-cols-3 gap-3 mt-6 md:hidden">
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-                            <div className="text-xl font-bold">{requests.length}</div>
-                            <div className="text-xs text-white/80">Chờ xử lý</div>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-                            <div className="text-xl font-bold">
-                                {requests.filter(r => r.can_donation).length}
-                            </div>
-                            <div className="text-xs text-white/80">Có thể hiến</div>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-                            <div className="text-xl font-bold">
-                                {requests.reduce((sum, r) => sum + (r.donation_count || 0), 0)}
-                            </div>
-                            <div className="text-xs text-white/80">Lượt hiến</div>
                         </div>
                     </div>
                 </div>
@@ -285,7 +343,7 @@ const PendingList = () => {
                 {/* Wave Separator */}
                 <div className="absolute bottom-0 left-0 right-0">
                     <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-                        <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F9FAFB"/>
+                        <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F9FAFB" />
                     </svg>
                 </div>
             </div>
@@ -293,13 +351,12 @@ const PendingList = () => {
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-50 animate-slideIn">
-                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${
-                        message.type === 'success' 
-                            ? 'bg-green-50 text-green-700 border border-green-200' 
-                            : 'bg-red-50 text-red-700 border border-red-200'
-                    }`}>
-                        {message.type === 'success' 
-                            ? <CheckCircle className="w-5 h-5" /> 
+                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${message.type === 'success'
+                        ? 'bg-green-50 text-green-700 border border-green-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                        }`}>
+                        {message.type === 'success'
+                            ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
                         }
                         <span>{message.text}</span>
@@ -312,19 +369,19 @@ const PendingList = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                         {/* Search Bar */}
-                        <div className="w-full md:w-96">
+                        <div className="w-full lg:w-[500px]">
                             <div className="relative group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm theo tên hoặc username..."
+                                    placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={handleSearchChange}
                                     className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
                                 />
                                 {searchTerm && (
                                     <button
-                                        onClick={() => setSearchTerm('')}
+                                        onClick={handleClearSearch}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
@@ -336,35 +393,21 @@ const PendingList = () => {
                         {/* Filter Tabs */}
                         <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1">
                             <button
-                                onClick={() => setSelectedFilter('all')}
-                                className={`px-4 py-2 rounded-lg transition-all ${
-                                    selectedFilter === 'all' 
-                                        ? 'bg-white text-red-600 shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                onClick={() => handleSortChange('recent')}
+                                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1 ${sortBy === 'recent'
+                                    ? 'bg-white text-red-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                             >
-                                Tất cả
-                            </button>
-                            <button
-                                onClick={() => setSelectedFilter('recent')}
-                                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1 ${
-                                    selectedFilter === 'recent' 
-                                        ? 'bg-white text-red-600 shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            >
-                                <ClockIcon className="w-4 h-4" />
                                 Mới nhất
                             </button>
                             <button
-                                onClick={() => setSelectedFilter('oldest')}
-                                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1 ${
-                                    selectedFilter === 'oldest' 
-                                        ? 'bg-white text-red-600 shadow-sm' 
-                                        : 'text-gray-600 hover:text-gray-900'
-                                }`}
+                                onClick={() => handleSortChange('oldest')}
+                                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1 ${sortBy === 'oldest'
+                                    ? 'bg-white text-red-600 shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                             >
-                                <CalendarDays className="w-4 h-4" />
                                 Cũ nhất
                             </button>
                         </div>
@@ -377,14 +420,11 @@ const PendingList = () => {
                                 <Search className="h-4 w-4" />
                                 <span>Tìm kiếm: "{searchTerm}"</span>
                                 <button
-                                    onClick={() => setSearchTerm('')}
+                                    onClick={handleClearSearch}
                                     className="p-1 hover:bg-white/20 rounded-lg transition-colors"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
-                            </span>
-                            <span className="text-sm text-gray-500 self-center">
-                                Tìm thấy {filteredRequests.length} kết quả
                             </span>
                         </div>
                     )}
@@ -393,6 +433,20 @@ const PendingList = () => {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Results Header */}
+                {!loading && requests.length > 0 && (
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
+                                <span className="font-bold">{totalRequests}</span>
+                            </div>
+                            <span className="text-gray-600">
+                                lời mời kết bạn {searchTerm && "phù hợp với tìm kiếm"}
+                            </span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Loading State */}
                 {loading && (
                     <div className="space-y-4">
@@ -415,180 +469,164 @@ const PendingList = () => {
                 )}
 
                 {/* Requests List */}
-                {!loading && filteredRequests.length > 0 ? (
-                    <div className="space-y-4">
-                        {filteredRequests.map((request) => {
-                            const DonationIcon = getDonationLevel(request.donation_count).icon;
-                            const levelColor = getDonationLevel(request.donation_count).color;
-                            const levelBg = getDonationLevel(request.donation_count).bg;
+                {!loading && requests.length > 0 ? (
+                    <>
+                        <div className="space-y-4">
+                            {requests.map((request) => {
 
-                            return (
-                                <div
-                                    key={request.id}
-                                    className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
-                                    onClick={() => handleViewDetail(request.id)}
-                                >
-                                    {/* Online Status */}
-                                    <div className="absolute top-4 left-4 z-10">
-                                        {request.is_online ? (
-                                            <span className="flex items-center gap-1 bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-medium">
-                                                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                                                Online
-                                            </span>
-                                        ) : (
-                                            <span className="bg-gray-500/80 text-white px-2 py-1 rounded-lg text-xs">
-                                                Hoạt động {formatDate(request.requested_at)}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Donation Level Badge */}
-                                    <div className="absolute top-4 right-4 z-10">
-                                        <div className={`${levelBg} px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-1`}>
-                                            <DonationIcon className={`w-4 h-4 ${levelColor}`} />
-                                            <span className="text-xs font-medium">{request.donation_count || 0} lần</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6">
-                                        <div className="flex flex-col md:flex-row gap-6">
-                                            {/* Avatar */}
-                                            <div className="flex-shrink-0">
-                                                <div className="relative">
-                                                    <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
-                                                        {request.avatar ? (
-                                                            <img
-                                                                src={getImageUrl(request.avatar)}
-                                                                alt={getFullName(request)}
-                                                                className="w-full h-full rounded-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            <User className="w-10 h-10 text-red-600" />
-                                                        )}
-                                                    </div>
-                                                    {request.can_donation && (
-                                                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
-                                                            <BadgeCheck className="w-4 h-4 text-white" />
+                                return (
+                                    <div
+                                        key={request.id}
+                                        className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                                        onClick={() => handleViewDetail(request.id)}
+                                    >
+                                        <div className="p-6">
+                                            <div className="flex flex-col md:flex-row gap-6">
+                                                {/* Avatar */}
+                                                <div className="flex-shrink-0">
+                                                    <div className="relative">
+                                                        <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
+                                                            {request.avatar ? (
+                                                                <img
+                                                                    src={getImageUrl(request.avatar)}
+                                                                    alt={getFullName(request)}
+                                                                    className="w-full h-full rounded-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <User className="w-10 h-10 text-red-600" />
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Info */}
-                                            <div className="flex-1">
-                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                    <div>
-                                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
-                                                            {getFullName(request)}
-                                                        </h3>
-                                                        <p className="text-gray-500">@{request.username}</p>
-                                                    </div>
-                                                    
-                                                    <div className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-1.5 rounded-lg">
-                                                        <Clock className="w-4 h-4 text-gray-500" />
-                                                        <span className="text-gray-600">
-                                                            Gửi lời mời {formatDate(request.requested_at)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Contact Info */}
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <Mail className="w-4 h-4 text-gray-400" />
-                                                        <span className="truncate">{request.email || 'Chưa cập nhật'}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <Phone className="w-4 h-4 text-gray-400" />
-                                                        <span>{request.phone || 'Chưa cập nhật'}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <Calendar className="w-4 h-4 text-gray-400" />
-                                                        <span>{formatDate(request.birth_date)}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <Heart className="w-4 h-4 text-gray-400" />
-                                                        <span>{getGenderText(request.gender)}</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Tags */}
-                                                <div className="flex flex-wrap gap-2 mt-4">
-                                                    {request.blood_type && (
-                                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 text-sm rounded-full">
-                                                            <Droplet className="w-4 h-4" />
-                                                            {getBloodTypeDisplay(request.blood_type, request.rh_factor)}
-                                                        </span>
-                                                    )}
-                                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-full">
-                                                        <Award className="w-4 h-4" />
-                                                        {request.donation_count} lần hiến
-                                                    </span>
-                                                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-50 text-purple-600 text-sm rounded-full">
-                                                        <Star className="w-4 h-4" />
-                                                        {request.points} điểm
-                                                    </span>
-                                                    {request.can_donation && (
-                                                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-600 text-sm rounded-full">
-                                                            <Heart className="w-4 h-4" />
-                                                            Sẵn sàng hiến
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                {/* Location & Work */}
-                                                {(request.permanent_address || request.province || request.career) && (
-                                                    <div className="mt-4 space-y-1 text-sm text-gray-500">
-                                                        {request.career && (
-                                                            <p className="flex items-center gap-1">
-                                                                <Briefcase className="w-4 h-4 text-gray-400" />
-                                                                {request.career} {request.organization && `tại ${request.organization}`}
-                                                            </p>
-                                                        )}
-                                                        {(request.permanent_address || request.province) && (
-                                                            <p className="flex items-center gap-1">
-                                                                <MapPin className="w-4 h-4 text-gray-400" />
-                                                                {request.permanent_address}
-                                                                {request.sub_district && `, ${request.sub_district}`}
-                                                                {request.province && `, ${request.province}`}
-                                                            </p>
+                                                        {request.can_donation && (
+                                                            <div className="absolute -bottom-1 -right-1 bg-red-500 items-center justify-between rounded-full p-1 border-2 border-white">
+                                                                <Droplet className="w-4 h-4 text-white" />
+                                                            </div>
                                                         )}
                                                     </div>
-                                                )}
+                                                </div>
 
-                                                {/* Action Buttons */}
-                                                <div className="flex gap-3 mt-6" onClick={(e) => e.stopPropagation()}>
-                                                    <button
-                                                        onClick={() => handleAccept(request.id)}
-                                                        disabled={processingId === request.id}
-                                                        className="flex-1 md:flex-none px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl hover:from-green-700 hover:to-green-600 transition-all shadow-lg shadow-green-500/25 disabled:from-gray-400 disabled:to-gray-400 flex items-center justify-center gap-2"
-                                                    >
-                                                        {processingId === request.id ? (
-                                                            <Loader className="w-4 h-4 animate-spin" />
+                                                {/* Info */}
+                                                <div className="flex-1">
+                                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                                                {getFullName(request)}
+                                                            </h3>
+                                                            <span className="flex items-center gap-1 bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-medium">
+                                                                Online {formatRelativeTime(request.last_login)}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-1.5 rounded-lg">
+                                                            <span className="text-gray-600">
+                                                                {formatDateInvite(request.requested_at)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    {/* Contact Info */}
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Mail className="w-4 h-4 text-red-400" />
+                                                            <span className="truncate">{request.email || 'Chưa cập nhật'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Phone className="w-4 h-4 text-red-400" />
+                                                            <span>{request.phone || 'Chưa cập nhật'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Calendar className="w-4 h-4 text-red-400" />
+                                                            <span>{formatDate(request.birth_date) || 'Chưa cập nhật'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <VenusAndMars className="w-4 h-4 text-red-400" />
+                                                            <span>{getGenderText(request.gender) || 'Chưa cập nhật'}</span>
+                                                        </div>
+                                                        {(request.career) ? (
+                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                                <Briefcase className="w-4 h-4 text-red-400" />
+                                                                <span>{request.career} {request.organization && `tại ${request.organization}`}</span>
+                                                            </div>
                                                         ) : (
-                                                            <UserCheck className="w-4 h-4" />
+                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                                <Briefcase className="w-4 h-4 text-red-400" />
+                                                                <span>Chưa cập nhật</span>
+                                                            </div>
                                                         )}
-                                                        Chấp nhận
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleReject(request.id)}
-                                                        disabled={processingId === request.id}
-                                                        className="flex-1 md:flex-none px-6 py-3 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                                    >
-                                                        <UserX className="w-4 h-4" />
-                                                        Từ chối
-                                                    </button>
+
+                                                        {(request.permanent_address || request.province || request.career) ? (
+                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                                <MapPin className="w-4 h-4 text-red-400" />
+                                                                <span>{request.permanent_address}
+                                                                    {request.sub_district && `, ${request.sub_district}`}
+                                                                    {request.province && `, ${request.province}`}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                                <MapPin className="w-4 h-4 text-red-400" />
+                                                                <span>Chưa cập nhật</span>
+                                                            </div>
+                                                        )}
+
+                                                    </div>
+
+                                                    {/* Action Buttons */}
+                                                    <div className="flex gap-3 mt-6" onClick={(e) => e.stopPropagation()}>
+                                                        <button
+                                                            onClick={() => handleAccept(request.id)}
+                                                            disabled={processingId === request.id}
+                                                            className="flex-1 md:flex-none px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 disabled:from-gray-400 disabled:to-gray-400 flex items-center justify-center gap-2"
+                                                        >
+                                                            {processingId === request.id ? (
+                                                                <Loader className="w-4 h-4 animate-spin" />
+                                                            ) : (
+                                                                <>
+                                                                    <UserCheck className="w-4 h-4" />
+                                                                    Chấp nhận
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleReject(request.id)}
+                                                            disabled={processingId === request.id}
+                                                            className="flex-1 md:flex-none px-6 py-3 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                                        >
+                                                            <UserX className="w-4 h-4" />
+                                                            Từ chối
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Decorative Elements */}
-                                    <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-gradient-to-br from-red-100 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Load More */}
+                        {hasNextPage && (
+                            <div className="flex justify-center mt-8">
+                                <button
+                                    onClick={handleLoadMore}
+                                    disabled={loadingMore}
+                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                >
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        {loadingMore ? (
+                                            <>
+                                                <Loader className="w-5 h-5 animate-spin" />
+                                                <span>Đang tải thêm...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>Xem thêm lời mời</span>
+                                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </span>
+                                </button>
+                            </div>
+                        )}
+                    </>
                 ) : !loading && (
                     <div className="text-center py-20">
                         <div className="relative inline-block">
@@ -605,14 +643,14 @@ const PendingList = () => {
                         </h3>
 
                         <p className="text-gray-600 mb-6">
-                            {searchTerm 
-                                ? 'Thử tìm kiếm với từ khóa khác' 
+                            {searchTerm
+                                ? 'Thử tìm kiếm với từ khóa khác'
                                 : 'Khi có ai đó gửi lời mời, họ sẽ xuất hiện ở đây'}
                         </p>
 
                         {searchTerm ? (
                             <button
-                                onClick={() => setSearchTerm('')}
+                                onClick={handleClearSearch}
                                 className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
                             >
                                 Xóa tìm kiếm
@@ -628,378 +666,6 @@ const PendingList = () => {
                     </div>
                 )}
             </div>
-
-            {/* Detail Modal */}
-            {showDialog && selectedDonor && (
-                <div 
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                    onClick={handleCloseDialog}
-                >
-                    <div 
-                        className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slideUp"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Modal Header */}
-                        <div className="relative bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white p-8 rounded-t-2xl">
-                            <div className="absolute inset-0 opacity-10">
-                                <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                            </div>
-
-                            <button
-                                onClick={handleCloseDialog}
-                                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-xl transition-colors"
-                            >
-                                <XCircle className="w-6 h-6" />
-                            </button>
-
-                            <div className="relative flex items-center gap-6">
-                                <div className="relative">
-                                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center border-4 border-white/30">
-                                        {selectedDonor.account?.avatar ? (
-                                            <img
-                                                src={getImageUrl(selectedDonor.account.avatar)}
-                                                alt={getFullName(selectedDonor)}
-                                                className="w-full h-full rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <User className="w-10 h-10 text-red-600" />
-                                        )}
-                                    </div>
-                                    {selectedDonor.can_donation && (
-                                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
-                                            <BadgeCheck className="w-5 h-5 text-white" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <h2 className="text-2xl font-bold">
-                                        {selectedDonor.account?.last_name} {selectedDonor.account?.first_name}
-                                    </h2>
-                                    <p className="text-red-100 mb-2">@{selectedDonor.account?.username}</p>
-                                    
-                                    <div className="flex gap-2">
-                                        <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs">
-                                            Gửi lời mời: {formatDateTime(selectedDonor.created_at)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Modal Tabs */}
-                        <div className="border-b border-gray-200 px-6">
-                            <div className="flex gap-6">
-                                <button
-                                    onClick={() => setActiveTab('info')}
-                                    className={`py-4 px-2 font-medium transition-all relative ${
-                                        activeTab === 'info'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
-                                    }`}
-                                >
-                                    Thông tin cơ bản
-                                    {activeTab === 'info' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('health')}
-                                    className={`py-4 px-2 font-medium transition-all relative ${
-                                        activeTab === 'health'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
-                                    }`}
-                                >
-                                    Sức khỏe
-                                    {activeTab === 'health' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('donation')}
-                                    className={`py-4 px-2 font-medium transition-all relative ${
-                                        activeTab === 'donation'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
-                                    }`}
-                                >
-                                    Lịch sử hiến
-                                    {activeTab === 'donation' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Modal Content */}
-                        <div className="p-6">
-                            {loadingDetail ? (
-                                <div className="flex justify-center py-12">
-                                    <div className="relative">
-                                        <div className="w-12 h-12 border-4 border-red-200 rounded-full"></div>
-                                        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin absolute top-0"></div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    {/* Info Tab */}
-                                    {activeTab === 'info' && (
-                                        <div className="space-y-6">
-                                            {/* Contact Info */}
-                                            <div>
-                                                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <div className="p-1.5 bg-red-100 rounded-lg">
-                                                        <User className="w-4 h-4 text-red-600" />
-                                                    </div>
-                                                    Thông tin liên hệ
-                                                </h3>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                                        <Mail className="w-4 h-4 text-gray-500" />
-                                                        <div>
-                                                            <div className="text-xs text-gray-500">Email</div>
-                                                            <div className="text-sm font-medium">{selectedDonor.account?.email || 'Chưa cập nhật'}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                                        <Phone className="w-4 h-4 text-gray-500" />
-                                                        <div>
-                                                            <div className="text-xs text-gray-500">Số điện thoại</div>
-                                                            <div className="text-sm font-medium">{selectedDonor.account?.phone || 'Chưa cập nhật'}</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Personal Info */}
-                                            <div>
-                                                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <div className="p-1.5 bg-red-100 rounded-lg">
-                                                        <Heart className="w-4 h-4 text-red-600" />
-                                                    </div>
-                                                    Thông tin cá nhân
-                                                </h3>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                                        <Calendar className="w-4 h-4 text-gray-500" />
-                                                        <div>
-                                                            <div className="text-xs text-gray-500">Ngày sinh</div>
-                                                            <div className="text-sm font-medium">{formatDate(selectedDonor.account?.birth_date)}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                                        <Heart className="w-4 h-4 text-gray-500" />
-                                                        <div>
-                                                            <div className="text-xs text-gray-500">Giới tính</div>
-                                                            <div className="text-sm font-medium">{getGenderText(selectedDonor.account?.gender)}</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Address */}
-                                            {(selectedDonor.permanent_address || selectedDonor.province) && (
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                        <div className="p-1.5 bg-red-100 rounded-lg">
-                                                            <MapPin className="w-4 h-4 text-red-600" />
-                                                        </div>
-                                                        Địa chỉ
-                                                    </h3>
-                                                    <div className="p-4 bg-gray-50 rounded-xl">
-                                                        <p className="text-sm text-gray-700">
-                                                            {selectedDonor.permanent_address}
-                                                            {selectedDonor.sub_district && `, ${selectedDonor.sub_district}`}
-                                                            {selectedDonor.province && `, ${selectedDonor.province}`}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Work */}
-                                            {(selectedDonor.career || selectedDonor.organization) && (
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                        <div className="p-1.5 bg-red-100 rounded-lg">
-                                                            <Briefcase className="w-4 h-4 text-red-600" />
-                                                        </div>
-                                                        Công việc
-                                                    </h3>
-                                                    <div className="p-4 bg-gray-50 rounded-xl">
-                                                        <p className="text-sm text-gray-700">
-                                                            {selectedDonor.career}
-                                                            {selectedDonor.organization && ` tại ${selectedDonor.organization}`}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Health Tab */}
-                                    {activeTab === 'health' && (
-                                        <div className="space-y-6">
-                                            {/* Blood Type */}
-                                            <div>
-                                                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <div className="p-1.5 bg-red-100 rounded-lg">
-                                                        <Droplet className="w-4 h-4 text-red-600" />
-                                                    </div>
-                                                    Nhóm máu
-                                                </h3>
-                                                <div className="p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl text-center">
-                                                    <div className="text-4xl font-bold text-red-600 mb-2">
-                                                        {getBloodTypeDisplay(selectedDonor.blood_type, selectedDonor.rh_factor)}
-                                                    </div>
-                                                    <p className="text-sm text-red-700">
-                                                        {selectedDonor.can_donation 
-                                                            ? 'Có thể hiến máu' 
-                                                            : 'Chưa đủ điều kiện hiến máu'}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* Physical Info */}
-                                            {(selectedDonor.weight || selectedDonor.height || selectedDonor.bmi) && (
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                        <div className="p-1.5 bg-red-100 rounded-lg">
-                                                            <Activity className="w-4 h-4 text-red-600" />
-                                                        </div>
-                                                        Thông số cơ thể
-                                                    </h3>
-                                                    <div className="grid grid-cols-3 gap-4">
-                                                        {selectedDonor.weight && (
-                                                            <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                                <Weight className="w-5 h-5 text-gray-500 mx-auto mb-2" />
-                                                                <div className="text-lg font-bold text-gray-900">{selectedDonor.weight}</div>
-                                                                <div className="text-xs text-gray-500">kg</div>
-                                                            </div>
-                                                        )}
-                                                        {selectedDonor.height && (
-                                                            <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                                <Ruler className="w-5 h-5 text-gray-500 mx-auto mb-2" />
-                                                                <div className="text-lg font-bold text-gray-900">{selectedDonor.height}</div>
-                                                                <div className="text-xs text-gray-500">cm</div>
-                                                            </div>
-                                                        )}
-                                                        {selectedDonor.bmi && (
-                                                            <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                                <Activity className="w-5 h-5 text-gray-500 mx-auto mb-2" />
-                                                                <div className="text-lg font-bold text-gray-900">{selectedDonor.bmi.toFixed(1)}</div>
-                                                                <div className="text-xs text-gray-500">BMI</div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Donation Tab */}
-                                    {activeTab === 'donation' && (
-                                        <div className="space-y-6">
-                                            {/* Stats */}
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl">
-                                                    <div className="text-2xl font-bold text-red-600">{selectedDonor.donation_count || 0}</div>
-                                                    <div className="text-sm text-gray-600">Lần hiến máu</div>
-                                                </div>
-                                                <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl">
-                                                    <div className="text-2xl font-bold text-red-600">{selectedDonor.points || 0}</div>
-                                                    <div className="text-sm text-gray-600">Điểm thưởng</div>
-                                                </div>
-                                            </div>
-
-                                            {/* Last Donation */}
-                                            {selectedDonor.last_donation && (
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-900 mb-3">Lần hiến gần nhất</h3>
-                                                    <div className="p-4 bg-gray-50 rounded-xl flex items-center gap-3">
-                                                        <Calendar className="w-5 h-5 text-red-600" />
-                                                        <div>
-                                                            <div className="font-medium">{formatDate(selectedDonor.last_donation)}</div>
-                                                            <div className="text-xs text-gray-500">
-                                                                {selectedDonor.can_donation ? 'Đã đủ điều kiện hiến tiếp' : 'Chưa đủ thời gian để hiến tiếp'}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Donation Level */}
-                                            {selectedDonor.donation_count > 0 && (
-                                                <div>
-                                                    <h3 className="font-semibold text-gray-900 mb-3">Cấp độ hiến máu</h3>
-                                                    <div className="p-4 bg-gray-50 rounded-xl">
-                                                        <div className="flex items-center gap-3 mb-2">
-                                                            {(() => {
-                                                                const level = getDonationLevel(selectedDonor.donation_count);
-                                                                const Icon = level.icon;
-                                                                return (
-                                                                    <>
-                                                                        <Icon className={`w-8 h-8 ${level.color}`} />
-                                                                        <div>
-                                                                            <div className="font-medium">{level.label}</div>
-                                                                            <div className="text-xs text-gray-500">
-                                                                                {selectedDonor.donation_count} lần hiến
-                                                                            </div>
-                                                                        </div>
-                                                                    </>
-                                                                );
-                                                            })()}
-                                                        </div>
-                                                        <div className="w-full bg-gray-200 rounded-full h-2">
-                                                            <div 
-                                                                className="bg-red-600 h-2 rounded-full" 
-                                                                style={{ width: `${Math.min((selectedDonor.donation_count / 20) * 100, 100)}%` }}
-                                                            ></div>
-                                                        </div>
-                                                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                                            <span>0</span>
-                                                            <span>5</span>
-                                                            <span>10</span>
-                                                            <span>15</span>
-                                                            <span>20+</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Action Buttons */}
-                                    <div className="border-t pt-6 flex gap-3">
-                                        <button 
-                                            onClick={() => handleAccept(selectedDonor.id)}
-                                            disabled={processingId === selectedDonor.id}
-                                            className="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl hover:from-green-700 hover:to-green-600 transition-all shadow-lg shadow-green-500/25 flex items-center justify-center gap-2 disabled:from-gray-400 disabled:to-gray-400"
-                                        >
-                                            {processingId === selectedDonor.id ? (
-                                                <Loader className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <UserCheck className="w-4 h-4" />
-                                                    Chấp nhận
-                                                </>
-                                            )}
-                                        </button>
-                                        <button 
-                                            onClick={() => handleReject(selectedDonor.id)}
-                                            disabled={processingId === selectedDonor.id}
-                                            className="flex-1 px-4 py-3 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                        >
-                                            <UserX className="w-4 h-4" />
-                                            Từ chối
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

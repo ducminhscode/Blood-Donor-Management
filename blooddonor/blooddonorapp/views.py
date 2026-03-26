@@ -423,10 +423,39 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
             status=FriendStatus.ADD_FRIEND.value
         ).select_related('requester')
 
-        donors = [f.requester for f in pending]
-        serializer = DonorSerializer(donors, many=True)
+        donor_ids = [f.requester.id for f in pending]
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        donors = Donor.objects.filter(
+            id__in=donor_ids,
+            is_active=True
+        ).select_related('account')
+
+        friend_created_at = {f.requester.id: f.created_at for f in pending}
+
+        search = request.query_params.get('search')
+        if search:
+            keywords = search.strip().split()
+            query = Q()
+            for word in keywords:
+                query &= (
+                        Q(account__first_name__icontains=word) |
+                        Q(account__last_name__icontains=word) |
+                        Q(account__email__icontains=word) |
+                        Q(account__phone__icontains=word)
+                )
+            donors = donors.filter(query)
+
+        paginator = Pagination()
+        page = paginator.paginate_queryset(donors, request)
+
+        serializer = DonorSerializer(page, many=True)
+
+        response_data = serializer.data
+        for donor_data in response_data:
+            donor_id = donor_data['id']
+            donor_data['friend_request_created_at'] = friend_created_at.get(donor_id)
+
+        return paginator.get_paginated_response(response_data)
 
     @action(methods=['get'], url_path='friend-list', detail=False)
     def friend_list(self, request):
@@ -578,6 +607,7 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
 class StaffViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Staff.objects.filter(is_active=True)
     serializer_class = StaffSerializer
+    pagination_class = Pagination
 
     def get_permissions(self):
         if self.action in ['staff_update', 'get_my_staff']:
@@ -605,15 +635,33 @@ class StaffViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
     def donation_event(self, request):
         staff = request.user.staff
         events = DonationEvent.objects.filter(staff=staff, is_active=True).order_by('-created_at')
-        serializer = DonationEventSerializer(events, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        search = request.query_params.get('search')
+        if search:
+            events = events.filter(title__icontains=search)
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(events, request)
+
+        serializer = DonationEventSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     @action(methods=['get'], url_path='emergency-request', detail=False)
     def emergency_request(self, request):
         staff = request.user.staff
         emergency = EmergencyRequest.objects.filter(staff=staff, is_active=True).order_by('-created_at')
-        serializer = EmergencyRequestSerializer(emergency, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        search = request.query_params.get('search')
+        if search:
+            emergency = emergency.filter(
+                Q(patient_name__icontains=search)
+            )
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(emergency, request)
+
+        serializer = EmergencyRequestSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
@@ -646,7 +694,7 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             if self.request.method == 'GET':
                 return [OR(OwnedStaffPermission(), OwnedDonorPermission())]
             return [OwnedStaffPermission()]
-        if self.action in ['register', 'my_registrations', 'my_registration_detail']:
+        if self.action in ['register']:
             return [DonorPermission()]
         return super().get_permissions()
 
@@ -667,8 +715,7 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
 
     def destroy(self, request, pk=None):
         donation_event = get_object_or_404(DonationEvent, pk=pk, is_active=True)
-        donation_event.is_active = False
-        donation_event.save(update_fields=["is_active"])
+        donation_event.delete()
         return Response({"message": "Xoá thành công"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], url_path='staff', detail=True)
@@ -683,6 +730,13 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
     def register(self, request, pk=None):
         donor = request.user.donor
         donation_event = get_object_or_404(DonationEvent, pk=pk, is_active=True, is_expire=False)
+
+        if not donor.can_donation:
+            return Response(
+                {"error": "Bạn hiện không đủ điều kiện để hiến máu. Vui lòng kiểm tra lại thông tin sức khỏe."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer = EventRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -748,8 +802,43 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             is_active=True
         ).order_by('-created_at')
 
-        serializer = EventRegistrationSerializer(registrations, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        search = request.query_params.get('search')
+        if search:
+            keywords = search.strip().split()
+            query = Q()
+            for word in keywords:
+                query |= (
+                        Q(donor__account__first_name__icontains=word) |
+                        Q(donor__account__last_name__icontains=word) |
+                        Q(donor__account__email__icontains=word) |
+                        Q(donor__account__phone__icontains=word) |
+                        Q(identification__icontains=word)
+                )
+            registrations = registrations.filter(query)
+
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            try:
+                status_int = int(status_filter)
+                if status_int in [s.value for s in RegistrationStatus]:
+                    registrations = registrations.filter(status=status_int)
+            except (ValueError, TypeError):
+                pass
+
+        from_date = request.query_params.get('from_date')
+        to_date = request.query_params.get('to_date')
+
+        if from_date:
+            registrations = registrations.filter(created_at__gte=from_date)
+        if to_date:
+            registrations = registrations.filter(created_at__lte=to_date)
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(registrations, request)
+
+        serializer = EventRegistrationSerializer(page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
 
     @action(methods=['get'], url_path=r'registrations/(?P<registration_id>[^/.]+)', detail=True)
     def registration_detail(self, request, pk=None, registration_id=None):
@@ -761,31 +850,6 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             EventRegistration,
             pk=registration_id,
             donation_event=donation_event,
-            is_active=True
-        )
-
-        serializer = EventRegistrationSerializer(registration)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['get'], url_path='my-registrations', detail=False)
-    def my_registrations(self, request):
-        donor = request.user.donor
-        registrations = EventRegistration.objects.filter(
-            donor=donor,
-            is_active=True
-        ).select_related('donation_event').order_by('-created_at')
-        serializer = EventRegistrationSerializer(registrations, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['get'], url_path=r'my-registrations/(?P<registration_id>[^/.]+)', detail=False)
-    def my_registration_detail(self, request, registration_id=None):
-
-        donor = request.user.donor
-
-        registration = get_object_or_404(
-            EventRegistration,
-            pk=registration_id,
-            donor=donor,
             is_active=True
         )
 
@@ -925,21 +989,12 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             is_active=True
         )
 
-        if registration.status == RegistrationStatus.REGISTERED.value:
+        # Kiểm tra trạng thái
+        if registration.status in [RegistrationStatus.REGISTERED.value,
+                                   RegistrationStatus.REJECTED.value,
+                                   RegistrationStatus.APPROVED.value]:
             return Response(
-                {"error": "Cannot complete a completed registration"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if registration.status == RegistrationStatus.REJECTED.value:
-            return Response(
-                {"error": "Cannot complete a completed registration"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if registration.status == RegistrationStatus.APPROVED.value:
-            return Response(
-                {"error": "Cannot complete a completed registration"},
+                {"error": "Cannot complete this registration"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -953,14 +1008,21 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             if not registration.is_proxy:
                 donor = registration.donor
 
-                medical_checkup = MedicalCheckUp.objects.filter(event_registration=registration, is_active=True).first()
-                if medical_checkup:
-                    height_m = donor.height / 100
-                    bmi = round(donor.weight / (height_m * height_m), 2)
+                medical_checkup = MedicalCheckUp.objects.filter(
+                    event_registration=registration,
+                    is_active=True
+                ).first()
 
+                if medical_checkup:
                     donor.weight = medical_checkup.weight
                     donor.height = medical_checkup.height
-                    donor.bmi = bmi
+
+                    if medical_checkup.weight and medical_checkup.height:
+                        height_m = medical_checkup.height / 100
+                        donor.bmi = round(medical_checkup.weight / (height_m * height_m), 2)
+                    else:
+                        donor.bmi = None
+
                     donor.province = registration.province
                     donor.sub_district = registration.sub_district
                     donor.permanent_address = registration.permanent_address
@@ -1053,8 +1115,7 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
                 )
 
             with transaction.atomic():
-                medical_checkup.is_active = False
-                medical_checkup.save(update_fields=['is_active'])
+                medical_checkup.delete()
 
             return Response({"message": "Medical checkup deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -1136,8 +1197,7 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
                 )
 
             with transaction.atomic():
-                blood_donation.is_active = False
-                blood_donation.save(update_fields=['is_active'])
+                blood_donation.delete()
 
             return Response({"message": "Blood donation deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -1163,7 +1223,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             if self.request.method == 'GET':
                 return [OR(OwnedStaffPermission(), OwnedDonorPermission())]
             return [OwnedStaffPermission()]
-        if self.action in ['response', 'my_responses', 'my_response_detail']:
+        if self.action in ['response']:
             return [DonorPermission()]
         return super().get_permissions()
 
@@ -1184,8 +1244,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
 
     def destroy(self, request, pk=None):
         emergency_request = get_object_or_404(EmergencyRequest, pk=pk, is_active=True)
-        emergency_request.is_active = False
-        emergency_request.save(update_fields=["is_active"])
+        emergency_request.delete()
         return Response({"message": "Xoá thành công"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], url_path='staff', detail=True)
@@ -1200,6 +1259,12 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
     def response(self, request, pk=None):
         donor = request.user.donor
         emergency_request = get_object_or_404(EmergencyRequest, pk=pk, is_active=True, is_expire=False)
+
+        if not donor.can_donation:
+            return Response(
+                {"error": "Bạn hiện không đủ điều kiện để hiến máu. Vui lòng kiểm tra lại thông tin sức khỏe."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         status_value = request.data.get('status_response')
 
@@ -1260,32 +1325,6 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
         serializer = EmergencyResponseSerializer(response_obj)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['get'], url_path='my-responses', detail=False)
-    def my_responses(self, request):
-        donor = request.user.donor
-
-        responses = EmergencyResponse.objects.filter(
-            donor=donor,
-            is_active=True
-        ).select_related('emergency_request').order_by('-created_at')
-
-        serializer = EmergencyResponseSerializer(responses, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['get'], url_path=r'my-responses/(?P<response_id>[^/.]+)', detail=False)
-    def my_response_detail(self, request, response_id=None):
-        donor = request.user.donor
-
-        response_obj = get_object_or_404(
-            EmergencyResponse,
-            pk=response_id,
-            donor=donor,
-            is_active=True
-        )
-
-        serializer = EmergencyResponseSerializer(response_obj)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
     @action(methods=['post'], url_path=r'responses/(?P<response_id>[^/.]+)/checkin', detail=True)
     def checkin_response(self, request, pk=None, response_id=None):
         staff = request.user.staff
@@ -1335,28 +1374,40 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
         if response_obj.status_registration == RegistrationStatus.COMPLETED.value:
             return Response({"error": "Donor already complete"}, status=status.HTTP_400_BAD_REQUEST)
 
-        response_obj.status_registration = RegistrationStatus.COMPLETED.value
-        response_obj.save(update_fields=['status_registration'])
+        with transaction.atomic():
+            response_obj.status_registration = RegistrationStatus.COMPLETED.value
+            response_obj.save(update_fields=['status_registration'])
 
-        donor = response_obj.donor
+            donor = response_obj.donor
 
-        medical_checkup = MedicalCheckUp.objects.filter(emergency_response=response_obj, is_active=True).first()
-        if medical_checkup:
-            height_m = donor.height / 100
-            bmi = round(donor.weight / (height_m * height_m), 2)
+            medical_checkup = MedicalCheckUp.objects.filter(
+                emergency_response=response_obj,
+                is_active=True
+            ).first()
 
-            donor.weight = medical_checkup.weight
-            donor.height = medical_checkup.height
-            donor.bmi = bmi
+            if medical_checkup:
+                # Cập nhật thông tin từ medical_checkup vào donor
+                donor.weight = medical_checkup.weight
+                donor.height = medical_checkup.height
 
-            blood_donation = BloodDonation.objects.filter(medical_check_up=medical_checkup, is_active=True).first()
+                # Tính BMI nếu có cả weight và height
+                if medical_checkup.weight and medical_checkup.height:
+                    height_m = medical_checkup.height / 100
+                    donor.bmi = round(medical_checkup.weight / (height_m * height_m), 2)
+                else:
+                    donor.bmi = None
 
-            if blood_donation:
-                donor.donation_count += 1
-                donor.last_donation = timezone.now()
-                donor.points += 200
+                blood_donation = BloodDonation.objects.filter(
+                    medical_check_up=medical_checkup,
+                    is_active=True
+                ).first()
 
-            donor.save()
+                if blood_donation:
+                    donor.donation_count += 1
+                    donor.last_donation = timezone.now()
+                    donor.points += 200
+
+                donor.save()
 
         return Response(EmergencyResponseSerializer(response_obj).data, status=status.HTTP_200_OK)
 
@@ -1427,8 +1478,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
                 )
 
             with transaction.atomic():
-                medical_checkup.is_active = False
-                medical_checkup.save(update_fields=['is_active'])
+                medical_checkup.delete()
 
             return Response({"message": "Medical checkup deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -1510,8 +1560,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
                 )
 
             with transaction.atomic():
-                blood_donation.is_active = False
-                blood_donation.save(update_fields=['is_active'])
+                blood_donation.delete()
 
             return Response({"message": "Blood donation deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -1655,3 +1704,110 @@ class RewardHistoryViewSet(viewsets.ViewSet, generics.ListAPIView):
 
         serializer = self.get_serializer(reward_history)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EventRegistrationViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+    permission_classes = [DonorPermission]
+    serializer_class = EventRegistrationSerializer
+    pagination_class = Pagination
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return EventRegistration.objects.none()
+
+        user = self.request.user
+
+        if user.is_anonymous:
+            return EventRegistration.objects.none()
+
+        queryset = EventRegistration.objects.filter(
+            donor=user.donor,
+            is_active=True
+        ).select_related(
+            'donation_event',
+            'donor__account'
+        )
+
+        search = self.request.query_params.get('search')
+        if search:
+            keywords = search.strip().split()
+            query = Q()
+            for word in keywords:
+                query &= (
+                    Q(donation_event__title__icontains=word)
+                )
+            queryset = queryset.filter(query)
+
+        status = self.request.query_params.get('status')
+        if status is not None:
+            try:
+                status_int = int(status)
+                if status_int in [s.value for s in RegistrationStatus]:
+                    queryset = queryset.filter(status=status_int)
+            except (ValueError, TypeError):
+                pass
+
+        from_date = self.request.query_params.get('from_date')
+        to_date = self.request.query_params.get('to_date')
+
+        if from_date:
+            queryset = queryset.filter(created_at__gte=from_date)
+        if to_date:
+            queryset = queryset.filter(created_at__lte=to_date)
+
+        queryset = queryset.order_by('-created_at')
+
+        return queryset
+
+
+class EmergencyResponseViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+    permission_classes = [DonorPermission]
+    serializer_class = EmergencyResponseSerializer
+    pagination_class = Pagination
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return EmergencyResponse.objects.none()
+
+        user = self.request.user
+
+        if user.is_anonymous:
+            return EmergencyResponse.objects.none()
+
+        queryset = EmergencyResponse.objects.filter(
+            donor=user.donor,
+            is_active=True
+        ).select_related(
+            'emergency_request',
+            'donor__account'
+        ).order_by('-created_at')
+
+        search = self.request.query_params.get('search')
+        if search:
+            keywords = search.strip().split()
+            query = Q()
+            for word in keywords:
+                query &= (
+                    Q(emergency_request__patient_name__icontains=word)
+                )
+            queryset = queryset.filter(query)
+
+        status_registration = self.request.query_params.get('status_registration')
+        if status_registration is not None:
+            try:
+                status_int = int(status_registration)
+                if status_int in [s.value for s in RegistrationStatus]:
+                    queryset = queryset.filter(status_registration=status_int)
+            except (ValueError, TypeError):
+                pass
+
+        # Lọc theo ngày
+        from_date = self.request.query_params.get('from_date')
+        to_date = self.request.query_params.get('to_date')
+
+        if from_date:
+            queryset = queryset.filter(created_at__gte=from_date)
+        if to_date:
+            queryset = queryset.filter(created_at__lte=to_date)
+
+        return queryset

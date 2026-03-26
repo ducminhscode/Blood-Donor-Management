@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, Calendar, Droplet, Edit2, Save, X, Settings, Shield, VenusAndMars, Eye, EyeOff, Key, Stethoscope, MapPin, Briefcase, Award, Heart, Activity, Weight, Ruler, CreditCard, Building2, Hospital, GraduationCap, BadgeAlert, Home, Map, MapPinned, FileText, Building, BadgeCheck } from 'lucide-react';
+import { User, Mail, Phone, Calendar, Droplet, Edit2, Save, X, Settings, Shield, VenusAndMars, Eye, EyeOff, Key, Stethoscope, MapPin, Briefcase, Award, Heart, Activity, Weight, Ruler, CreditCard, Building2, Hospital, GraduationCap, BadgeAlert, Home, Map, MapPinned, FileText, Building, BadgeCheck, IdCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { UserContexts, UserDispatchContext } from '../../configs/UserContexts';
@@ -412,14 +412,8 @@ const Profile = () => {
 
     const formatBloodType = (bloodType, rhFactor) => {
         if (!bloodType) return "Chưa cập nhật";
-        return `${bloodType}${rhFactor === 'positive' ? '+' : rhFactor === 'negative' ? '-' : ''}`;
+        return `${bloodType === 0 ? 'O' : bloodType === 1 ? 'A' : bloodType === 2 ? 'B' : 'AB'}${rhFactor === 0 ? '-' : '+'}`;
     };
-
-    const bloodTypes = ['A', 'B', 'AB', 'O'];
-    const rhFactors = [
-        { value: 'positive', label: 'Rh+' },
-        { value: 'negative', label: 'Rh-' }
-    ];
 
     const tabs = [
         { id: 'overview', label: 'Tổng quan', icon: User },
@@ -792,7 +786,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <CreditCard className="w-4 h-4 text-red-500" />
+                                                                <IdCard className="w-4 h-4 text-red-500" />
                                                                 CMND/CCCD
                                                             </div>
                                                         </label>
@@ -931,7 +925,7 @@ const Profile = () => {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <CreditCard className="w-5 h-5 text-red-500 mt-0.5" />
+                                                            <IdCard className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">CMND/CCCD</p>
                                                                 <p className="font-medium">{donorInfo.identification || 'Chưa cập nhật'}</p>
@@ -1037,7 +1031,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Building2 className="w-4 h-4 text-green-500" />
+                                                                <Building2 className="w-4 h-4 text-red-500" />
                                                                 Khoa/Phòng
                                                             </div>
                                                         </label>
@@ -1053,7 +1047,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <GraduationCap className="w-4 h-4 text-purple-500" />
+                                                                <GraduationCap className="w-4 h-4 text-red-500" />
                                                                 Học vị/Chứng chỉ
                                                             </div>
                                                         </label>
@@ -1069,7 +1063,7 @@ const Profile = () => {
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                                             <div className="flex items-center gap-1">
-                                                                <Briefcase className="w-4 h-4 text-indigo-500" />
+                                                                <Briefcase className="w-4 h-4 text-red-500" />
                                                                 Số năm kinh nghiệm
                                                             </div>
                                                         </label>
@@ -1105,7 +1099,7 @@ const Profile = () => {
                                                 <>
                                                     <div className="grid md:grid-cols-2 gap-4">
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Hospital className="w-5 h-5 text-blue-500 mt-0.5" />
+                                                            <Hospital className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Bệnh viện</p>
                                                                 <p className="font-medium">{staffInfo.hospital?.name || 'Chưa cập nhật'}</p>
@@ -1117,28 +1111,28 @@ const Profile = () => {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Building2 className="w-5 h-5 text-green-500 mt-0.5" />
+                                                            <Building2 className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Khoa/Phòng</p>
                                                                 <p className="font-medium">{staffInfo.department || 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <GraduationCap className="w-5 h-5 text-purple-500 mt-0.5" />
+                                                            <GraduationCap className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Học vị/Chứng chỉ</p>
                                                                 <p className="font-medium">{staffInfo.degree || 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <BadgeAlert className="w-5 h-5 text-orange-500 mt-0.5" />
+                                                            <BadgeAlert className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Số giấy phép</p>
                                                                 <p className="font-medium">{staffInfo.license_number || 'Chưa cập nhật'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <Briefcase className="w-5 h-5 text-indigo-500 mt-0.5" />
+                                                            <Briefcase className="w-5 h-5 text-red-500 mt-0.5" />
                                                             <div>
                                                                 <p className="text-sm text-gray-500">Số năm kinh nghiệm</p>
                                                                 <p className="font-medium">{staffInfo.experience_years ? `${staffInfo.experience_years} năm` : 'Chưa cập nhật'}</p>

@@ -247,7 +247,7 @@ const FriendList = () => {
 
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
         if (!bloodType || !rhFactor) return 'Chưa cập nhật';
-        return `${bloodType === 0 ? 'O' : bloodType === 1 ? 'A' : bloodType === 2 ? 'B' : 'AB'}${rhFactor === 0 ? '+' : '-'}`;
+        return `${bloodType === 0 ? 'O' : bloodType === 1 ? 'A' : bloodType === 2 ? 'B' : 'AB'}${rhFactor === 0 ? '-' : '+'}`;
     };
 
     return (
@@ -276,7 +276,7 @@ const FriendList = () => {
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-16">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                         <div>
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
@@ -534,7 +534,7 @@ const FriendList = () => {
                                             {/* Online Status */}
                                             <div className="absolute top-4 left-4 z-10">
                                                 <span className="bg-green-500 text-white px-2 py-1 rounded-lg text-xs">
-                                                    {formatRelativeTime(friend.last_login)}
+                                                    Online {formatRelativeTime(friend.last_login)}
                                                 </span>
                                             </div>
 
@@ -642,8 +642,8 @@ const FriendList = () => {
 
                                                     {/* Last login badge */}
                                                     {friend.last_login && (
-                                                        <span className="absolute -bottom-1 -right-1 bg-green-500 text-white px-1.5 py-[3px] rounded text-[5px] shadow">
-                                                            {formatRelativeTime(friend.last_login)}
+                                                        <span className="absolute -bottom-1 -right-1 bg-green-500 text-white px-1.5 py-[3px] rounded text-[4px] shadow">
+                                                            Online {formatRelativeTime(friend.last_login)}
                                                         </span>
                                                     )}
                                                 </div>
