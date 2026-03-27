@@ -40,8 +40,8 @@ export const endpoints = {
     'reward_history_detail': '/reward-history/${id}/',
     'event_registration': '/event-registration/',
     'event_registration_detail': '/event-registration/${id}',
-    'medical_checkup': '/donation-event/${id}/registrations/${registration_id}/medical-checkup/',
-    'blood_donation': '/donation-event/${id}/registrations/${registration_id}/medical-checkup/${medical_check_up_id}/blood-donation/',
+    'donation_medical_checkup': '/donation-event/${id}/registrations/${registration_id}/medical-checkup/',
+    'donation_blood_donation': '/donation-event/${id}/registrations/${registration_id}/medical-checkup/${medical_check_up_id}/blood-donation/',
     'staff_donation_event': '/staff/donation-event/',
     'staff_donation_event_detail': '/donation-event/${id}/staff/',
     'staff_registrations_event': '/donation-event/${id}/registrations/',
@@ -53,6 +53,10 @@ export const endpoints = {
     'staff_responses_request_detail': '/emergency-request/${id}/responses/${response_id}/',
     'emergency_response': '/emergency-request/${id}/response/',
     'emergency_request_detail': '/emergency-request/${id}/',
+    'emergency_responses': '/emergency-response/',
+    'emergency_responses_detail': '/emergency-response/${id}/',
+    'emergency_medical_checkup': '/emergency-request/${id}/responses/${response_id}/medical-checkup/',
+    'emergency_blood_donation': '/emergency-request/${id}/responses/${response_id}/medical-checkup/${medical_check_up_id}/blood-donation/',
 }
 
 export const authApis = () => {

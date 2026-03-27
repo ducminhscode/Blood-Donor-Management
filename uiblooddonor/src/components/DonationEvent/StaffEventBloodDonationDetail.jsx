@@ -459,7 +459,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
     );
 };
 
-const StaffBloodDonationDetail = () => {
+const StaffEventBloodDonationDetail = () => {
     const { id, registration_id, medical_check_up_id } = useParams();
     const navigate = useNavigate();
 
@@ -487,7 +487,7 @@ const StaffBloodDonationDetail = () => {
         setLoading(true);
         setError('');
         try {
-            const url = endpoints.blood_donation
+            const url = endpoints.donation_blood_donation
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id)
                 .replace('${medical_check_up_id}', medical_check_up_id);
@@ -520,7 +520,7 @@ const StaffBloodDonationDetail = () => {
     const handleUpdateDonation = async (formData) => {
         setUpdating(true);
         try {
-            const url = endpoints.blood_donation
+            const url = endpoints.donation_blood_donation
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id)
                 .replace('${medical_check_up_id}', medical_check_up_id);
@@ -540,7 +540,7 @@ const StaffBloodDonationDetail = () => {
     const handleDeleteDonation = async () => {
         setDeleting(true);
         try {
-            const url = endpoints.blood_donation
+            const url = endpoints.donation_blood_donation
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id)
                 .replace('${medical_check_up_id}', medical_check_up_id);
@@ -967,4 +967,4 @@ const StaffBloodDonationDetail = () => {
     );
 };
 
-export default StaffBloodDonationDetail;
+export default StaffEventBloodDonationDetail;

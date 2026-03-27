@@ -1212,6 +1212,18 @@ class HospitalViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListA
 class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
     queryset = EmergencyRequest.objects.filter(is_active=True, is_expire=False)
     serializer_class = EmergencyRequestSerializer
+    pagination_class = Pagination
+
+    def get_queryset(self):
+        queryset = EmergencyRequest.objects.filter(is_active=True, is_expire=False)
+
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(patient_name__icontains=search)
+
+        queryset = queryset.order_by('-created_at')
+
+        return queryset
 
     def get_permissions(self):
         if self.action in ['create']:
@@ -1304,7 +1316,38 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
         responses = EmergencyResponse.objects.filter(
             emergency_request=emergency_request,
             is_active=True
-        )
+        ).select_related(
+            'donor',
+            'donor__account'
+        ).order_by('-created_at')
+
+        search = request.query_params.get('search')
+        if search:
+            keywords = search.strip().split()
+            query = Q()
+            for word in keywords:
+                query &= (
+                        Q(donor__account__first_name__icontains=word) |
+                        Q(donor__account__last_name__icontains=word) |
+                        Q(donor__account__email__icontains=word) |
+                        Q(donor__account__phone__icontains=word)
+                )
+            responses = responses.filter(query)
+
+        from_date = request.query_params.get('from_date')
+        to_date = request.query_params.get('to_date')
+
+        if from_date:
+            responses = responses.filter(created_at__gte=from_date)
+        if to_date:
+            responses = responses.filter(created_at__lte=to_date)
+
+        paginator = Pagination()
+        page = paginator.paginate_queryset(responses, request)
+
+        if page is not None:
+            serializer = EmergencyResponseSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
 
         serializer = EmergencyResponseSerializer(responses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1436,7 +1479,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             if response_obj.status_registration != RegistrationStatus.CHECKED_IN.value:
                 return Response({"error": "Donor has not checked in"}, status=status.HTTP_400_BAD_REQUEST)
 
-            if MedicalCheckUp.objects.filter(emergency_request=emergency_request).exists():
+            if MedicalCheckUp.objects.filter(emergency_response=response_obj).exists():
                 return Response(
                     {"error": "Medical checkup already exists for this registration"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -1471,7 +1514,7 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
         elif request.method == 'DELETE':
             medical_checkup = get_object_or_404(MedicalCheckUp, emergency_response=response_obj, is_active=True)
 
-            if response_obj.status == RegistrationStatus.COMPLETED.value:
+            if response_obj.status_registration == RegistrationStatus.COMPLETED.value:
                 return Response(
                     {"error": "Cannot delete medical checkup for completed registration"},
                     status=status.HTTP_400_BAD_REQUEST

@@ -10,7 +10,8 @@ import {
     ChevronLeft, RefreshCw, Info, FileText,
     NotepadText, InfoIcon, VenusAndMars, Edit, Trash2,
     Save, Upload, Image as ImageIcon, Ambulance, Hospital,
-    Syringe, AlertOctagon, HeartHandshake, Timer
+    Syringe, AlertOctagon, HeartHandshake, Timer,
+    CheckCircle2, AlertTriangle, ExternalLink
 } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
@@ -157,7 +158,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
         if (!formData.patient_name.trim()) {
             setError('Vui lòng nhập tên bệnh nhân');
             return;
@@ -253,7 +253,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </div>
                         )}
 
-                        {/* Thông tin bệnh nhân */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -284,7 +283,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </div>
                         </div>
 
-                        {/* Nhóm máu và Rh */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -319,7 +317,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </div>
                         </div>
 
-                        {/* Loại hiến máu và thể tích */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -354,7 +351,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </div>
                         </div>
 
-                        {/* Bệnh viện */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Bệnh viện tiếp nhận
@@ -378,7 +374,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </select>
                         </div>
 
-                        {/* Mức độ khẩn cấp và trạng thái hết hạn */}
                         <div className="grid md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -388,7 +383,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                                     <label className="flex items-center gap-2">
                                         <input
                                             type="radio"
-                                            value="true"
                                             checked={formData.critical === true}
                                             onChange={() => setFormData({ ...formData, critical: true })}
                                             className="rounded-full border-gray-300 text-red-600 focus:ring-red-500"
@@ -398,7 +392,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                                     <label className="flex items-center gap-2">
                                         <input
                                             type="radio"
-                                            value="false"
                                             checked={formData.critical === false}
                                             onChange={() => setFormData({ ...formData, critical: false })}
                                             className="rounded-full border-gray-300 text-red-600 focus:ring-red-500"
@@ -409,7 +402,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </div>
                         </div>
 
-                        {/* Ghi chú */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Ghi chú
@@ -440,7 +432,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </p>
                         </div>
 
-                        {/* Buttons */}
                         <div className="flex gap-3 pt-4 sticky bottom-0 bg-white pb-2">
                             <button
                                 type="submit"
@@ -494,7 +485,7 @@ const StaffEmergencyRequestDetail = () => {
     const [hasNextPage, setHasNextPage] = useState(true);
     const [totalResponses, setTotalResponses] = useState(0);
 
-    // Edit/Delete states
+    // Dialog states
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -571,7 +562,7 @@ const StaffEmergencyRequestDetail = () => {
             }
 
             const response = await authApis().get(url);
-            const results = response.data.results || [];
+            const results = response.data.results || response.data || [];
 
             if (isLoadMore) {
                 setResponses(prev => [...prev, ...results]);
@@ -579,7 +570,7 @@ const StaffEmergencyRequestDetail = () => {
                 setResponses(results);
             }
 
-            setTotalResponses(response.data.count);
+            setTotalResponses(response.data.count || results.length);
             setHasNextPage(response.data.next !== null);
 
         } catch (err) {
@@ -650,6 +641,10 @@ const StaffEmergencyRequestDetail = () => {
         }
     };
 
+    const handleViewResponseDetail = (response) => {
+        navigate(`/staff-emergency-request/${id}/responses/${response.id}`);
+    };
+
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
@@ -673,11 +668,6 @@ const StaffEmergencyRequestDetail = () => {
         loadEmergencyDetail();
     };
 
-    const handleViewDetail = (responseId) => {
-        // Navigate to response detail if needed
-        console.log("View response detail:", responseId);
-    };
-
     const formatResponseDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -692,6 +682,24 @@ const StaffEmergencyRequestDetail = () => {
         if (diffDays < 7) return `${diffDays} ngày trước`;
 
         return formatDate(dateString);
+    };
+
+    // Helper để lấy thông tin donor từ response
+    const getDonorInfo = (response) => {
+        const donor = response.donor;
+        const account = donor?.account || {};
+        return {
+            id: donor?.id,
+            fullName: `${account.last_name || ''} ${account.first_name || ''}`.trim() || 'Chưa có thông tin',
+            phone: account.phone || '',
+            email: account.email || '',
+            bloodType: donor?.blood_type,
+            rhFactor: donor?.rh_factor,
+            donationCount: donor?.donation_count || 0,
+            statusResponse: response.status_response,
+            statusRegistration: response.status_registration,
+            createdAt: response.created_at
+        };
     };
 
     return (
@@ -1009,7 +1017,6 @@ const StaffEmergencyRequestDetail = () => {
                             </div>
 
                             <div className="space-y-4">
-                                {/* Date Filter - Mobile */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Ngày phản hồi</label>
                                     <div className="space-y-2">
@@ -1030,7 +1037,6 @@ const StaffEmergencyRequestDetail = () => {
                                     </div>
                                 </div>
 
-                                {/* View Mode - Mobile */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Chế độ xem</label>
                                     <div className="grid grid-cols-2 gap-2">
@@ -1061,7 +1067,6 @@ const StaffEmergencyRequestDetail = () => {
                                     </div>
                                 </div>
 
-                                {/* Apply Button - Mobile */}
                                 <button
                                     onClick={() => setShowFilters(false)}
                                     className="w-full px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
@@ -1231,131 +1236,166 @@ const StaffEmergencyRequestDetail = () => {
                             {/* Grid View */}
                             {viewMode === 'grid' ? (
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {responses.map((response) => (
-                                        <div
-                                            key={response.id}
-                                            className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-                                            onClick={() => handleViewDetail(response.id)}
-                                        >
-                                            {/* User Avatar */}
-                                            <div className="relative h-32 bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center">
-                                                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                                    <HeartHandshake className="w-10 h-10 text-green-600" />
+                                    {responses.map((response) => {
+                                        const donorInfo = getDonorInfo(response);
+
+                                        return (
+                                            <div
+                                                key={response.id}
+                                                className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                                                onClick={() => handleViewResponseDetail(response)}
+                                            >
+                                                {/* User Avatar */}
+                                                <div className="relative h-32 bg-gradient-to-r from-red-500 to-red-500 flex items-center justify-center">
+                                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                                        <User className="w-10 h-10 text-red-600" />
+                                                    </div>
+
+                                                    {/* Status Badge */}
+                                                    <div className="absolute top-4 left-4">
+                                                        <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold ${donorInfo.statusResponse === 1
+                                                            ? 'bg-red-500 text-white'
+                                                            : donorInfo.statusResponse === 2
+                                                                ? 'bg-red-500 text-white'
+                                                                : 'bg-gray-500 text-white'
+                                                            }`}>
+                                                            {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
+                                                                donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Response Date */}
+                                                    <div className="absolute top-4 right-4">
+                                                        <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold">
+                                                            {formatResponseDate(donorInfo.createdAt)}
+                                                        </span>
+                                                    </div>
                                                 </div>
 
-                                                {/* Response Date */}
-                                                <div className="absolute top-4 right-4">
-                                                    <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold">
-                                                        {formatResponseDate(response.created_at)}
-                                                    </span>
+                                                {/* Content */}
+                                                <div className="p-6">
+                                                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+                                                        {donorInfo.fullName}
+                                                    </h3>
+
+                                                    {/* Personal Info */}
+                                                    <div className="space-y-2 mb-4">
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Phone className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
+                                                            <span className="truncate">{donorInfo.phone || 'Chưa cập nhật'}</span>
+                                                        </div>
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Mail className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
+                                                            <span className="truncate">{donorInfo.email || 'Chưa cập nhật'}</span>
+                                                        </div>
+                                                        {donorInfo.bloodType !== undefined && (
+                                                            <div className="flex items-center text-sm text-gray-600">
+                                                                <Droplet className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
+                                                                <span>Nhóm máu: {getBloodTypeDisplay(donorInfo.bloodType, donorInfo.rhFactor)}</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Award className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
+                                                            <span>Đã hiến: {donorInfo.donationCount} lần</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Status Registration */}
+                                                    {donorInfo.statusRegistration !== undefined && donorInfo.statusRegistration !== -1 && (
+                                                        <div className="mb-4 p-2 bg-gray-50 rounded-lg">
+                                                            <p className="text-xs text-gray-600 flex items-center gap-1">
+                                                                <CheckCircle2 className="w-3 h-3 text-red-500" />
+                                                                Trạng thái: {
+                                                                    donorInfo.statusRegistration === 4 ? 'Đã hoàn thành' :
+                                                                        donorInfo.statusRegistration === 3 ? 'Đã Check-in' :
+                                                                            donorInfo.statusRegistration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Action Button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleViewResponseDetail(response);
+                                                        }}
+                                                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group/btn bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25"
+                                                    >
+                                                        <span className="font-medium">Xem chi tiết</span>
+                                                        <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" />
+                                                    </button>
                                                 </div>
                                             </div>
-
-                                            {/* Content */}
-                                            <div className="p-6">
-                                                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
-                                                    {response.last_name} {response.first_name}
-                                                </h3>
-
-                                                {/* Personal Info */}
-                                                <div className="space-y-2 mb-4">
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <Phone className="w-4 h-4 text-green-600 mr-2" />
-                                                        <span>{response.phone}</span>
-                                                    </div>
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <Mail className="w-4 h-4 text-green-600 mr-2" />
-                                                        <span className="truncate">{response.email}</span>
-                                                    </div>
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <Droplet className="w-4 h-4 text-green-600 mr-2" />
-                                                        <span>Nhóm máu: {getBloodTypeDisplay(response.blood_type, response.rh_factor)}</span>
-                                                    </div>
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <Syringe className="w-4 h-4 text-green-600 mr-2" />
-                                                        <span>Đã hiến: {response.amount_donated || 0} ml</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Donation Note */}
-                                                {response.note && (
-                                                    <div className="mb-4 p-2 bg-gray-50 rounded-lg">
-                                                        <p className="text-xs text-gray-600 line-clamp-2">{response.note}</p>
-                                                    </div>
-                                                )}
-
-                                                {/* Action Button */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleViewDetail(response.id);
-                                                    }}
-                                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group/btn bg-gradient-to-r from-green-600 to-teal-500 text-white hover:from-green-700 hover:to-teal-600 shadow-lg shadow-green-500/25"
-                                                >
-                                                    <span className="font-medium">Xem chi tiết</span>
-                                                    <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 // List View
                                 <div className="space-y-4">
-                                    {responses.map((response) => (
-                                        <div
-                                            key={response.id}
-                                            className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-                                            onClick={() => handleViewDetail(response.id)}
-                                        >
-                                            <div className="p-6">
-                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-3 mb-2">
-                                                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
-                                                                {response.last_name} {response.first_name}
-                                                            </h3>
+                                    {responses.map((response) => {
+                                        const donorInfo = getDonorInfo(response);
+
+                                        return (
+                                            <div
+                                                key={response.id}
+                                                className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                                                onClick={() => handleViewResponseDetail(response)}
+                                            >
+                                                <div className="p-6">
+                                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-3 mb-2">
+                                                                <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                                                    {donorInfo.fullName}
+                                                                </h3>
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${donorInfo.statusResponse === 1
+                                                                    ? 'bg-red-100 text-red-700'
+                                                                    : donorInfo.statusResponse === 2
+                                                                        ? 'bg-red-100 text-red-700'
+                                                                        : 'bg-gray-100 text-gray-700'
+                                                                    }`}>
+                                                                    {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
+                                                                        donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                                                <div className="flex items-center text-gray-600">
+                                                                    <Phone className="w-4 h-4 text-red-600 mr-2" />
+                                                                    <span>{donorInfo.phone || 'Chưa cập nhật'}</span>
+                                                                </div>
+                                                                <div className="flex items-center text-gray-600">
+                                                                    <Mail className="w-4 h-4 text-red-600 mr-2" />
+                                                                    <span className="truncate">{donorInfo.email || 'Chưa cập nhật'}</span>
+                                                                </div>
+                                                                {donorInfo.bloodType !== undefined && (
+                                                                    <div className="flex items-center text-gray-600">
+                                                                        <Droplet className="w-4 h-4 text-red-600 mr-2" />
+                                                                        <span>{getBloodTypeDisplay(donorInfo.bloodType, donorInfo.rhFactor)}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                                            <div className="flex items-center text-gray-600">
-                                                                <Phone className="w-4 h-4 text-green-600 mr-2" />
-                                                                <span>{response.phone}</span>
-                                                            </div>
-                                                            <div className="flex items-center text-gray-600">
-                                                                <Mail className="w-4 h-4 text-green-600 mr-2" />
-                                                                <span className="truncate">{response.email}</span>
-                                                            </div>
-                                                            <div className="flex items-center text-gray-600">
-                                                                <Droplet className="w-4 h-4 text-green-600 mr-2" />
-                                                                <span>{getBloodTypeDisplay(response.blood_type, response.rh_factor)}</span>
-                                                            </div>
-                                                            <div className="flex items-center text-gray-600">
-                                                                <Syringe className="w-4 h-4 text-green-600 mr-2" />
-                                                                <span>{response.amount_donated || 0} ml</span>
-                                                            </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap">
+                                                                {formatResponseDate(donorInfo.createdAt)}
+                                                            </span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleViewResponseDetail(response);
+                                                                }}
+                                                                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 text-sm flex items-center gap-2 whitespace-nowrap"
+                                                            >
+                                                                <Eye className="w-4 h-4" />
+                                                                <span>Chi tiết</span>
+                                                            </button>
                                                         </div>
-                                                        {response.note && (
-                                                            <p className="mt-2 text-xs text-gray-500">{response.note}</p>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-xs font-semibold">
-                                                            {formatResponseDate(response.created_at)}
-                                                        </span>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleViewDetail(response.id);
-                                                            }}
-                                                            className="px-4 py-2 bg-gradient-to-r from-green-600 to-teal-500 text-white rounded-xl hover:from-green-700 hover:to-teal-600 transition-all shadow-lg shadow-green-500/25 text-sm flex items-center gap-2"
-                                                        >
-                                                            <span>Chi tiết</span>
-                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
 

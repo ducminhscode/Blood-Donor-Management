@@ -114,7 +114,7 @@ class DonationEventSerializer(ModelSerializer):
 
 
 class EmergencyRequestSerializer(ModelSerializer):
-    # staff = StaffSerializer(read_only=True)
+    staff = StaffSerializer(read_only=True)
     hospital_id = serializers.PrimaryKeyRelatedField(
         queryset=Hospital.objects.filter(is_active=True),
         source='hospital',
@@ -165,6 +165,7 @@ class RewardHistorySerializer(ModelSerializer):
 
 class EmergencyResponseSerializer(ModelSerializer):
     emergency_request = EmergencyRequestSerializer(read_only=True)
+    donor = DonorSerializer(read_only=True)
     class Meta:
         model = EmergencyResponse
         fields = ['id', 'status_response', 'emergency_request', 'donor', 'created_at', 'status_registration']

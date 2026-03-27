@@ -905,7 +905,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
     );
 };
 
-const StaffMedicalCheckUpDetail = () => {
+const StaffEventMedicalCheckUpDetail = () => {
     const { id, registration_id } = useParams();
     const navigate = useNavigate();
 
@@ -936,7 +936,7 @@ const StaffMedicalCheckUpDetail = () => {
         setLoading(true);
         setError('');
         try {
-            const url = endpoints.medical_checkup
+            const url = endpoints.donation_medical_checkup
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id);
             const response = await authApis().get(url);
@@ -970,7 +970,7 @@ const StaffMedicalCheckUpDetail = () => {
 
     const fetchBloodDonation = async (medicalCheckUpId) => {
         try {
-            const url = endpoints.blood_donation
+            const url = endpoints.donation_blood_donation
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id)
                 .replace('${medical_check_up_id}', medicalCheckUpId);
@@ -985,7 +985,7 @@ const StaffMedicalCheckUpDetail = () => {
     const handleUpdateMedicalCheckup = async (formData) => {
         setUpdating(true);
         try {
-            const url = endpoints.medical_checkup
+            const url = endpoints.donation_medical_checkup
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id);
             
@@ -1004,7 +1004,7 @@ const StaffMedicalCheckUpDetail = () => {
     const handleDeleteMedicalCheckup = async () => {
         setDeleting(true);
         try {
-            const url = endpoints.medical_checkup
+            const url = endpoints.donation_medical_checkup
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id);
             
@@ -1027,7 +1027,7 @@ const StaffMedicalCheckUpDetail = () => {
     const handleCreateBloodDonation = async (formData) => {
         setCreatingBloodDonation(true);
         try {
-            const url = endpoints.blood_donation
+            const url = endpoints.donation_blood_donation
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id)
                 .replace('${medical_check_up_id}', checkup.id);
@@ -1510,4 +1510,4 @@ const StaffMedicalCheckUpDetail = () => {
     );
 };
 
-export default StaffMedicalCheckUpDetail;
+export default StaffEventMedicalCheckUpDetail;

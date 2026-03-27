@@ -16,7 +16,8 @@ import {
     ThumbsUp, Bookmark, Bell, CalendarDays, MessageCircle,
     Share, ExternalLink, ClipboardClock, CalendarCog,
     RefreshCw, Loader2, PlusCircle,
-    NotebookPen
+    NotebookPen, Ambulance, Hospital, Syringe,
+    AlertTriangle, HeartHandshake, FlaskConical
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
@@ -135,36 +136,51 @@ const InfoCard = ({ icon: Icon, label, value, className = "" }) => {
 };
 
 // Status Badge Component
-const StatusBadge = ({ status }) => {
-    const statusConfig = {
-        0: {
-            label: 'Đã đăng ký',
-            color: 'bg-blue-100 text-blue-700 border-blue-200',
-            icon: CalendarCheck
-        },
-        1: {
-            label: 'Đã xác nhận',
-            color: 'bg-green-100 text-green-700 border-green-200',
-            icon: CheckCircle2
-        },
-        2: {
-            label: 'Đã từ chối',
-            color: 'bg-red-100 text-red-700 border-red-200',
-            icon: XCircle
-        },
-        3: {
-            label: 'Đã Check-in',
-            color: 'bg-purple-100 text-purple-700 border-purple-200',
-            icon: UserCheck
-        },
-        4: {
-            label: 'Đã hoàn thành',
-            color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            icon: ClipboardCheck
+const ResponseStatusBadge = ({ statusResponse, statusRegistration }) => {
+    const getStatusConfig = () => {
+        if (statusResponse === 1) {
+            if (statusRegistration === 4) {
+                return {
+                    label: 'Đã hoàn thành',
+                    color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                    icon: ClipboardCheck
+                };
+            }
+            if (statusRegistration === 3) {
+                return {
+                    label: 'Đã Check-in',
+                    color: 'bg-purple-100 text-purple-700 border-purple-200',
+                    icon: UserCheck
+                };
+            }
+            if (statusRegistration === 1) {
+                return {
+                    label: 'Đã xác nhận',
+                    color: 'bg-green-100 text-green-700 border-green-200',
+                    icon: CheckCircle2
+                };
+            }
+            return {
+                label: 'Đã chấp nhận',
+                color: 'bg-green-100 text-green-700 border-green-200',
+                icon: CheckCircle2
+            };
         }
+        if (statusResponse === 2) {
+            return {
+                label: 'Đã từ chối',
+                color: 'bg-red-100 text-red-700 border-red-200',
+                icon: XCircle
+            };
+        }
+        return {
+            label: 'Đang xử lý',
+            color: 'bg-gray-100 text-gray-700 border-gray-200',
+            icon: Timer
+        };
     };
 
-    const config = statusConfig[status] || statusConfig[0];
+    const config = getStatusConfig();
     const Icon = config.icon;
 
     return (
@@ -172,61 +188,6 @@ const StatusBadge = ({ status }) => {
             <Icon className="w-4 h-4" />
             {config.label}
         </span>
-    );
-};
-
-// BloodDonation Card Component
-const BloodDonationCard = ({ donation, onView }) => {
-    if (!donation) return null;
-
-    const getResultColor = (result) => {
-        if (result === 'PASS') return 'text-green-600 bg-green-50';
-        if (result === 'FAIL') return 'text-red-600 bg-red-50';
-        return 'text-gray-600 bg-gray-50';
-    };
-
-    return (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={onView}>
-            <div className="bg-gradient-to-r from-red-50 to-orange-50 px-5 py-3 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <HeartPulse className="w-5 h-5 text-red-600" />
-                    Kết quả hiến máu
-                </h3>
-            </div>
-            <div className="p-5">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <p className="text-sm text-gray-500 mb-1">Kết quả</p>
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getResultColor(donation.result)}`}>
-                            {donation.result === 'PASS' ? 'Đạt' : donation.result === 'FAIL' ? 'Không đạt' : 'Đang xử lý'}
-                        </span>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-xs text-gray-500 mb-1">Ngày hiến</p>
-                        <p className="text-sm font-medium text-gray-900">{formatDate(donation.created_at)}</p>
-                    </div>
-                </div>
-
-                {donation.blood_volume && (
-                    <div className="flex items-center gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
-                        <Droplet className="w-4 h-4 text-red-500" />
-                        <span className="text-sm text-gray-700">Lượng máu hiến: </span>
-                        <span className="font-semibold text-gray-900">{donation.blood_volume} ml</span>
-                    </div>
-                )}
-
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onView();
-                    }}
-                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all bg-red-50 text-red-700 hover:bg-red-100"
-                >
-                    <span className="text-sm font-medium">Xem chi tiết</span>
-                    <ChevronRight className="w-4 h-4" />
-                </button>
-            </div>
-        </div>
     );
 };
 
@@ -426,7 +387,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     onChange={handleChange}
                                     required
                                     placeholder="Nhập tên bác sĩ khám"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                 />
                             </div>
                         </div>
@@ -449,7 +410,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         step="0.1"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -463,7 +424,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         step="0.1"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -477,7 +438,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         placeholder="120/80"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -490,7 +451,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         value={formData.heart_rate}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -504,7 +465,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         step="0.1"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
                                 </div>
                                 <div>
@@ -517,7 +478,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         value={formData.hemoglobin_level}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -539,7 +500,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     value={formData.last_donation}
                                     max={today}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
                                     * Nếu chưa từng hiến máu, để trống
@@ -560,7 +521,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="has_infectious"
                                         checked={formData.has_infectious}
                                         onChange={handleChange}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                                     />
                                     <span className="text-sm text-gray-700">Bệnh truyền nhiễm</span>
                                 </label>
@@ -570,7 +531,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="has_chronic"
                                         checked={formData.has_chronic}
                                         onChange={handleChange}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                                     />
                                     <span className="text-sm text-gray-700">Bệnh mãn tính</span>
                                 </label>
@@ -580,7 +541,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="recent_surgery"
                                         checked={formData.recent_surgery}
                                         onChange={handleChange}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                                     />
                                     <span className="text-sm text-gray-700">Phẫu thuật gần đây</span>
                                 </label>
@@ -590,7 +551,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="recent_tattoo"
                                         checked={formData.recent_tattoo}
                                         onChange={handleChange}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                                     />
                                     <span className="text-sm text-gray-700">Xăm hình gần đây</span>
                                 </label>
@@ -600,7 +561,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="is_drug"
                                         checked={formData.is_drug}
                                         onChange={handleChange}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                                     />
                                     <span className="text-sm text-gray-700">Sử dụng chất kích thích</span>
                                 </label>
@@ -610,7 +571,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="is_pregnant"
                                         checked={formData.is_pregnant}
                                         onChange={handleChange}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                                     />
                                     <span className="text-sm text-gray-700">Đang mang thai</span>
                                 </label>
@@ -620,7 +581,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="is_breast_feeding"
                                         checked={formData.is_breast_feeding}
                                         onChange={handleChange}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                                     />
                                     <span className="text-sm text-gray-700">Đang cho con bú</span>
                                 </label>
@@ -641,10 +602,10 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     name="is_eligible"
                                     value={formData.is_eligible}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                 >
                                     <option value={true}>Đủ điều kiện</option>
-                                    <option value={false}>Không đủ điều</option>
+                                    <option value={false}>Không đủ điều kiện</option>
                                 </select>
                             </div>
                         </div>
@@ -661,7 +622,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                 onChange={handleChange}
                                 rows="3"
                                 placeholder="Nhập ghi chú y tế (nếu có)..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                             />
                         </div>
 
@@ -677,9 +638,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         <span>Đang tạo...</span>
                                     </>
                                 ) : (
-                                    <>
-                                        <span>Tạo phiếu khám</span>
-                                    </>
+                                    <span>Tạo phiếu khám</span>
                                 )}
                             </button>
                             <button
@@ -768,12 +727,13 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
     );
 };
 
-const StaffRegistrationDetail = () => {
-    const { id, registration_id } = useParams();
+const StaffResponseDetail = () => {
+    const { id, response_id } = useParams();
     const navigate = useNavigate();
 
-    const [registration, setRegistration] = useState(null);
-    const [eventInfo, setEventInfo] = useState(null);
+    const [response, setResponse] = useState(null);
+    const [emergency, setEmergency] = useState(null);
+    const [donor, setDonor] = useState(null);
     const [medicalCheckup, setMedicalCheckup] = useState(null);
     const [bloodDonation, setBloodDonation] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -792,37 +752,49 @@ const StaffRegistrationDetail = () => {
     });
 
     useEffect(() => {
-        fetchRegistrationDetail();
-    }, [id, registration_id]);
+        fetchResponseDetail();
+    }, [id, response_id]);
 
-    const fetchRegistrationDetail = async () => {
+    const fetchResponseDetail = async () => {
         setLoading(true);
         setError('');
         try {
-            const url = endpoints['staff_registrations_event_detail']
+            const url = endpoints['staff_responses_request_detail']
                 .replace('${id}', id)
-                .replace('${registration_id}', registration_id);
-            const response = await authApis().get(url);
-            setRegistration(response.data);
-
-            if (response.data.donation_event) {
-                setEventInfo(response.data.donation_event);
-            }
+                .replace('${response_id}', response_id);
+            const responseData = await authApis().get(url);
+            setResponse(responseData.data);
+            setEmergency(responseData.data.emergency_request);
+            setDonor(responseData.data.donor);
 
             // Try to fetch medical checkup
             try {
-                const checkupUrl = endpoints.donation_medical_checkup
+                const checkupUrl = endpoints.emergency_medical_checkup
                     .replace('${id}', id)
-                    .replace('${registration_id}', registration_id);
+                    .replace('${response_id}', response_id);
                 const checkupResponse = await authApis().get(checkupUrl);
                 setMedicalCheckup(checkupResponse.data);
+
+                // Try to fetch blood donation
+                if (checkupResponse.data.id) {
+                    try {
+                        const donationUrl = endpoints.emergency_blood_donation
+                            .replace('${id}', id)
+                            .replace('${response_id}', response_id)
+                            .replace('${medical_check_up_id}', checkupResponse.data.id);
+                        const donationResponse = await authApis().get(donationUrl);
+                        setBloodDonation(donationResponse.data);
+                    } catch (err) {
+                        console.log("No blood donation found");
+                    }
+                }
             } catch (err) {
                 console.log("No medical checkup found");
             }
 
         } catch (err) {
-            console.error("Error fetching registration detail:", err);
-            setError("Không thể tải thông tin đăng ký. Vui lòng thử lại sau.");
+            console.error("Error fetching response detail:", err);
+            setError("Không thể tải thông tin phản hồi. Vui lòng thử lại sau.");
         } finally {
             setLoading(false);
         }
@@ -831,23 +803,19 @@ const StaffRegistrationDetail = () => {
     const handleUpdateStatus = async (newStatus) => {
         setUpdatingStatus(true);
         try {
-            const url = endpoints['staff_registrations_event_detail']
+            const url = endpoints['staff_responses_request_detail']
                 .replace('${id}', id)
-                .replace('${registration_id}', registration_id);
+                .replace('${response_id}', response_id);
 
             let endpoint = url;
-            if (newStatus === 1) {
-                endpoint += 'approve/';
-            } else if (newStatus === 2) {
-                endpoint += 'reject/';
-            } else if (newStatus === 3) {
+            if (newStatus === 3) {
                 endpoint += 'checkin/';
             } else if (newStatus === 4) {
                 endpoint += 'complete/';
             }
 
             await authApis().post(endpoint);
-            await fetchRegistrationDetail();
+            await fetchResponseDetail();
             showMessage('Cập nhật trạng thái thành công!', 'success');
         } catch (err) {
             console.error("Error updating status:", err);
@@ -861,14 +829,14 @@ const StaffRegistrationDetail = () => {
     const handleCreateMedicalCheckup = async (formData) => {
         setCreatingMedicalCheckup(true);
         try {
-            const url = endpoints.donation_medical_checkup
+            const url = endpoints.emergency_medical_checkup
                 .replace('${id}', id)
-                .replace('${registration_id}', registration_id);
+                .replace('${response_id}', response_id);
 
             await authApis().post(url, formData);
             showMessage('Tạo phiếu khám sức khỏe thành công!', 'success');
             setShowCreateMedicalDialog(false);
-            await fetchRegistrationDetail();
+            await fetchResponseDetail();
         } catch (err) {
             console.error("Error creating medical checkup:", err);
             showMessage('Tạo phiếu khám sức khỏe thất bại. Vui lòng thử lại.', 'error');
@@ -879,8 +847,6 @@ const StaffRegistrationDetail = () => {
 
     const openConfirmDialog = (newStatus) => {
         const statusConfig = {
-            1: { title: 'Xác nhận đăng ký', message: 'Bạn có chắc chắn muốn xác nhận đăng ký này? Hành động này sẽ cho phép người dùng tham gia sự kiện.' },
-            2: { title: 'Từ chối đăng ký', message: 'Bạn có chắc chắn muốn từ chối đăng ký này? Người dùng sẽ không thể tham gia sự kiện.' },
             3: { title: 'Check-in', message: 'Bạn có chắc chắn muốn check-in cho người dùng này? Hành động này xác nhận người dùng đã đến tham gia.' },
             4: { title: 'Hoàn thành', message: 'Bạn có chắc chắn muốn đánh dấu hoàn thành? Người dùng đã hoàn tất quá trình hiến máu.' }
         };
@@ -893,20 +859,15 @@ const StaffRegistrationDetail = () => {
         });
     };
 
-    const getGenderLabel = (gender) => {
-        if (gender === 0) return 'Nam';
-        if (gender === 1) return 'Nữ';
-        return 'Khác';
+    const getBloodTypeDisplay = (bloodType, rhFactor) => {
+        const bloodTypeMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
+        const rh = rhFactor ? '+' : '-';
+        return `${bloodTypeMap[bloodType]}${rh}`;
     };
 
-    const getFullAddress = () => {
-        if (!registration) return 'Chưa cập nhật';
-        const parts = [
-            registration.permanent_address,
-            registration.sub_district,
-            registration.province
-        ].filter(Boolean);
-        return parts.join(', ') || 'Chưa cập nhật';
+    const getDonationTypeText = (type) => {
+        const types = ['Máu toàn phần', 'Tiểu cầu', 'Huyết tương', 'Bạch cầu'];
+        return types[type] || 'Không xác định';
     };
 
     const showMessage = (text, type) => {
@@ -915,13 +876,14 @@ const StaffRegistrationDetail = () => {
     };
 
     const canUpdateStatus = () => {
-        if (!registration) return false;
-        const currentStatus = registration.status;
-        return currentStatus === 0 || currentStatus === 1 || currentStatus === 3;
+        if (!response) return false;
+        const statusResponse = response.status_response;
+        const statusRegistration = response.status_registration;
+        return statusResponse === 1 && (statusRegistration === 1 || statusRegistration === 3);
     };
 
     const canCreateMedicalCheckup = () => {
-        return registration?.status === 3 && !medicalCheckup;
+        return response?.status_registration === 3 && !medicalCheckup;
     };
 
     if (loading) {
@@ -951,7 +913,7 @@ const StaffRegistrationDetail = () => {
         );
     }
 
-    if (error || !registration) {
+    if (error || !response) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -960,17 +922,17 @@ const StaffRegistrationDetail = () => {
                             <AlertCircle className="w-12 h-12 text-red-600" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            {error ? 'Có lỗi xảy ra' : 'Không tìm thấy thông tin đăng ký'}
+                            {error ? 'Có lỗi xảy ra' : 'Không tìm thấy thông tin phản hồi'}
                         </h2>
                         <p className="text-gray-600 mb-6">
-                            {error || 'Thông tin đăng ký bạn đang tìm không tồn tại'}
+                            {error || 'Thông tin phản hồi bạn đang tìm không tồn tại'}
                         </p>
                         <button
-                            onClick={() => navigate(`/staff-donation-event/${id}/registrations`)}
+                            onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
                             className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-500/25"
                         >
                             <ArrowLeft className="w-5 h-5" />
-                            Quay lại danh sách đăng ký
+                            Quay lại danh sách phản hồi
                         </button>
                     </div>
                 </div>
@@ -978,9 +940,9 @@ const StaffRegistrationDetail = () => {
         );
     }
 
-    const event = eventInfo;
-    const isProxy = registration.is_proxy;
-    const currentStatus = registration.status;
+    const donorAccount = donor?.account || {};
+    const statusResponse = response.status_response;
+    const statusRegistration = response.status_registration;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -1001,7 +963,7 @@ const StaffRegistrationDetail = () => {
             )}
 
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white pb-8">
+            <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white pb-8">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-300 rounded-full blur-3xl"></div>
@@ -1019,34 +981,34 @@ const StaffRegistrationDetail = () => {
                                 animationDuration: '15s'
                             }}
                         >
-                            <CalendarCheck className="w-8 h-8 text-white opacity-10" />
+                            <Ambulance className="w-8 h-8 text-white opacity-10" />
                         </div>
                     ))}
                 </div>
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Quản lý sự kiện</span>
+                        <span>Quản lý yêu cầu</span>
                         <span>/</span>
-                        <span>Danh sách đăng ký</span>
+                        <span>Danh sách phản hồi</span>
                         <span>/</span>
-                        <span className="text-white">Chi tiết đăng ký</span>
+                        <span className="text-white">Chi tiết phản hồi</span>
                     </nav>
 
                     <button
-                        onClick={() => navigate(`/staff-donation-event/${id}/registrations`)}
+                        onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
                         className="flex p-1 relative z-20 items-center mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
                     >
                         <div className="rotate-180 p-2 group-hover:-translate-x-1 transition-transform">
                             <ChevronRight className="w-5 h-5" />
                         </div>
-                        <span className='mr-1'>Danh sách đăng ký</span>
+                        <span className='mr-1'>Danh sách phản hồi</span>
                     </button>
 
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                         <div>
                             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                                Chi tiết đăng ký
+                                Chi tiết phản hồi cấp cứu
                             </h1>
                         </div>
                     </div>
@@ -1069,20 +1031,24 @@ const StaffRegistrationDetail = () => {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                                        {event?.title || 'Sự kiện hiến máu'}
+                                        {donorAccount.last_name} {donorAccount.first_name}
                                     </h1>
                                     <div className="flex items-center gap-3 mt-4 mb-4 flex-wrap">
-                                        <StatusBadge status={registration.status} />
-                                        {isProxy && (
-                                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
-                                                Đăng ký hộ
+                                        <ResponseStatusBadge 
+                                            statusResponse={statusResponse} 
+                                            statusRegistration={statusRegistration}
+                                        />
+                                        {emergency?.critical && !emergency?.is_expire && (
+                                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 animate-pulse">
+                                                <AlertTriangle className="w-4 h-4" />
+                                                Cấp cứu khẩn cấp
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-3 mt-3 flex-wrap">
                                         {medicalCheckup && (
                                             <button
-                                                onClick={() => navigate(`/staff-donation-event/${id}/registrations/${registration_id}/medical-checkup`)}
+                                                onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`)}
                                                 className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
                                             >
                                                 <Stethoscope className="w-4 h-4" />
@@ -1096,15 +1062,6 @@ const StaffRegistrationDetail = () => {
                                             >
                                                 <NotebookPen className="w-4 h-4" />
                                                 <span>Tạo phiếu khám sức khỏe</span>
-                                            </button>
-                                        )}
-                                        {bloodDonation && (
-                                            <button
-                                                onClick={() => navigate(`/staff-donation-event/${id}/registration/${registration_id}/medical-checkup/${medicalCheckup?.id}/blood-donation`)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                                            >
-                                                <HeartPulse className="w-4 h-4" />
-                                                <span>Kết quả hiến máu</span>
                                             </button>
                                         )}
                                     </div>
@@ -1123,32 +1080,32 @@ const StaffRegistrationDetail = () => {
                                             : 'text-gray-500 hover:text-gray-700'
                                             }`}
                                     >
-                                        Thông tin đăng ký
+                                        Thông tin phản hồi
                                         {activeTab === 'info' && (
                                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
                                         )}
                                     </button>
                                     <button
-                                        onClick={() => setActiveTab('event')}
-                                        className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap ${activeTab === 'event'
+                                        onClick={() => setActiveTab('donor')}
+                                        className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap ${activeTab === 'donor'
                                             ? 'text-red-600'
                                             : 'text-gray-500 hover:text-gray-700'
                                             }`}
                                     >
-                                        Thông tin sự kiện
-                                        {activeTab === 'event' && (
+                                        Thông tin người hiến
+                                        {activeTab === 'donor' && (
                                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
                                         )}
                                     </button>
                                     <button
-                                        onClick={() => setActiveTab('organizer')}
-                                        className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap ${activeTab === 'organizer'
+                                        onClick={() => setActiveTab('emergency')}
+                                        className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap ${activeTab === 'emergency'
                                             ? 'text-red-600'
                                             : 'text-gray-500 hover:text-gray-700'
                                             }`}
                                     >
-                                        Ban tổ chức
-                                        {activeTab === 'organizer' && (
+                                        Thông tin yêu cầu
+                                        {activeTab === 'emergency' && (
                                             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
                                         )}
                                     </button>
@@ -1158,206 +1115,138 @@ const StaffRegistrationDetail = () => {
                             <div className="p-6">
                                 {activeTab === 'info' && (
                                     <div className="space-y-6">
-                                        {/* Thông tin người đăng ký */}
+                                        {/* Thông tin phản hồi */}
                                         <div>
                                             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                Thông tin người tham gia
+                                                Thông tin phản hồi
+                                            </h3>
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                <InfoCard
+                                                    icon={Clock3}
+                                                    label="Ngày phản hồi"
+                                                    value={formatDateTime(response.created_at)}
+                                                />
+                                                <InfoCard
+                                                    icon={UserCheck}
+                                                    label="Trạng thái phản hồi"
+                                                    value={statusResponse === 1 ? 'Đã chấp nhận' : 'Đã từ chối'}
+                                                />
+                                                <InfoCard
+                                                    icon={ClipboardCheck}
+                                                    label="Trạng thái đăng ký"
+                                                    value={
+                                                        statusRegistration === 4 ? 'Đã hoàn thành' :
+                                                        statusRegistration === 3 ? 'Đã Check-in' :
+                                                        statusRegistration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'donor' && donor && (
+                                    <div className="space-y-6">
+                                        {/* Thông tin cá nhân */}
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                                Thông tin cá nhân
                                             </h3>
                                             <div className="grid md:grid-cols-2 gap-4">
                                                 <InfoCard
                                                     icon={User}
                                                     label="Họ và tên"
-                                                    value={`${registration.last_name || ''} ${registration.first_name || ''}`}
-                                                />
-                                                <InfoCard
-                                                    icon={Calendar}
-                                                    label="Ngày sinh"
-                                                    value={formatDate(registration.birth_date)}
-                                                />
-                                                <InfoCard
-                                                    icon={registration.gender === 0 ? Mars : Venus}
-                                                    label="Giới tính"
-                                                    value={getGenderLabel(registration.gender)}
-                                                />
-                                                <InfoCard
-                                                    icon={IdCard}
-                                                    label="CMND/CCCD"
-                                                    value={registration.identification}
+                                                    value={`${donorAccount.last_name || ''} ${donorAccount.first_name || ''}`}
                                                 />
                                                 <InfoCard
                                                     icon={Phone}
                                                     label="Số điện thoại"
-                                                    value={registration.phone}
+                                                    value={donorAccount.phone || 'Chưa cập nhật'}
                                                 />
                                                 <InfoCard
                                                     icon={Mail}
                                                     label="Email"
-                                                    value={registration.email}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Thông tin địa chỉ */}
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                Địa chỉ thường trú
-                                            </h3>
-                                            <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-gray-900 mb-2">
-                                                    {registration.permanent_address}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    {registration.sub_district}, {registration.province}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Thông tin công việc */}
-                                        {(registration.career || registration.organization) && (
-                                            <div>
-                                                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                    Công việc
-                                                </h3>
-                                                <div className="grid md:grid-cols-2 gap-4">
-                                                    {registration.career && (
-                                                        <InfoCard
-                                                            icon={Briefcase}
-                                                            label="Nghề nghiệp"
-                                                            value={registration.career}
-                                                        />
-                                                    )}
-                                                    {registration.organization && (
-                                                        <InfoCard
-                                                            icon={Building2}
-                                                            label="Đơn vị công tác"
-                                                            value={registration.organization}
-                                                        />
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Thông tin đăng ký */}
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                Thông tin đăng ký
-                                            </h3>
-                                            <div className="grid md:grid-cols-2 gap-4">
-                                                <InfoCard
-                                                    icon={CalendarClock}
-                                                    label="Thời gian dự kiến đến"
-                                                    value={formatDateTime(registration.expected_arrive)}
+                                                    value={donorAccount.email || 'Chưa cập nhật'}
                                                 />
                                                 <InfoCard
-                                                    icon={Clock3}
-                                                    label="Ngày đăng ký"
-                                                    value={formatDateTime(registration.created_at)}
+                                                    icon={Droplet}
+                                                    label="Nhóm máu"
+                                                    value={donor?.blood_type !== undefined ? getBloodTypeDisplay(donor.blood_type, donor.rh_factor) : 'Chưa cập nhật'}
                                                 />
                                                 <InfoCard
-                                                    icon={UserPlus}
-                                                    label="Hình thức đăng ký"
-                                                    value={isProxy ? 'Đăng ký hộ' : 'Tự đăng ký'}
+                                                    icon={Award}
+                                                    label="Số lần hiến máu"
+                                                    value={`${donor.donation_count || 0} lần`}
                                                 />
+                                                {donor.last_donation && (
+                                                    <InfoCard
+                                                        icon={Calendar}
+                                                        label="Lần hiến gần nhất"
+                                                        value={formatDate(donor.last_donation)}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
-
-                                        {/* Blood Donation Card */}
-                                        {bloodDonation && (
-                                            <BloodDonationCard
-                                                donation={bloodDonation}
-                                                onView={() => navigate(`/staff-donation-event/${id}/registration/${registration_id}/medical-checkup/${medicalCheckup?.id}/blood-donation`)}
-                                            />
-                                        )}
                                     </div>
                                 )}
 
-                                {activeTab === 'event' && event && (
+                                {activeTab === 'emergency' && emergency && (
                                     <div className="space-y-6">
-                                        {/* Thông tin cơ bản */}
+                                        {/* Thông tin bệnh nhân */}
                                         <div>
                                             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                Thời gian
+                                                Thông tin bệnh nhân
                                             </h3>
                                             <div className="grid md:grid-cols-2 gap-4">
                                                 <InfoCard
-                                                    icon={Calendar}
-                                                    label="Ngày bắt đầu"
-                                                    value={formatDate(event.time_start)}
+                                                    icon={User}
+                                                    label="Họ và tên"
+                                                    value={emergency.patient_name}
                                                 />
                                                 <InfoCard
-                                                    icon={AlarmClock}
-                                                    label="Giờ bắt đầu"
-                                                    value={formatTime(event.time_start)}
+                                                    icon={Phone}
+                                                    label="Số điện thoại"
+                                                    value={emergency.phone}
+                                                />
+                                                <InfoCard
+                                                    icon={Syringe}
+                                                    label="Nhóm máu cần"
+                                                    value={getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor)}
+                                                />
+                                                <InfoCard
+                                                    icon={Droplet}
+                                                    label="Lượng máu cần"
+                                                    value={`${emergency.blood_volume}ml`}
+                                                />
+                                                <InfoCard
+                                                    icon={FlaskConical}
+                                                    label="Loại hiến máu"
+                                                    value={getDonationTypeText(emergency.donation_type)}
+                                                />
+                                                <InfoCard
+                                                    icon={Hospital}
+                                                    label="Bệnh viện"
+                                                    value={emergency.hospital?.name || 'Chưa cập nhật'}
                                                 />
                                             </div>
                                         </div>
 
-                                        {/* Địa điểm */}
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                Địa điểm tổ chức
-                                            </h3>
-                                            <OpenStreetMap
-                                                location={event.location}
-                                                province={event.province}
-                                                subDistrict={event.sub_district}
-                                            />
-                                        </div>
-
-                                        {/* Mô tả */}
-                                        {event.description && (
+                                        {/* Ghi chú cấp cứu */}
+                                        {emergency.emergency_note && (
                                             <div>
                                                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                    Mô tả sự kiện
+                                                    Ghi chú cấp cứu
                                                 </h3>
-                                                <div className="bg-gray-50 rounded-xl p-4">
-                                                    <p className="text-gray-700 whitespace-pre-line">
-                                                        {event.description}
+                                                <div className="bg-red-50 rounded-xl p-4">
+                                                    <p className="text-red-700 whitespace-pre-line">
+                                                        {emergency.emergency_note}
                                                     </p>
                                                 </div>
                                             </div>
                                         )}
-                                    </div>
-                                )}
-
-                                {activeTab === 'organizer' && event && (
-                                    <div className="space-y-6">
-                                        {/* Bệnh viện */}
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                Bệnh viện tổ chức
-                                            </h3>
-                                            <div className="bg-gray-50 rounded-xl p-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
-                                                        {event.staff?.hospital?.image_url ? (
-                                                            <img
-                                                                src={getImageUrl(event.staff.hospital.image_url)}
-                                                                alt={event.staff.hospital.name}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            <Building2 className="w-8 h-8 text-red-600" />
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-semibold text-gray-900 mb-1">
-                                                            {event.staff?.hospital?.name || 'Đang cập nhật'}
-                                                        </h4>
-                                                        <p className="text-sm text-gray-600">
-                                                            {[
-                                                                event.staff?.hospital?.hospital_address,
-                                                                event.staff?.hospital?.sub_district,
-                                                                event.staff?.hospital?.province
-                                                            ].filter(Boolean).join(', ') || 'Đang cập nhật địa chỉ'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
 
                                         {/* Nhân viên y tế */}
-                                        {event.staff && (
+                                        {emergency.staff && (
                                             <div>
                                                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                                     Nhân viên y tế phụ trách
@@ -1366,10 +1255,10 @@ const StaffRegistrationDetail = () => {
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center overflow-hidden">
-                                                                {event.staff.account?.avatar ? (
+                                                                {emergency.staff.account?.avatar ? (
                                                                     <img
-                                                                        src={getImageUrl(event.staff.account.avatar)}
-                                                                        alt={`${event.staff.account.last_name} ${event.staff.account.first_name}`}
+                                                                        src={getImageUrl(emergency.staff.account.avatar)}
+                                                                        alt={`${emergency.staff.account.last_name} ${emergency.staff.account.first_name}`}
                                                                         className="w-full h-full object-cover"
                                                                     />
                                                                 ) : (
@@ -1379,14 +1268,14 @@ const StaffRegistrationDetail = () => {
                                                             <div>
                                                                 <div className="flex items-center gap-2 mb-1">
                                                                     <span className="font-medium text-gray-900">
-                                                                        {`${event.staff.account?.last_name || ''} ${event.staff.account?.first_name || ''}`}
+                                                                        {`${emergency.staff.account?.last_name || ''} ${emergency.staff.account?.first_name || ''}`}
                                                                     </span>
-                                                                    {event.staff.is_verified && (
+                                                                    {emergency.staff.is_verified && (
                                                                         <BadgeCheck className="w-4 h-4 text-blue-500" />
                                                                     )}
                                                                 </div>
                                                                 <p className="text-sm text-gray-600">
-                                                                    {event.staff.degree} - {event.staff.department}
+                                                                    {emergency.staff.degree} - {emergency.staff.department}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -1398,29 +1287,6 @@ const StaffRegistrationDetail = () => {
                                                             <ChevronRight className="w-4 h-4" />
                                                         </button>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Hotline */}
-                                        {event.staff?.emergency_phone && (
-                                            <div>
-                                                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                    Hotline hỗ trợ
-                                                </h3>
-                                                <div className="bg-red-50 rounded-xl p-4">
-                                                    <a
-                                                        href={`tel:${event.staff.emergency_phone}`}
-                                                        className="flex items-center gap-3 text-red-600 hover:text-red-700"
-                                                    >
-                                                        <div className="p-2 bg-white rounded-lg">
-                                                            <Phone className="w-5 h-5" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm text-red-600/80">Gọi ngay</p>
-                                                            <p className="text-lg font-bold">{event.staff.emergency_phone}</p>
-                                                        </div>
-                                                    </a>
                                                 </div>
                                             </div>
                                         )}
@@ -1441,41 +1307,48 @@ const StaffRegistrationDetail = () => {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Trạng thái</span>
-                                    <StatusBadge status={registration.status} />
+                                    <ResponseStatusBadge 
+                                        statusResponse={statusResponse} 
+                                        statusRegistration={statusRegistration}
+                                    />
                                 </div>
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Loại đăng ký</span>
+                                    <span className="text-gray-600">Người hiến</span>
                                     <span className="font-medium text-gray-900">
-                                        {isProxy ? 'Đăng ký hộ' : 'Tự đăng ký'}
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Người tham gia</span>
-                                    <span className="font-medium text-gray-900">
-                                        {`${registration.last_name || ''} ${registration.first_name || ''}`}
+                                        {donorAccount.last_name} {donorAccount.first_name}
                                     </span>
                                 </div>
 
                                 <div className="flex items-start justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Số điện thoại</span>
-                                    <span className="font-medium text-gray-900">{registration.phone}</span>
+                                    <span className="font-medium text-gray-900">{donorAccount.phone || 'Chưa cập nhật'}</span>
                                 </div>
 
-                                <div className="flex items-start justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Thời gian dự kiến</span>
-                                    <div className="text-right">
-                                        <p className="text-sm text-gray-500">{formatTime(registration.expected_arrive)}</p>
-                                        <p className="font-medium text-gray-900">{formatDate(registration.expected_arrive)}</p>
-                                    </div>
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Nhóm máu người hiến</span>
+                                    <span className="font-bold text-red-600">
+                                        {donor?.blood_type !== undefined ? getBloodTypeDisplay(donor.blood_type, donor.rh_factor) : 'Chưa cập nhật'}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Bệnh nhân</span>
+                                    <span className="font-medium text-gray-900">{emergency?.patient_name}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Nhóm máu cần</span>
+                                    <span className="font-bold text-red-600">
+                                        {emergency ? getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor) : 'Chưa cập nhật'}
+                                    </span>
                                 </div>
 
                                 <div className="flex items-start justify-between">
-                                    <span className="text-gray-600">Ngày đăng ký</span>
+                                    <span className="text-gray-600">Ngày phản hồi</span>
                                     <div className="text-right">
-                                        <p className="text-sm text-gray-500">{formatTime(registration.created_at)}</p>
-                                        <p className="font-medium text-gray-900">{formatDate(registration.created_at)}</p>
+                                        <p className="text-sm text-gray-500">{formatTime(response.created_at)}</p>
+                                        <p className="font-medium text-gray-900">{formatDate(response.created_at)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -1486,25 +1359,7 @@ const StaffRegistrationDetail = () => {
                                     <div className="space-y-2">
                                         <p className="text-gray-600">Cập nhật trạng thái:</p>
                                         <div className="grid grid-cols-2 gap-2">
-                                            {currentStatus === 0 && (
-                                                <>
-                                                    <button
-                                                        onClick={() => openConfirmDialog(1)}
-                                                        disabled={updatingStatus}
-                                                        className="py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
-                                                    >
-                                                        Xác nhận
-                                                    </button>
-                                                    <button
-                                                        onClick={() => openConfirmDialog(2)}
-                                                        disabled={updatingStatus}
-                                                        className="py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
-                                                    >
-                                                        Từ chối
-                                                    </button>
-                                                </>
-                                            )}
-                                            {currentStatus === 1 && (
+                                            {statusRegistration === 1 && (
                                                 <button
                                                     onClick={() => openConfirmDialog(3)}
                                                     disabled={updatingStatus}
@@ -1513,7 +1368,7 @@ const StaffRegistrationDetail = () => {
                                                     Check-in
                                                 </button>
                                             )}
-                                            {currentStatus === 3 && (
+                                            {statusRegistration === 3 && (
                                                 <button
                                                     onClick={() => openConfirmDialog(4)}
                                                     disabled={updatingStatus}
@@ -1540,8 +1395,8 @@ const StaffRegistrationDetail = () => {
                                 <p className="text-xs text-blue-700 flex items-start gap-2">
                                     <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                                     <span>
-                                        Vui lòng mang theo CMND/CCCD khi tham gia sự kiện.
-                                        Có mặt trước giờ dự kiến 15 phút.
+                                        Vui lòng kiểm tra kỹ thông tin trước khi cập nhật trạng thái.
+                                        Hành động này không thể hoàn tác.
                                     </span>
                                 </p>
                             </div>
@@ -1554,7 +1409,7 @@ const StaffRegistrationDetail = () => {
             <StaffDetailDialog
                 isOpen={isStaffDialogOpen}
                 onClose={() => setIsStaffDialogOpen(false)}
-                staff={event?.staff}
+                staff={emergency?.staff}
             />
 
             {/* Create Medical Checkup Dialog */}
@@ -1578,4 +1433,4 @@ const StaffRegistrationDetail = () => {
     );
 };
 
-export default StaffRegistrationDetail;
+export default StaffResponseDetail;

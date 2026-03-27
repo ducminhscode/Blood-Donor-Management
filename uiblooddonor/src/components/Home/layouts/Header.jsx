@@ -80,6 +80,7 @@ const Header = () => {
                     <div className="hidden md:flex items-center space-x-2">
                         <Link to="/" className={getTabClass('/')}>Trang chủ</Link>
                         <Link to="/list-event" className={getTabClass('/list-event')}>Sự kiện</Link>
+                        <Link to="/list-emergency-request" className={getTabClass('/list-emergency-request')}>Khẩn cấp</Link>
                         {user?.role === 1 && (
                             <Link to="/reward-category" className={getTabClass('/reward-category')}>Đổi thưởng</Link>
                         )}
@@ -177,6 +178,15 @@ const Header = () => {
                                                     Sự kiện đã đăng ký
                                                 </Link>
                                             )}
+                                            {user?.role === 1 && (
+                                                <Link
+                                                    to="/emergency-response"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition"
+                                                    onClick={() => setIsDropdownOpen(false)}
+                                                >
+                                                    Yêu cầu đã phản hồi
+                                                </Link>
+                                            )}
                                             {user?.role===2 &&(
                                                 <Link
                                                     to="/staff-donation-event"
@@ -252,10 +262,12 @@ const Header = () => {
 
                         <Link to="/" className={getMobileTabClass('/')}>Trang chủ</Link>
                         <Link to="/list-event" className={getMobileTabClass('/list-event')}>Sự kiện</Link>
+                        <Link to="/list-emergency-request" className={getMobileTabClass('/list-emergency-request')}>Khẩn cấp</Link>
 
                         {user?.role === 1 && (
                             <Link to="/reward-category" className={getMobileTabClass('/reward-category')}>Đổi thưởng</Link>
                         )}
+                        
 
                         {isLoggedIn && (
                             <>

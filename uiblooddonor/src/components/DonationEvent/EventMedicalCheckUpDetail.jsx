@@ -11,17 +11,84 @@ import {
     X, FileText, UserCircle, IdCard, Briefcase, Home,
     CalendarClock, Clock3, Clock12, Ban, CheckCircle2,
     Timer, Hourglass, UserPlus, UserMinus, Edit,
-    Printer, Download, Send, MessageSquare,
-    HeartPulse, Activity, FileHeart, Award as AwardIcon,
-    Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon,
-    Syringe,
-    FlaskConical
+    Printer, Download, Send, MessageSquare, Scale,
+    Ruler, Activity, Thermometer, Droplets, AlertTriangle,
+    Stethoscope, Syringe, Pill, Baby, HeartPulse,
+    Brain, Bone, Wind, Shield as ShieldIcon,
+    ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle,
+    User as UserIcon, Calendar as CalendarIcon,
+    Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon,
+    FileHeart, NotebookPen
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import "../../styles/EventDetail.css";
 import { UserContexts } from '../../configs/UserContexts';
+
+const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue" }) => {
+    const colors = {
+        normal: {
+            blue: 'bg-blue-50 text-blue-600 border-blue-200',
+            green: 'bg-green-50 text-green-600 border-green-200',
+            red: 'bg-red-50 text-red-600 border-red-200',
+            purple: 'bg-purple-50 text-purple-600 border-purple-200',
+            orange: 'bg-orange-50 text-orange-600 border-orange-200'
+        },
+        warning: {
+            blue: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+            green: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+            red: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+            purple: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+            orange: 'bg-yellow-50 text-yellow-600 border-yellow-200'
+        },
+        danger: {
+            blue: 'bg-red-50 text-red-600 border-red-200',
+            green: 'bg-red-50 text-red-600 border-red-200',
+            red: 'bg-red-50 text-red-600 border-red-200',
+            purple: 'bg-red-50 text-red-600 border-red-200',
+            orange: 'bg-red-50 text-red-600 border-red-200'
+        }
+    };
+
+    const bgColor = colors[status][color];
+
+    return (
+        <div className={`rounded-xl p-4 border ${bgColor}`}>
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg">
+                    <Icon className="w-5 h-5" />
+                </div>
+                <div>
+                    <p className="text-xs opacity-80">{label}</p>
+                    <div className="flex items-baseline gap-1">
+                        <p className="text-xl font-bold">{value}</p>
+                        {unit && <span className="text-xs opacity-60">{unit}</span>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Eligibility Badge Component
+const EligibilityBadge = ({ isEligible }) => {
+    if (isEligible) {
+        return (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full border border-green-200">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="font-medium">Đủ điều kiện hiến máu</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full border border-red-200">
+            <XCircle className="w-4 h-4" />
+            <span className="font-medium">Không đủ điều kiện hiến máu</span>
+        </div>
+    );
+};
 
 // Staff Detail Dialog
 const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
@@ -156,96 +223,114 @@ const InfoCard = ({ icon: Icon, label, value, className = "" }) => {
     );
 };
 
-// Blood Type Badge Component
-const BloodTypeBadge = ({ bloodType, rhFactor }) => {
-    const getBloodTypeDisplay = () => {
-        if (bloodType === undefined || rhFactor === undefined) return 'Chưa cập nhật';
-        const bloodTypeMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
-        const rh = rhFactor ? '+' : '-';
-        return `${bloodTypeMap[bloodType]}${rh}`;
-    };
-
-    const bloodTypeDisplay = getBloodTypeDisplay();
-    
+// Boolean Status Component
+const BooleanStatus = ({ label, value, trueLabel = "Có", falseLabel = "Không" }) => {
     return (
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full border border-red-200">
-            <Droplet className="w-5 h-5 fill-current" />
-            <span className="font-bold text-lg">{bloodTypeDisplay}</span>
+        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+            <span className="text-sm text-gray-600">{label}</span>
+            <span className={`text-sm font-medium ${value ? 'text-red-600' : 'text-green-600'}`}>
+                {value ? trueLabel : falseLabel}
+            </span>
         </div>
     );
 };
 
-// Donation Type Badge
-const DonationTypeBadge = ({ type }) => {
-    const typeConfig = {
-        0: { label: 'Hiến máu toàn phần', color: 'bg-blue-100 text-blue-700', icon: Droplet },
-        1: { label: 'Hiến tiểu cầu', color: 'bg-purple-100 text-purple-700', icon: FlaskConical },
-        2: { label: 'Hiến huyết tương', color: 'bg-orange-100 text-orange-700', icon: Activity }
-    };
-
-    const config = typeConfig[type] || typeConfig[0];
-    const Icon = config.icon;
+// Medical Note Component
+const MedicalNote = ({ note, doctor }) => {
+    if (!note && !doctor) return null;
 
     return (
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${config.color}`}>
-            <Icon className="w-4 h-4" />
-            {config.label}
-        </span>
+        <div className="bg-red-50 rounded-xl p-4 border border-red-200">
+            <div className="flex items-start gap-3">
+                <div className="p-2 bg-white rounded-lg">
+                    <MessageSquare className="w-5 h-5 text-red-600" />
+                </div>
+                <div className="flex-1">
+                    <p className="text-sm font-medium text-red-900 mb-2">Ghi chú khám sức khỏe</p>
+                    <p className="text-sm text-red-800 mb-2 italic">"{note || 'Không có ghi chú'}"</p>
+                    {doctor && (
+                        <p className="text-xs text-red-600 flex items-center gap-1">
+                            <UserIcon className="w-3 h-3" />
+                            Bác sĩ: {doctor}
+                        </p>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 };
 
-const BloodDonationDetail = () => {
-    const { id, registration_id, medical_check_up_id } = useParams();
+// Info Section Component
+const InfoSection = ({ title, icon: Icon, children }) => {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Icon className="w-5 h-5 text-red-500" />
+                {title}
+            </h3>
+            {children}
+        </div>
+    );
+};
+
+const EventMedicalCheckUpDetail = () => {
+    const { id, registration_id } = useParams();
     const navigate = useNavigate();
 
-    const [donation, setDonation] = useState(null);
+    const [checkup, setCheckup] = useState(null);
+    const [bloodDonation, setBloodDonation] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [message, setMessage] = useState({ text: '', type: '' });
+    const user = useContext(UserContexts);
 
     const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false);
 
     useEffect(() => {
-        fetchBloodDonation();
-    }, [id, registration_id, medical_check_up_id]);
+        fetchMedicalCheckup();
+    }, [id, registration_id]);
 
-    const fetchBloodDonation = async () => {
+    const fetchMedicalCheckup = async () => {
         setLoading(true);
         setError('');
         try {
-            const url = endpoints.blood_donation
+            const url = endpoints.donation_medical_checkup
                 .replace('${id}', id)
-                .replace('${registration_id}', registration_id)
-                .replace('${medical_check_up_id}', medical_check_up_id);
+                .replace('${registration_id}', registration_id);
             const response = await authApis().get(url);
-            setDonation(response.data);
+            setCheckup(response.data);
+            
+            // Kiểm tra xem đã có blood donation chưa
+            await fetchBloodDonation(response.data.id);
         } catch (err) {
-            console.error("Error fetching blood donation:", err);
+            console.error("Error fetching medical checkup:", err);
             if (err.response?.status === 404) {
-                setError("Không tìm thấy thông tin hiến máu.");
+                setError("Không tìm thấy thông tin khám sức khỏe.");
             } else {
-                setError("Không thể tải thông tin hiến máu. Vui lòng thử lại sau.");
+                setError("Không thể tải thông tin khám sức khỏe. Vui lòng thử lại sau.");
             }
         } finally {
             setLoading(false);
         }
     };
 
+    const fetchBloodDonation = async (medicalCheckUpId) => {
+        try {
+            const url = endpoints.donation_blood_donation
+                .replace('${id}', id)
+                .replace('${registration_id}', registration_id)
+                .replace('${medical_check_up_id}', medicalCheckUpId);
+            const response = await authApis().get(url);
+            setBloodDonation(response.data);
+        } catch (err) {
+            console.log("No blood donation found");
+            setBloodDonation(null);
+        }
+    };
+
     const showMessage = (text, type) => {
         setMessage({ text, type });
         setTimeout(() => setMessage({ text: '', type: '' }), 3000);
-    };
-
-    const getBloodTypeDisplay = () => {
-        if (!donation) return 'Chưa cập nhật';
-        const bloodTypeMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
-        const rh = donation.rh_factor ? '+' : '-';
-        return `${bloodTypeMap[donation.blood_type]}${rh}`;
-    };
-
-    const getDonationTypeText = () => {
-        const types = ['Hiến máu toàn phần', 'Hiến tiểu cầu', 'Hiến huyết tương', 'White Blood Cell'];
-        return types[donation?.donation_type] || 'Không xác định';
     };
 
     if (loading) {
@@ -257,12 +342,13 @@ const BloodDonationDetail = () => {
                             <div className="h-8 w-64 bg-gray-200 rounded-lg mb-6"></div>
                             <div className="grid lg:grid-cols-3 gap-8">
                                 <div className="lg:col-span-2">
-                                    <div className="h-32 bg-gray-200 rounded-xl mb-6"></div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-4 mb-6">
                                         {[1, 2, 3, 4].map(i => (
                                             <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
                                         ))}
                                     </div>
+                                    <div className="h-48 bg-gray-200 rounded-xl mb-4"></div>
+                                    <div className="h-32 bg-gray-200 rounded-xl"></div>
                                 </div>
                                 <div>
                                     <div className="h-64 bg-gray-200 rounded-2xl mb-4"></div>
@@ -275,7 +361,7 @@ const BloodDonationDetail = () => {
         );
     }
 
-    if (error || !donation) {
+    if (error || !checkup) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -284,17 +370,17 @@ const BloodDonationDetail = () => {
                             <AlertCircle className="w-12 h-12 text-red-600" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            {error ? 'Có lỗi xảy ra' : 'Không tìm thấy thông tin hiến máu'}
+                            {error ? 'Có lỗi xảy ra' : 'Không tìm thấy thông tin khám sức khỏe'}
                         </h2>
                         <p className="text-gray-600 mb-6">
-                            {error || 'Thông tin hiến máu bạn đang tìm không tồn tại'}
+                            {error || 'Thông tin khám sức khỏe bạn đang tìm không tồn tại'}
                         </p>
                         <button
-                            onClick={() => navigate(`/event/${id}/registrations/${registration_id}/medical-checkup`)}
+                            onClick={() => navigate(`/event-registration/`)}
                             className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-500/25"
                         >
                             <ArrowLeft className="w-5 h-5" />
-                            Quay lại kết quả khám
+                            Quay lại danh sách đăng ký
                         </button>
                     </div>
                 </div>
@@ -302,18 +388,18 @@ const BloodDonationDetail = () => {
         );
     }
 
-    const staff = donation.staff;
+    const staff = checkup.staff;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideIn">
-                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${
-                        message.type === 'success'
-                            ? 'bg-green-50 text-green-700 border border-green-200'
-                            : 'bg-red-50 text-red-700 border border-red-200'
-                    }`}>
+                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${message.type === 'success'
+                        ? 'bg-green-50 text-green-700 border border-green-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -342,7 +428,7 @@ const BloodDonationDetail = () => {
                                 animationDuration: '15s'
                             }}
                         >
-                            <HeartPulse className="w-8 h-8 text-white opacity-10" />
+                            <Droplet className="w-8 h-8 text-white opacity-10" />
                         </div>
                     ))}
                 </div>
@@ -350,32 +436,25 @@ const BloodDonationDetail = () => {
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     {/* Breadcrumb */}
                     <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>
-                            Sự kiện đã đăng ký
-                        </span>
+                        <span>Sự kiện đã đăng ký</span>
                         <span>/</span>
-                        <span>
-                            Chi tiết đăng ký
-                        </span>
+                        <span>Chi tiết đăng ký</span>
                         <span>/</span>
-                        <span>
-                            Kết quả khám sức khỏe
-                        </span>
-                        <span>/</span>
-                        <span className="text-white">Kết quả hiến máu</span>
+                        <span className="text-white">Kết quả khám sức khỏe</span>
                     </nav>
 
                     <div className="flex items-center justify-between">
                         <button
-                            onClick={() => navigate(`/event/${id}/registrations/${registration_id}/medical-checkup`)}
+                            onClick={() => navigate(`/event-registration/${registration_id}`)}
                             className="flex p-1 relative z-20 items-center mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
                         >
                             <div className="rotate-180 p-2 group-hover:-translate-x-1 transition-transform">
                                 <ChevronRight className="w-5 h-5" />
                             </div>
-                            <span className='mr-1'>Kết quả khám sức khỏe</span>
+                            <span className='mr-1'>Chi tiết đăng ký</span>
                         </button>
                     </div>
+                    {/* Thêm Action Buttons */}
                 </div>
 
                 {/* Wave Separator */}
@@ -393,126 +472,189 @@ const BloodDonationDetail = () => {
                     <div className="lg:col-span-2 space-y-6">
                         {/* Title Section */}
                         <div className="bg-white rounded-2xl shadow-sm p-6">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-start justify-between">
                                 <div>
                                     <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                                        Kết quả hiến máu
+                                        Kết quả khám sức khỏe
                                     </h1>
-                                    <div className="flex items-center gap-3 mb-3 flex-wrap">
-                                        <BloodTypeBadge 
-                                            bloodType={donation.blood_type} 
-                                            rhFactor={donation.rh_factor} 
-                                        />
-                                        <DonationTypeBadge type={donation.donation_type} />
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <EligibilityBadge isEligible={checkup.is_eligible} />
                                     </div>
                                 </div>
+
+                            </div>
+                            <div className="flex flex-wrap gap-3 mt-2">
+                                {checkup.is_eligible && (
+                                    <>
+                                        {bloodDonation && (
+                                            <button
+                                                onClick={() => {
+                                                    navigate(`/event/${id}/registrations/${registration_id}/medical-checkup/${checkup.id}/blood-donation`)
+                                                }}
+                                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+                                            >
+                                                <FileHeart className="w-4 h-4" />
+                                                <span>Xem kết quả hiến máu</span>
+                                            </button>
+                                        )}
+                                    </>
+                                )}
                             </div>
                         </div>
 
-                        {/* Donation Info */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6">
-                            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                Thông tin hiến máu
-                            </h2>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <InfoCard
-                                    icon={Droplet}
-                                    label="Nhóm máu"
-                                    value={getBloodTypeDisplay()}
+                        {/* Vital Signs */}
+                        <InfoSection title="Chỉ số sức khỏe" icon={Activity}>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <VitalSignCard
+                                    icon={Weight}
+                                    label="Cân nặng"
+                                    value={checkup.weight}
+                                    unit="kg"
+                                    color="red"
                                 />
-                                <InfoCard
-                                    icon={Activity}
-                                    label="Loại hiến"
-                                    value={getDonationTypeText()}
+                                <VitalSignCard
+                                    icon={Ruler}
+                                    label="Chiều cao"
+                                    value={checkup.height}
+                                    unit="cm"
+                                    color="red"
                                 />
-                                <InfoCard
-                                    icon={Droplet}
-                                    label="Thể tích máu"
-                                    value={`${donation.blood_volume} ml`}
+                                <VitalSignCard
+                                    icon={Gauge}
+                                    label="Huyết áp"
+                                    value={checkup.blood_pressure}
+                                    unit="mmHg"
+                                    color="red"
                                 />
-                                <InfoCard
-                                    icon={User}
-                                    label="Người lấy máu"
-                                    value={donation.blood_taker || 'Chưa cập nhật'}
+                                <VitalSignCard
+                                    icon={HeartIcon}
+                                    label="Nhịp tim"
+                                    value={checkup.heart_rate}
+                                    unit="bpm"
+                                    color="red"
                                 />
-                                <InfoCard
-                                    icon={CalendarClock}
-                                    label="Thời gian hiến"
-                                    value={formatDateTime(donation.created_at) || 'Chưa cập nhật'}
+                                <VitalSignCard
+                                    icon={ThermometerIcon}
+                                    label="Nhiệt độ"
+                                    value={checkup.body_temperature}
+                                    unit="°C"
+                                    color="red"
+                                />
+                                <VitalSignCard
+                                    icon={Droplets}
+                                    label="Hemoglobin"
+                                    value={checkup.hemoglobin_level}
+                                    unit="g/L"
+                                    color="red"
                                 />
                             </div>
-                        </div>
+                        </InfoSection>
 
-                        {/* Donation Note */}
-                        {donation.donation_note && (
-                            <div className="bg-red-50 rounded-xl p-4 border border-red-200">
-                                <div className="flex items-start gap-3">
-                                    <div className="p-2 bg-white rounded-lg">
-                                        <MessageSquare className="w-5 h-5 text-red-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium text-red-900 mb-2">Ghi chú</p>
-                                        <p className="text-sm text-red-800 italic">"{donation.donation_note}"</p>
-                                    </div>
+                        <InfoSection title="Tiền sử bệnh lý" icon={Stethoscope}>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <h4 className="font-medium text-gray-700 mb-3">Các yếu tố nguy cơ</h4>
+                                    <BooleanStatus
+                                        label="Bệnh truyền nhiễm"
+                                        value={checkup.has_infectious}
+                                    />
+                                    <BooleanStatus
+                                        label="Bệnh mãn tính"
+                                        value={checkup.has_chronic}
+                                    />
+                                    <BooleanStatus
+                                        label="Phẫu thuật gần đây"
+                                        value={checkup.recent_surgery}
+                                    />
+                                    <BooleanStatus
+                                        label="Xăm hình gần đây"
+                                        value={checkup.recent_tattoo}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-medium text-gray-700 mb-3">Tình trạng hiện tại</h4>
+                                    <BooleanStatus
+                                        label="Sử dụng chất kích thích"
+                                        value={checkup.is_drug}
+                                    />
+                                    <BooleanStatus
+                                        label="Đang mang thai"
+                                        value={checkup.is_pregnant}
+                                    />
+                                    <BooleanStatus
+                                        label="Đang cho con bú"
+                                        value={checkup.is_breast_feeding}
+                                    />
+                                    {checkup.last_donation && (
+                                        <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                            <span className="text-sm text-gray-600">Lần hiến gần nhất</span>
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {formatDate(checkup.last_donation)}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                        </InfoSection>
+
+                        {/* Medical Note */}
+                        {checkup.medical_note && (
+                            <MedicalNote note={checkup.medical_note} doctor={checkup.doctor} />
                         )}
-
-                        {/* Thank You Message */}
-                        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-6 text-center border border-red-100">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-                                <HeartPulse className="w-8 h-8 text-red-600" />
-                            </div>
-                            <h3 className="text-xl font-bold text-red-700 mb-2">
-                                Cảm ơn bạn đã hiến máu!
-                            </h3>
-                            <p className="text-red-600">
-                                Mỗi giọt máu cho đi là một cuộc đời ở lại. Hành động của bạn thật đáng trân trọng!
-                            </p>
-                        </div>
                     </div>
 
                     {/* Right Column - Summary Card */}
                     <div className="space-y-6">
                         <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-24">
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <FileHeart className="w-5 h-5 text-red-500" />
-                                Thông tin hiến
+                                <FileText className="w-5 h-5 text-red-500" />
+                                Thông tin khám
                             </h2>
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Nhóm máu</span>
-                                    <span className="font-bold text-red-600">{getBloodTypeDisplay()}</span>
+                                    <span className="text-gray-600">Kết luận</span>
+                                    <EligibilityBadge isEligible={checkup.is_eligible} />
                                 </div>
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Thể tích</span>
-                                    <span className="font-medium text-gray-900">{donation.blood_volume} ml</span>
+                                    <span className="text-gray-600">Bác sĩ khám</span>
+                                    <span className="font-medium text-gray-900">{checkup.doctor || 'Chưa cập nhật'}</span>
                                 </div>
 
-                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Loại hiến</span>
-                                    <DonationTypeBadge type={donation.donation_type} />
-                                </div>
-
-                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Người lấy máu</span>
-                                    <span className="font-medium text-gray-900">{donation.blood_taker || 'Chưa cập nhật'}</span>
-                                </div>
-
-                                <div className="flex items-start justify-between">
-                                    <span className="text-gray-600">Thời gian</span>
+                                <div className="flex items-start justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Ngày khám</span>
                                     <div className="text-right">
-                                        <p className="font-medium text-gray-900">{formatDate(donation.created_at)}</p>
-                                        <p className="text-sm text-gray-500">{formatTime(donation.created_at)}</p>
+                                        <p className="font-medium text-gray-900">{formatDate(checkup.created_at)}</p>
+                                        <p className="text-sm text-gray-500">{formatTime(checkup.created_at)}</p>
                                     </div>
                                 </div>
+
+                                {checkup.updated_at && checkup.updated_at !== checkup.created_at && (
+                                    <div className="flex items-start justify-between pb-3 border-b border-gray-100">
+                                        <span className="text-gray-600">Cập nhật</span>
+                                        <div className="text-right">
+                                            <p className="font-medium text-gray-900">{formatDate(checkup.updated_at)}</p>
+                                            <p className="text-sm text-gray-500">{formatTime(checkup.updated_at)}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Thêm trạng thái hiến máu */}
+                                {bloodDonation && (
+                                    <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                        <span className="text-gray-600">Trạng thái hiến máu</span>
+                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                                            <CheckCircle2 className="w-3 h-3" />
+                                            Đã hiến máu
+                                        </span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Staff Info */}
                             {staff && (
-                                <div className="mt-6 pt-4 border-t border-gray-100">
+                                <div className="mt-6 pt-4">
                                     <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                         Nhân viên y tế
                                     </h3>
@@ -551,20 +693,17 @@ const BloodDonationDetail = () => {
                                 </div>
                             )}
 
-                            {/* Health Tips */}
-                            <div className="mt-6 p-3 bg-green-50 rounded-lg border border-green-200">
-                                <div className="flex items-start gap-2">
-                                    <HeartPulse className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                                    <div className="text-xs text-green-700">
-                                        <p className="font-medium mb-1">Lưu ý sau hiến máu:</p>
-                                        <ul className="space-y-1 list-disc list-inside">
-                                            <li>Uống nhiều nước trong 24 giờ sau hiến</li>
-                                            <li>Tránh vận động mạnh trong 24 giờ</li>
-                                            <li>Ăn uống đủ chất, bổ sung sắt</li>
-                                        </ul>
-                                    </div>
+                            {/* Emergency Response */}
+                            {checkup.emergency_response && (
+                                <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
+                                    <p className="text-xs text-red-700 flex items-start gap-2">
+                                        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                        <span>
+                                            <span className="font-semibold">Phản ứng khẩn cấp:</span> {checkup.emergency_response}
+                                        </span>
+                                    </p>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -576,8 +715,9 @@ const BloodDonationDetail = () => {
                 onClose={() => setIsStaffDialogOpen(false)}
                 staff={staff}
             />
+
         </div>
     );
 };
 
-export default BloodDonationDetail;
+export default EventMedicalCheckUpDetail;
