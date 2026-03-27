@@ -1083,8 +1083,6 @@ const EventDetail = () => {
     const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false);
     const [showRegistrationForm, setShowRegistrationForm] = useState(false);
     const [registerLoading, setRegisterLoading] = useState(false);
-    const [hasRegistered, setHasRegistered] = useState(false);
-    const [myRegistration, setMyRegistration] = useState(null);
 
     const [donorInfo, setDonorInfo] = useState(null);
 
@@ -1115,10 +1113,7 @@ const EventDetail = () => {
 
     useEffect(() => {
         fetchEventDetail();
-        if (user?.role === 1) {
-            checkMyRegistration();
-        }
-    }, [id, user]);
+    }, [id]);
 
     // Fetch tên tỉnh/thành khi có event
     useEffect(() => {
@@ -1136,19 +1131,6 @@ const EventDetail = () => {
             fetchRelatedEvents(event.province);
         }
     }, [event]);
-
-    const checkMyRegistration = async () => {
-        if (!user || user.role !== 1) return;
-        try {
-            const response = await authApis().get(endpoints.event_registration);
-            const registrations = response.data.results || response.data;
-            const myReg = registrations.find(reg => reg.donation_event?.id === parseInt(id));
-            setHasRegistered(!!myReg);
-            setMyRegistration(myReg);
-        } catch (error) {
-            console.error("Error checking registration:", error);
-        }
-    };
 
     const fetchProvinceName = async (provinceCode) => {
         try {
@@ -1522,28 +1504,15 @@ const EventDetail = () => {
                                         >
                                             <span>Đăng nhập để tham gia</span>
                                         </button>
-                                    ) : user.role === 1 ? (
-                                        hasRegistered ? (
-                                            <div className="flex items-center gap-2 px-6 py-3 rounded-xl bg-green-50 text-green-700 border border-green-200">
-                                                <CheckCircle className="w-5 h-5" />
-                                                <span className="font-medium">Đã đăng ký tham gia</span>
-                                                {myRegistration?.status === 1 && (
-                                                    <span className="ml-2 text-xs bg-green-100 px-2 py-1 rounded-full">Đã duyệt</span>
-                                                )}
-                                                {myRegistration?.status === 2 && (
-                                                    <span className="ml-2 text-xs bg-red-100 px-2 py-1 rounded-full">Đã từ chối</span>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <button
-                                                onClick={handleRegisterClick}
-                                                disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}
-                                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <span>Tham gia ngay</span>
-                                            </button>
-                                        )
-                                    ) : null}
+                                    ) : user.role === 1 && (
+                                        <button
+                                            onClick={handleRegisterClick}
+                                            disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}
+                                            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <span>Tham gia ngay</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -1560,22 +1529,15 @@ const EventDetail = () => {
                                     >
                                         <span>Đăng nhập để tham gia</span>
                                     </button>
-                                ) : user.role === 1 ? (
-                                    hasRegistered ? (
-                                        <div className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-green-50 text-green-700 border border-green-200">
-                                            <CheckCircle className="w-5 h-5" />
-                                            <span className="font-medium">Đã đăng ký tham gia</span>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            onClick={handleRegisterClick}
-                                            disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}
-                                            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <span>Tham gia ngay</span>
-                                        </button>
-                                    )
-                                ) : null}
+                                ) : (
+                                    <button
+                                        onClick={handleRegisterClick}
+                                        disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}
+                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <span>Tham gia ngay</span>
+                                    </button>
+                                )}
 
                                 {/* Stats under button - mobile */}
                                 {localStorage.getItem('access_token') && (

@@ -472,24 +472,29 @@ const EmergencyRequestDetail = () => {
         if (!user || user.role !== 1) return;
 
         try {
-            // Gọi API lấy danh sách responses của donor
+            const donorResponse = await authApis().get(endpoints.donor_me);
+            const currentDonorId = donorResponse.data.id;
+
             const response = await authApis().get(endpoints.emergency_responses, {
                 params: {
                     emergency_request: id
                 }
             });
 
-            // Kiểm tra xem có response nào cho emergency request này không
             if (response.data && response.data.results && response.data.results.length > 0) {
-                const myResponseData = response.data.results.find(r => r.donor?.id === user.donor?.id);
+                const myResponseData = response.data.results.find(r => r.donor?.id === currentDonorId);
+
                 if (myResponseData) {
                     setHasResponded(true);
                     setMyResponse(myResponseData);
+                } else {
+                    setHasResponded(false);
                 }
+            } else {
+                setHasResponded(false);
             }
         } catch (error) {
             console.error("Error checking response:", error);
-            // Nếu API chưa có, giả định là chưa response
             setHasResponded(false);
         }
     };

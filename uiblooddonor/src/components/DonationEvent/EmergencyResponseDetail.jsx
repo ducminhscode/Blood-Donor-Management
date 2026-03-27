@@ -572,7 +572,7 @@ const EmergencyResponseDetail = () => {
 
                     <div className="flex items-center justify-between">
                         <button
-                            onClick={() => navigate("/emergency-responses")}
+                            onClick={() => navigate("/emergency-response")}
                             className="flex p-1 relative z-20 items-center mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
                         >
                             <div className="rotate-180 p-2 group-hover:-translate-x-1 transition-transform">
