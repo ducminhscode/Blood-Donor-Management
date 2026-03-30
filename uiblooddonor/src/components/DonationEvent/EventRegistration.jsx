@@ -5,13 +5,14 @@ import {
     AlertCircle, ChevronRight, X, Sparkles, Users, Activity,
     Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle,
     Clock as ClockIcon, UserCheck, UserX, Loader2,
-    CalendarCheck
+    CalendarCheck, Grid, List, Filter as FilterIcon,
+    Send, Eye, TrendingUp, CheckCircle2,
+    RefreshCw
 } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import debounce from 'lodash.debounce';
-import '../../styles/EventList.css';
 import { UserContexts } from '../../configs/UserContexts';
 
 const EventRegistration = () => {
@@ -25,6 +26,7 @@ const EventRegistration = () => {
     const [viewMode, setViewMode] = useState('grid');
     const [dateRange, setDateRange] = useState({ from: '', to: '' });
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
     const user = useContext(UserContexts);
 
@@ -35,21 +37,20 @@ const EventRegistration = () => {
     const [originalCompletedCount, setOriginalCompletedCount] = useState(0);
 
     const statusConfig = {
-        0: { label: 'Đã đăng ký', color: 'bg-blue-500', textColor: 'text-blue-700', bgColor: 'bg-blue-50' },
-        1: { label: 'Đã xác nhận', color: 'bg-green-500', textColor: 'text-green-700', bgColor: 'bg-green-50' },
-        2: { label: 'Từ chối', color: 'bg-red-500', textColor: 'text-red-700', bgColor: 'bg-red-50' },
-        3: { label: 'Đã Check-in', color: 'bg-purple-500', textColor: 'text-purple-700', bgColor: 'bg-purple-50' },
-        4: { label: 'Đã hoàn thành', color: 'bg-emerald-500', textColor: 'text-emerald-700', bgColor: 'bg-emerald-50' }
+        0: { label: 'Đã đăng ký', color: 'bg-gradient-to-r from-blue-500 to-blue-600', textColor: 'text-white', bgColor: 'bg-blue-50' },
+        1: { label: 'Đã xác nhận', color: 'bg-gradient-to-r from-green-500 to-emerald-500', textColor: 'text-white', bgColor: 'bg-green-50' },
+        2: { label: 'Từ chối', color: 'bg-gradient-to-r from-red-500 to-red-600', textColor: 'text-white', bgColor: 'bg-red-50' },
+        3: { label: 'Đã Check-in', color: 'bg-gradient-to-r from-purple-500 to-purple-600', textColor: 'text-white', bgColor: 'bg-purple-50' },
+        4: { label: 'Đã hoàn thành', color: 'bg-gradient-to-r from-emerald-500 to-green-500', textColor: 'text-white', bgColor: 'bg-emerald-50' }
     };
 
-    // Status filter options
     const statusOptions = [
         { value: 'all', label: 'Tất cả' },
-        { value: '0', label: 'Đã đăng ký', color: 'blue' },
-        { value: '1', label: 'Đã xác nhận', color: 'green' },
-        { value: '2', label: 'Từ chối', color: 'red' },
-        { value: '3', label: 'Đã Check-in', color: 'purple' },
-        { value: '4', label: 'Đã hoàn thành', color: 'emerald' }
+        { value: '0', label: 'Đã đăng ký' },
+        { value: '1', label: 'Đã xác nhận' },
+        { value: '2', label: 'Từ chối' },
+        { value: '3', label: 'Đã Check-in' },
+        { value: '4', label: 'Đã hoàn thành' }
     ];
 
     const loadRegistrations = async (isLoadMore = false) => {
@@ -149,6 +150,7 @@ const EventRegistration = () => {
     const handleStatusChange = (status) => {
         setSelectedStatus(status);
         setPage(1);
+        setShowStatusDropdown(false);
     };
 
     const handleClearFilters = () => {
@@ -173,9 +175,8 @@ const EventRegistration = () => {
     const getStatusInfo = (statusCode) => {
         return statusConfig[statusCode] || {
             label: 'Không xác định',
-            color: 'bg-gray-500',
-            icon: AlertCircle,
-            textColor: 'text-gray-700',
+            color: 'bg-gradient-to-r from-gray-500 to-gray-600',
+            textColor: 'text-white',
             bgColor: 'bg-gray-50'
         };
     };
@@ -183,33 +184,42 @@ const EventRegistration = () => {
     const formatRegistrationDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
-
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
         const diffDays = Math.round((today - target) / (1000 * 60 * 60 * 24));
 
         if (diffDays === 0) return 'Hôm nay';
         if (diffDays === 1) return 'Hôm qua';
         if (diffDays < 7) return `${diffDays} ngày trước`;
-
         return formatDate(dateString);
     };
 
+    const getStatusLabel = () => {
+        if (selectedStatus === 'all') return 'Tất cả';
+        return statusConfig[selectedStatus]?.label || 'Tất cả';
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showStatusDropdown && !event.target.closest('.status-dropdown')) {
+                setShowStatusDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showStatusDropdown]);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
-                {/* Background Pattern */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-300 rounded-full blur-3xl"></div>
                 </div>
 
-                {/* Animated Elements */}
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -217,33 +227,35 @@ const EventRegistration = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <CalendarCheck className="w-8 h-8 text-white opacity-10" />
+                            <CalendarCheck className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="text-center md:text-left">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+                        <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                                 <Sparkles className="w-4 h-4" />
                                 <span className="text-sm font-medium">Lịch sử đăng ký của bạn</span>
                             </div>
 
-                            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                                Sự kiện đã đăng ký
-                            </h1>
+                            <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
+                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                                    <CalendarCheck className="w-10 h-10" />
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-bold">Sự kiện đã đăng ký</h1>
+                            </div>
 
-                            <p className="text-xl text-red-100 max-w-2xl mx-auto md:mx-0 mb-8">
+                            <p className="text-lg text-red-100 max-w-2xl">
                                 Theo dõi trạng thái và lịch sử tham gia các sự kiện hiến máu của bạn
                             </p>
 
-                            {/* Stats - Cố định như EventList */}
-                            <div className="flex flex-wrap gap-6 justify-center md:justify-start">
-                                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                            <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
+                                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300">
                                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                                         <Calendar className="w-6 h-6" />
                                     </div>
@@ -252,14 +264,12 @@ const EventRegistration = () => {
                                         <div className="text-sm text-white/80">Lượt đăng ký</div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300">
                                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                                         <Award className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <div className="text-2xl font-bold">
-                                            {originalCompletedCount}
-                                        </div>
+                                        <div className="text-2xl font-bold">{originalCompletedCount}</div>
                                         <div className="text-sm text-white/80">Đã hoàn thành</div>
                                     </div>
                                 </div>
@@ -267,13 +277,13 @@ const EventRegistration = () => {
                         </div>
 
                         {/* Feature Card */}
-                        <div className="hidden lg:block transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
+                        <div className="transform rotate-2 hover:rotate-0 transition-all duration-500">
+                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-xl">
                                 <div className="text-center">
-                                    <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                        <Heart className="w-10 h-10" />
+                                    <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                                        <Heart className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-xl font-bold mb-2">Cảm ơn bạn!</h3>
+                                    <h3 className="text-lg font-bold mb-1">Cảm ơn bạn!</h3>
                                     <p className="text-white/80 text-sm">Mỗi giọt máu đều quý giá</p>
                                 </div>
                             </div>
@@ -287,22 +297,22 @@ const EventRegistration = () => {
                         <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F9FAFB" />
                     </svg>
                 </div>
-            </section>
+            </div>
 
             {/* Search & Filter Section */}
-            <section className="sticky top-[64px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                         {/* Search Bar */}
-                        <div className="w-full lg:w-[450px]">
+                        <div className="w-full lg:w-[500px]">
                             <div className="relative group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm theo tên sự kiện"
+                                    placeholder="Tìm kiếm theo tên sự kiện..."
                                     value={searchTerm}
                                     onChange={handleSearchChange}
-                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300"
                                 />
                                 {searchTerm && (
                                     <button
@@ -320,94 +330,80 @@ const EventRegistration = () => {
                             </div>
                         </div>
 
-                        {/* Filter Buttons - Desktop */}
-                        <div className="hidden lg:flex items-center gap-3">
-                            {/* Status Filter Dropdown */}
-                            <div className="relative group">
-                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
-                                    <span>Trạng thái</span>
-                                    <ChevronRight className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                        <div className="flex items-center gap-3 w-full lg:w-auto">
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                            >
+                                <FilterIcon className="h-5 w-5" />
+                                <span className="font-medium">Bộ lọc</span>
+                            </button>
+
+                            {/* Status Dropdown */}
+                            <div className="relative status-dropdown">
+                                <button
+                                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[160px] justify-between"
+                                >
+                                    <span className="text-gray-700 font-medium">{getStatusLabel()}</span>
+                                    <ChevronRight className={`h-4 w-4 text-gray-500 transition-transform ${showStatusDropdown ? 'rotate-90' : ''}`} />
                                 </button>
-
-                                {/* Dropdown Menu */}
-                                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                    <div className="p-2">
-                                        {statusOptions.map((option) => {
-                                            const isSelected = selectedStatus === option.value;
-                                            const status = option.value !== 'all' ? statusConfig[option.value] : null;
-
-                                            return (
-                                                <button
-                                                    key={option.value}
-                                                    onClick={() => handleStatusChange(option.value)}
-                                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isSelected
-                                                        ? option.value === 'all'
-                                                            ? 'bg-red-600 text-white'
-                                                            : `${status.bgColor} ${status.textColor}`
-                                                        : 'hover:bg-gray-50 text-gray-700'
-                                                        }`}
-                                                >
-                                                    <span className="flex-1 text-left font-medium">{option.label}</span>
-                                                </button>
-                                            );
-                                        })}
+                                
+                                {showStatusDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
+                                        {statusOptions.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => handleStatusChange(option.value)}
+                                                className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedStatus === option.value ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                </div>
+                                )}
                             </div>
 
                             {/* Date Filter Button */}
                             <button
                                 onClick={() => setShowDatePicker(!showDatePicker)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                className="hidden lg:flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                             >
-                                <span>Ngày đăng ký</span>
+                                <Calendar className="w-4 h-4" />
+                                <span className="font-medium">Ngày đăng ký</span>
                             </button>
 
                             {/* View Mode Toggle */}
-                            <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
+                            <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                    className={`p-2 rounded-lg transition-all duration-300 ${
+                                        viewMode === 'grid'
+                                            ? 'bg-white text-red-600 shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                                     title="Xem dạng lưới"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                    </svg>
+                                    <Grid className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                    className={`p-2 rounded-lg transition-all duration-300 ${
+                                        viewMode === 'list'
+                                            ? 'bg-white text-red-600 shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                                     title="Xem dạng danh sách"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                    </svg>
+                                    <List className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>
-
-                        {/* Mobile Filter Button */}
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="lg:hidden flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors w-full justify-center"
-                        >
-                            <Filter className="h-5 w-5" />
-                            <span>Bộ lọc</span>
-                            {(selectedStatus !== 'all' || dateRange.from || dateRange.to) && (
-                                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                            )}
-                        </button>
                     </div>
 
                     {/* Date Picker */}
                     {showDatePicker && (
-                        <div className="hidden lg:block mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="hidden lg:block mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center gap-4">
                                 <div className="flex-1">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
@@ -415,7 +411,7 @@ const EventRegistration = () => {
                                         type="date"
                                         value={dateRange.from}
                                         onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -424,12 +420,12 @@ const EventRegistration = () => {
                                         type="date"
                                         value={dateRange.to}
                                         onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
                                 </div>
                                 <button
                                     onClick={() => setShowDatePicker(false)}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
+                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Áp dụng
                                 </button>
@@ -439,112 +435,90 @@ const EventRegistration = () => {
 
                     {/* Mobile Filters */}
                     {showFilters && (
-                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold">Bộ lọc</h3>
-                                <button
-                                    onClick={() => setShowFilters(false)}
-                                    className="p-2 hover:bg-gray-200 rounded-lg"
-                                >
+                                <h3 className="font-semibold text-gray-900">Bộ lọc</h3>
+                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-200 rounded-lg">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
                             <div className="space-y-4">
-                                {/* Status Filter - Mobile */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Trạng thái
-                                    </label>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Trạng thái</label>
                                     <div className="grid grid-cols-2 gap-2">
-                                        {statusOptions.map((option) => {
-                                            const isSelected = selectedStatus === option.value;
-                                            const status = option.value !== 'all' ? statusConfig[option.value] : null;
-
-                                            return (
-                                                <button
-                                                    key={option.value}
-                                                    onClick={() => {
-                                                        handleStatusChange(option.value);
-                                                        setShowFilters(false);
-                                                    }}
-                                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${isSelected
-                                                        ? option.value === 'all'
-                                                            ? 'bg-red-600 text-white border-red-600'
-                                                            : `${status.bgColor} ${status.textColor} border-${status.color}-200`
-                                                        : 'border-gray-200 hover:border-red-200 hover:text-red-600 bg-white'
-                                                        }`}
-                                                >
-                                                    <span className="text-sm">{option.label}</span>
-                                                </button>
-                                            );
-                                        })}
+                                        {statusOptions.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => {
+                                                    handleStatusChange(option.value);
+                                                    setShowFilters(false);
+                                                }}
+                                                className={`px-3 py-2 rounded-lg border transition-all ${
+                                                    selectedStatus === option.value
+                                                        ? 'border-red-500 bg-red-50 text-red-600'
+                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                }`}
+                                            >
+                                                <span className="text-sm">{option.label}</span>
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
-                                {/* Date Filter - Mobile */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Ngày đăng ký
-                                    </label>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Ngày đăng ký</label>
                                     <div className="space-y-2">
                                         <input
                                             type="date"
                                             value={dateRange.from}
                                             onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                             placeholder="Từ ngày"
                                         />
                                         <input
                                             type="date"
                                             value={dateRange.to}
                                             onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                             placeholder="Đến ngày"
                                         />
                                     </div>
                                 </div>
 
-                                {/* View Mode - Mobile */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Chế độ xem
-                                    </label>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Chế độ xem</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
-                                            onClick={() => setViewMode('grid')}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
-                                                ? 'border-red-500 bg-red-50 text-red-600'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
+                                            onClick={() => {
+                                                setViewMode('grid');
+                                                setShowFilters(false);
+                                            }}
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
+                                                viewMode === 'grid'
+                                                    ? 'border-red-500 bg-red-50 text-red-600'
+                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                            }`}
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                            </svg>
+                                            <Grid className="w-4 h-4" />
                                             <span>Dạng lưới</span>
                                         </button>
                                         <button
-                                            onClick={() => setViewMode('list')}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
-                                                ? 'border-red-500 bg-red-50 text-red-600'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
+                                            onClick={() => {
+                                                setViewMode('list');
+                                                setShowFilters(false);
+                                            }}
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
+                                                viewMode === 'list'
+                                                    ? 'border-red-500 bg-red-50 text-red-600'
+                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                            }`}
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                            </svg>
+                                            <List className="w-4 h-4" />
                                             <span>Dạng danh sách</span>
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* Apply Button - Mobile */}
-                                <button
-                                    onClick={() => setShowFilters(false)}
-                                    className="w-full px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
-                                >
-                                    Áp dụng bộ lọc
-                                </button>
                             </div>
                         </div>
                     )}
@@ -555,10 +529,7 @@ const EventRegistration = () => {
                             {selectedStatus !== 'all' && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Trạng thái: {statusConfig[selectedStatus]?.label}</span>
-                                    <button
-                                        onClick={() => setSelectedStatus('all')}
-                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-                                    >
+                                    <button onClick={() => setSelectedStatus('all')} className="p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -566,10 +537,7 @@ const EventRegistration = () => {
                             {dateRange.from && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Từ: {formatDate(dateRange.from)}</span>
-                                    <button
-                                        onClick={() => setDateRange(prev => ({ ...prev, from: '' }))}
-                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-                                    >
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, from: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -577,10 +545,7 @@ const EventRegistration = () => {
                             {dateRange.to && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Đến: {formatDate(dateRange.to)}</span>
-                                    <button
-                                        onClick={() => setDateRange(prev => ({ ...prev, to: '' }))}
-                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-                                    >
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, to: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -589,14 +554,7 @@ const EventRegistration = () => {
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <Search className="h-4 w-4" />
                                     <span>Tìm kiếm: "{searchTerm}"</span>
-                                    <button
-                                        onClick={() => {
-                                            setSearchTerm("");
-                                            setPage(1);
-                                            loadRegistrations(false);
-                                        }}
-                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-                                    >
+                                    <button onClick={() => setSearchTerm("")} className="p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -612,145 +570,235 @@ const EventRegistration = () => {
                         </div>
                     )}
                 </div>
-            </section>
+            </div>
 
             {/* Main Content */}
-            <section className="py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Loading Skeleton */}
-                    {loading && (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
-                                    <div className="h-48 bg-gray-200"></div>
-                                    <div className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
-                                            <div className="h-6 w-24 bg-gray-200 rounded-lg"></div>
-                                        </div>
-                                        <div className="h-6 bg-gray-200 rounded-lg mb-2"></div>
-                                        <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                                        <div className="space-y-2 mb-4">
-                                            <div className="h-4 bg-gray-200 rounded"></div>
-                                            <div className="h-4 bg-gray-200 rounded"></div>
-                                            <div className="h-4 bg-gray-200 rounded"></div>
-                                        </div>
-                                        <div className="h-10 bg-gray-200 rounded-lg"></div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Loading Skeleton */}
+                {loading && (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
+                                <div className="h-48 bg-gray-200"></div>
+                                <div className="p-5">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+                                        <div className="h-6 w-24 bg-gray-200 rounded-lg"></div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {error && !loading && (
-                        <div className="max-w-2xl mx-auto mb-6">
-                            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <AlertCircle className="h-6 w-6 text-red-600" />
+                                    <div className="h-6 bg-gray-200 rounded-lg w-3/4 mb-3"></div>
+                                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                                    <div className="space-y-2 mb-4">
+                                        <div className="h-4 bg-gray-200 rounded"></div>
+                                        <div className="h-4 bg-gray-200 rounded"></div>
+                                        <div className="h-4 bg-gray-200 rounded"></div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold text-red-800 mb-1">Đã xảy ra lỗi</h3>
-                                        <p className="text-red-600">{error}</p>
-                                    </div>
-                                    <button
-                                        onClick={handleRefresh}
-                                        className="ml-auto px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
-                                    >
-                                        Thử lại
-                                    </button>
+                                    <div className="h-10 bg-gray-200 rounded-lg"></div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
+                )}
 
-                    {!loading && !error && registrations.length === 0 && (
-                        <div className="text-center py-20">
-                            <div className="relative inline-block">
-                                <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform">
-                                    <Calendar className="h-16 w-16 text-red-600" />
+                {/* Error State */}
+                {error && !loading && (
+                    <div className="max-w-2xl mx-auto mb-6">
+                        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 animate-shake">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <AlertCircle className="h-6 w-6 text-red-600" />
                                 </div>
-                                <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                    0
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-red-800 mb-1">Đã xảy ra lỗi</h3>
+                                    <p className="text-red-600">{error}</p>
                                 </div>
-                            </div>
-
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                                {searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to
-                                    ? "Không tìm thấy đăng ký phù hợp"
-                                    : "Bạn chưa đăng ký sự kiện nào"}
-                            </h3>
-
-                            <p className="text-gray-600 mb-6">
-                                {searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to
-                                    ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác"
-                                    : "Hãy tham gia các sự kiện hiến máu để cứu giúp những mảnh đời cần bạn"}
-                            </p>
-
-                            {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) ? (
                                 <button
-                                    onClick={handleClearFilters}
-                                    className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
+                                    onClick={handleRefresh}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
-                                    Xóa tất cả bộ lọc
+                                    Thử lại
                                 </button>
-                            ) : (
-                                <Link
-                                    to="/events"
-                                    className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 inline-flex items-center gap-2"
-                                >
-                                    <Heart className="w-5 h-5" />
-                                    <span>Khám phá sự kiện</span>
-                                </Link>
-                            )}
+                            </div>
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {!loading && !error && registrations.length > 0 && (
-                        <>
-                            {/* Results Header */}
-                            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
-                                        <span className="font-bold">{registrations.length}</span>
-                                    </div>
-                                    <span className="text-gray-600">
-                                        đăng ký {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) && "phù hợp"}
-                                    </span>
-                                </div>
+                {/* Empty State */}
+                {!loading && !error && registrations.length === 0 && (
+                    <div className="text-center py-20">
+                        <div className="relative inline-block">
+                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg">
+                                <Calendar className="h-16 w-16 text-red-600" />
+                            </div>
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                                0
+                            </div>
+                        </div>
 
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handleRefresh}
-                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
-                                        disabled={loading}
-                                    >
-                                        <svg
-                                            className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`}
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        <span>Làm mới</span>
-                                    </button>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                            {searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to
+                                ? "Không tìm thấy đăng ký phù hợp"
+                                : "Bạn chưa đăng ký sự kiện nào"}
+                        </h3>
+
+                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                            {searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to
+                                ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác"
+                                : "Hãy tham gia các sự kiện hiến máu để cứu giúp những mảnh đời cần bạn"}
+                        </p>
+
+                        {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) ? (
+                            <button
+                                onClick={handleClearFilters}
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                            >
+                                <X className="w-5 h-5" />
+                                Xóa tất cả bộ lọc
+                            </button>
+                        ) : (
+                            <Link
+                                to="/list-event"
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                            >
+                                <Heart className="w-5 h-5" />
+                                Khám phá sự kiện
+                            </Link>
+                        )}
+                    </div>
+                )}
+
+                {/* Results */}
+                {!loading && !error && registrations.length > 0 && (
+                    <>
+                        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
+                                    <span className="font-bold text-lg">{totalRegistrations}</span>
                                 </div>
+                                <span className="text-gray-600">
+                                    đăng ký {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) && "phù hợp"}
+                                </span>
                             </div>
 
-                            {/* Grid View */}
-                            {viewMode === 'grid' ? (
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {registrations.map((registration) => {
-                                        const statusInfo = getStatusInfo(registration.status);
+                            <button
+                                onClick={handleRefresh}
+                                disabled={loading}
+                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                            >
+                                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                                <span>Làm mới</span>
+                            </button>
+                        </div>
 
-                                        return (
-                                            <div
-                                                key={registration.id}
-                                                className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
-                                            >
-                                                {/* Image Container */}
-                                                <div className="relative h-48 overflow-hidden">
+                        {/* Grid View */}
+                        {viewMode === 'grid' ? (
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {registrations.map((registration) => {
+                                    const statusInfo = getStatusInfo(registration.status);
+
+                                    return (
+                                        <div
+                                            key={registration.id}
+                                            className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200"
+                                        >
+                                            {/* Image Container */}
+                                            <div className="relative h-48 overflow-hidden">
+                                                {registration.donation_event?.image_url ? (
+                                                    <img
+                                                        src={getImageUrl(registration.donation_event.image_url)}
+                                                        alt={registration.donation_event.title}
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
+                                                        <Droplet className="h-16 w-16 text-white opacity-50" />
+                                                    </div>
+                                                )}
+
+                                                {/* Status Badge */}
+                                                <div className="absolute top-4 left-4">
+                                                    <span className={`${statusInfo.color} text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-md`}>
+                                                        {statusInfo.label}
+                                                    </span>
+                                                </div>
+
+                                                {/* Registration Date */}
+                                                <div className="absolute top-4 right-4">
+                                                    <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold">
+                                                        {formatRegistrationDate(registration.created_at)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="p-5">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">
+                                                    {registration.donation_event?.title || "Sự kiện hiến máu"}
+                                                </h3>
+
+                                                <p className="text-gray-500 text-sm mb-4 line-clamp-2">
+                                                    {registration.donation_event?.description || "Cùng tham gia hiến máu cứu người"}
+                                                </p>
+
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex items-start text-sm text-gray-600">
+                                                        <MapPin className="w-4 h-4 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                                                        <span className="truncate">
+                                                            {registration.donation_event?.location}, {registration.donation_event?.sub_district}, {registration.donation_event?.province}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-gray-600">
+                                                        <Calendar className="w-4 h-4 text-red-500 mr-2" />
+                                                        <span>{registration.donation_event?.time_start ? formatDate(registration.donation_event.time_start) : 'Chưa cập nhật'}</span>
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-gray-600">
+                                                        <Clock className="w-4 h-4 text-red-500 mr-2" />
+                                                        <span>{registration.donation_event?.time_start ? formatTime(registration.donation_event.time_start) : 'Chưa cập nhật'}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Registration Info */}
+                                                <div className="mb-4 p-3 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100">
+                                                    <div className="flex items-center justify-between text-sm mb-2">
+                                                        <span className="text-gray-500">Người đăng ký:</span>
+                                                        <span className="font-semibold text-gray-900">
+                                                            {registration.last_name} {registration.first_name}
+                                                        </span>
+                                                    </div>
+                                                    {registration.is_proxy && (
+                                                        <div className="inline-flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
+                                                            <Users className="w-3 h-3" />
+                                                            <span>Đăng ký hộ</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Action Button */}
+                                                <Link
+                                                    to={`/event-registration/${registration.id}`}
+                                                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg"
+                                                >
+                                                    <span className="font-medium">Xem chi tiết</span>
+                                                    <Eye className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            // List View
+                            <div className="space-y-3">
+                                {registrations.map((registration) => {
+                                    const statusInfo = getStatusInfo(registration.status);
+
+                                    return (
+                                        <div
+                                            key={registration.id}
+                                            className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200"
+                                        >
+                                            <div className="flex flex-col md:flex-row">
+                                                {/* Image */}
+                                                <div className="md:w-64 h-48 md:h-auto relative overflow-hidden bg-gradient-to-br from-red-400 to-red-600">
                                                     {registration.donation_event?.image_url ? (
                                                         <img
                                                             src={getImageUrl(registration.donation_event.image_url)}
@@ -758,217 +806,142 @@ const EventRegistration = () => {
                                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                         />
                                                     ) : (
-                                                        <div className="w-full h-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
-                                                            <Droplet className="h-16 w-16 text-white opacity-50" />
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <Droplet className="h-12 w-12 text-white opacity-50" />
                                                         </div>
                                                     )}
-
-                                                    {/* Status Badge */}
                                                     <div className="absolute top-4 left-4">
-                                                        <span className={`${statusInfo.color} text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-lg`}>
-
+                                                        <span className={`${statusInfo.color} text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-md`}>
                                                             {statusInfo.label}
                                                         </span>
                                                     </div>
+                                                </div>
 
-                                                    {/* Registration Date */}
-                                                    <div className="absolute top-4 right-4">
-                                                        <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1">
+                                                {/* Content */}
+                                                <div className="flex-1 p-5">
+                                                    <div className="flex items-start justify-between mb-2">
+                                                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                                            {registration.donation_event?.title || "Sự kiện hiến máu"}
+                                                        </h3>
+                                                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                                                            <Clock className="w-4 h-4" />
                                                             {formatRegistrationDate(registration.created_at)}
                                                         </span>
                                                     </div>
 
-                                                    {/* Gradient Overlay */}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                </div>
-
-                                                {/* Content */}
-                                                <div className="p-6">
-                                                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">
-                                                        {registration.donation_event?.title || "Sự kiện hiến máu"}
-                                                    </h3>
-
-                                                    <p className="text-gray-600 mb-4 line-clamp-2">
+                                                    <p className="text-gray-500 text-sm mb-3 line-clamp-2">
                                                         {registration.donation_event?.description || "Cùng tham gia hiến máu cứu người"}
                                                     </p>
 
-                                                    {/* Event Details */}
-                                                    <div className="space-y-3 mb-4">
-                                                        <div className="flex items-start text-gray-600">
-                                                            <MapPin className="h-4 w-4 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
-                                                            <span className="text-sm break-words whitespace-normal">
-                                                                {registration.donation_event?.location}, {registration.donation_event?.sub_district}, {registration.donation_event?.province}
-                                                            </span>
+                                                    <div className="grid grid-cols-2 gap-3 mb-4">
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <MapPin className="w-4 h-4 text-red-500 mr-2" />
+                                                            <span className="truncate">{registration.donation_event?.province}</span>
                                                         </div>
-
-                                                        <div className="flex items-center text-gray-600">
-                                                            <Calendar className="h-4 w-4 text-red-600 mr-2 flex-shrink-0" />
-                                                            <span className="text-sm">
-                                                                {registration.donation_event?.time_start ? formatDate(registration.donation_event.time_start) : 'Chưa cập nhật'}
-                                                            </span>
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Calendar className="w-4 h-4 text-red-500 mr-2" />
+                                                            <span>{registration.donation_event?.time_start ? formatDate(registration.donation_event.time_start) : 'Chưa cập nhật'}</span>
                                                         </div>
-
-                                                        <div className="flex items-center text-gray-600">
-                                                            <Clock className="h-4 w-4 text-red-600 mr-2 flex-shrink-0" />
-                                                            <span className="text-sm">
-                                                                {registration.donation_event?.time_start ? formatTime(registration.donation_event.time_start) : 'Chưa cập nhật'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Registration Info */}
-                                                    <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-                                                        <div className="flex items-center justify-between text-sm mb-2">
-                                                            <span className="text-gray-600">Người đăng ký:</span>
-                                                            <span className="font-medium text-gray-900">
-                                                                {registration.last_name} {registration.first_name}
-                                                            </span>
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Users className="w-4 h-4 text-red-500 mr-2" />
+                                                            <span>{registration.last_name} {registration.first_name}</span>
                                                         </div>
                                                         {registration.is_proxy && (
-                                                            <div className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
-                                                                <Users className="w-3 h-3" />
+                                                            <div className="flex items-center text-orange-600 text-sm">
+                                                                <Users className="w-4 h-4 mr-2" />
                                                                 <span>Đăng ký hộ</span>
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    {/* Action Button */}
                                                     <Link
                                                         to={`/event-registration/${registration.id}`}
-                                                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group/btn bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25"
+                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md text-sm font-medium"
                                                     >
-                                                        <span className="font-medium">Xem chi tiết đăng ký</span>
-                                                        <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" />
+                                                        <Eye className="w-4 h-4" />
+                                                        Xem chi tiết
                                                     </Link>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Load More */}
+                        {hasNextPage && (
+                            <div className="flex justify-center mt-12">
+                                <button
+                                    onClick={handleLoadMore}
+                                    disabled={loadingMore}
+                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                >
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        {loadingMore ? (
+                                            <>
+                                                <Loader2 className="animate-spin w-5 h-5" />
+                                                <span>Đang tải thêm...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send className="w-5 h-5" />
+                                                <span>Xem thêm đăng ký</span>
+                                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </span>
+                                </button>
+                            </div>
+                        )}
+
+                        {!hasNextPage && registrations.length > 0 && (
+                            <div className="text-center mt-12">
+                                <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
+                                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                    <span>Đã hiển thị tất cả {totalRegistrations} đăng ký</span>
                                 </div>
-                            ) : (
-                                // List View
-                                <div className="space-y-4">
-                                    {registrations.map((registration) => {
-                                        const statusInfo = getStatusInfo(registration.status);
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
 
-                                        return (
-                                            <div
-                                                key={registration.id}
-                                                className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
-                                            >
-                                                <div className="flex flex-col md:flex-row">
-                                                    {/* Image */}
-                                                    <div className="md:w-64 h-48 md:h-auto relative overflow-hidden">
-                                                        {registration.donation_event?.image_url ? (
-                                                            <img
-                                                                src={getImageUrl(registration.donation_event.image_url)}
-                                                                alt={registration.donation_event.title}
-                                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
-                                                                <Droplet className="h-16 w-16 text-white opacity-50" />
-                                                            </div>
-                                                        )}
-
-                                                        <div className="absolute top-4 left-4">
-                                                            <span className={`${statusInfo.color} text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1`}>
-
-                                                                {statusInfo.label}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Content */}
-                                                    <div className="flex-1 p-6">
-                                                        <div className="flex items-start justify-between mb-2">
-                                                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
-                                                                {registration.donation_event?.title || "Sự kiện hiến máu"}
-                                                            </h3>
-                                                            <span className="text-sm text-gray-500 flex items-center gap-1">
-                                                                <Clock className="w-4 h-4" />
-                                                                {formatRegistrationDate(registration.created_at)}
-                                                            </span>
-                                                        </div>
-
-                                                        <p className="text-gray-600 mb-4">
-                                                            {registration.donation_event?.description || "Cùng tham gia hiến máu cứu người"}
-                                                        </p>
-
-                                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                                            <div className="flex items-center text-gray-600">
-                                                                <MapPin className="h-4 w-4 text-red-600 mr-2 flex-shrink-0" />
-                                                                <span className="text-sm">{registration.donation_event?.province}</span>
-                                                            </div>
-                                                            <div className="flex items-center text-gray-600">
-                                                                <Calendar className="h-4 w-4 text-red-600 mr-2 flex-shrink-0" />
-                                                                <span className="text-sm">{registration.donation_event?.time_start ? formatDate(registration.donation_event.time_start) : 'Chưa cập nhật'}</span>
-                                                            </div>
-                                                            <div className="flex items-center text-gray-600">
-                                                                <Users className="h-4 w-4 text-red-600 mr-2 flex-shrink-0" />
-                                                                <span className="text-sm">{registration.last_name} {registration.first_name}</span>
-                                                            </div>
-                                                            {registration.is_proxy && (
-                                                                <div className="flex items-center text-orange-600">
-                                                                    <Users className="h-4 w-4 mr-2" />
-                                                                    <span className="text-sm">Đăng ký hộ</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-
-                                                        <Link
-                                                            to={`/event/${registration.donation_event?.id}`}
-                                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
-                                                        >
-                                                            <span>Xem chi tiết</span>
-                                                            <ChevronRight className="h-4 w-4" />
-                                                        </Link>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-
-                            {/* Load More */}
-                            {hasNextPage && (
-                                <div className="flex justify-center mt-12">
-                                    <button
-                                        onClick={handleLoadMore}
-                                        disabled={loadingMore}
-                                        className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-xl disabled:from-red-400 disabled:to-red-400 disabled:cursor-not-allowed overflow-hidden"
-                                    >
-                                        <span className="relative z-10 flex items-center gap-2">
-                                            {loadingMore ? (
-                                                <>
-                                                    <Loader2 className="animate-spin h-5 w-5" />
-                                                    <span>Đang tải thêm...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>Xem thêm đăng ký</span>
-                                                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                                </>
-                                            )}
-                                        </span>
-                                    </button>
-                                </div>
-                            )}
-
-                            {!hasNextPage && registrations.length > 0 && (
-                                <div className="text-center mt-12">
-                                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
-                                        <CalendarCheck className="w-5 h-5" />
-                                        <span>Đã hiển thị tất cả đăng ký</span>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            </section>
-
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out;
+                }
+                
+                .animate-shake {
+                    animation: shake 0.5s ease-in-out;
+                }
+            `}</style>
         </div>
     );
 };

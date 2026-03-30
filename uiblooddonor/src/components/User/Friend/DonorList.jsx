@@ -9,14 +9,14 @@ import {
     Copy, Facebook, Twitter, Mail as MailIcon, MessageSquare,
     Phone as PhoneIcon, MapPinned, Home, FileText, Globe,
     Cake, Hash, BadgeCheck, Medal, Trophy, Target,
-    Filter, Send, Ban
+    Filter, Send, Ban, Loader2, TrendingUp, CalendarDays,
+    VenusAndMars, BadgeInfo
 } from 'lucide-react';
 import { authApis, endpoints } from '../../../configs/APIs';
 import { getImageUrl } from '../../../utils/Image';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
 import { UserContexts } from '../../../configs/UserContexts';
-import '../../../styles/DonorList.css';
 
 const DonorList = () => {
     const [donors, setDonors] = useState([]);
@@ -37,8 +37,7 @@ const DonorList = () => {
     const [message, setMessage] = useState({ text: "", type: "" });
     const [activeTab, setActiveTab] = useState('info');
 
-    const currentUser = useContext(UserContexts)
-
+    const currentUser = useContext(UserContexts);
     const [friendStatuses, setFriendStatuses] = useState({});
     const navigate = useNavigate();
 
@@ -85,7 +84,7 @@ const DonorList = () => {
                 params.append('search', searchTerm);
             }
 
-            let ordering = 'recent';
+            let ordering = '-last_login';
             if (sortBy === 'donation_count') ordering = '-donation_count';
             else if (sortBy === 'points') ordering = '-points';
             else if (sortBy === 'name') ordering = 'last_name,first_name';
@@ -99,33 +98,35 @@ const DonorList = () => {
 
             const response = await authApis().get(url);
 
-            const formattedDonors = response.data.results.filter(donor => donor.account.id !== currentUser?.id).map(donor => ({
-                id: donor.id,
-                username: donor.account.username,
-                last_name: donor.account.last_name,
-                first_name: donor.account.first_name,
-                avatar: donor.account.avatar,
-                email: donor.account.email,
-                phone: donor.account.phone,
-                birth_date: donor.account.birth_date,
-                gender: donor.account.gender,
-                blood_type: donor.blood_type,
-                rh_factor: donor.rh_factor,
-                donation_count: donor.donation_count,
-                points: donor.points,
-                career: donor.career,
-                organization: donor.organization,
-                province: donor.province,
-                sub_district: donor.sub_district,
-                permanent_address: donor.permanent_address,
-                weight: donor.weight,
-                height: donor.height,
-                bmi: donor.bmi,
-                can_donation: donor.can_donation,
-                last_donation: donor.last_donation,
-                is_private: donor.is_private,
-                last_login: donor.account.last_login
-            }));
+            const formattedDonors = response.data.results
+                .filter(donor => donor.account.id !== currentUser?.id)
+                .map(donor => ({
+                    id: donor.id,
+                    username: donor.account.username,
+                    last_name: donor.account.last_name,
+                    first_name: donor.account.first_name,
+                    avatar: donor.account.avatar,
+                    email: donor.account.email,
+                    phone: donor.account.phone,
+                    birth_date: donor.account.birth_date,
+                    gender: donor.account.gender,
+                    blood_type: donor.blood_type,
+                    rh_factor: donor.rh_factor,
+                    donation_count: donor.donation_count,
+                    points: donor.points,
+                    career: donor.career,
+                    organization: donor.organization,
+                    province: donor.province,
+                    sub_district: donor.sub_district,
+                    permanent_address: donor.permanent_address,
+                    weight: donor.weight,
+                    height: donor.height,
+                    bmi: donor.bmi,
+                    can_donation: donor.can_donation,
+                    last_donation: donor.last_donation,
+                    is_private: donor.is_private,
+                    last_login: donor.account.last_login
+                }));
 
             if (isLoadMore) {
                 setDonors(prev => [...prev, ...formattedDonors]);
@@ -271,6 +272,11 @@ const DonorList = () => {
         }
     };
 
+    const handleSortChange = (value) => {
+        setSortBy(value);
+        setPage(1);
+    };
+
     const getFullName = (donor) => {
         return `${donor.last_name || ''} ${donor.first_name || ''}`.trim() || 'Chưa cập nhật';
     };
@@ -299,8 +305,9 @@ const DonorList = () => {
     };
 
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
-        if (!bloodType || !rhFactor) return 'Chưa cập nhật';
-        return `${bloodType === 0 ? 'O' : bloodType === 1 ? 'A' : bloodType === 2 ? 'B' : 'AB'}${rhFactor === 0 ? '-' : '+'}`;
+        if (bloodType === undefined || rhFactor === undefined) return 'Chưa cập nhật';
+        const bloodMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
+        return `${bloodMap[bloodType] || '?'}${rhFactor === 0 ? '-' : '+'}`;
     };
 
     const getDonationLevel = (count) => {
@@ -318,9 +325,9 @@ const DonorList = () => {
             return (
                 <button
                     disabled
-                    className="w-full px-4 py-3 bg-gray-400 text-white rounded-xl flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 bg-gray-400 text-white rounded-xl flex items-center justify-center gap-2 cursor-not-allowed"
                 >
-                    <Loader className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     Đang xử lý...
                 </button>
             );
@@ -332,9 +339,9 @@ const DonorList = () => {
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate('#');
+                            navigate('/chat', { state: { selectedFriend: donor } });
                         }}
-                        className="w-full px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-red-50 to-red-100 text-red-600 rounded-xl hover:from-red-100 hover:to-red-200 transition-all duration-300 flex items-center justify-center gap-2 font-medium"
                     >
                         <MessageCircle className="w-4 h-4" />
                         Nhắn tin
@@ -346,7 +353,7 @@ const DonorList = () => {
                     <div className="flex gap-2 w-full">
                         <button
                             disabled
-                            className="flex-1 px-4 py-3 text-red-600 border-2 border-red-600 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed"
+                            className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-500 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed"
                         >
                             <Send className="w-4 h-4" />
                             Đã gửi lời mời
@@ -356,11 +363,10 @@ const DonorList = () => {
                                 e.stopPropagation();
                                 handleCancelRequest(donor.id);
                             }}
-                            className="px-4 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                            className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 flex items-center justify-center gap-2"
                             title="Hủy lời mời"
                         >
                             <UserMinus className="w-4 h-4" />
-                            Hủy lời mời
                         </button>
                     </div>
                 );
@@ -373,7 +379,7 @@ const DonorList = () => {
                                 e.stopPropagation();
                                 handleAcceptRequest(donor.id);
                             }}
-                            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 flex items-center justify-center gap-2"
+                            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl hover:from-green-700 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
                         >
                             <UserCheck className="w-4 h-4" />
                             Chấp nhận
@@ -383,11 +389,10 @@ const DonorList = () => {
                                 e.stopPropagation();
                                 handleRejectRequest(donor.id);
                             }}
-                            className="x-4 py-3 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50 min-w-[120px]"
+                            className="px-4 py-2.5 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all duration-300 flex items-center justify-center gap-2"
                             title="Từ chối"
                         >
                             <UserX className="w-4 h-4" />
-                            Từ chối
                         </button>
                     </div>
                 );
@@ -400,7 +405,7 @@ const DonorList = () => {
                             e.stopPropagation();
                             handleSendRequest(donor.id);
                         }}
-                        className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 flex items-center justify-center gap-2"
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                     >
                         <UserPlus className="w-4 h-4" />
                         Kết bạn
@@ -419,7 +424,7 @@ const DonorList = () => {
                 </div>
 
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -427,38 +432,46 @@ const DonorList = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <Users className="w-8 h-8 text-white opacity-10" />
+                            <Users className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-16">
-                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Danh sách bạn bè</span>
-                        <span>/</span>
-                        <span className='text-white'>Tìm kiếm người hiến máu</span>
-                    </nav>
-                    <button
-                        onClick={() => navigate("/friend-list")}
-                        className="flex p-2 mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
-                    >
-                        <ChevronRight className="w-6 h-6 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Danh sách bạn bè</span>
-                    </button>
-                    <div className="flex items-center gap-4 mb-6">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div>
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Users className="w-8 h-8" />
-                                </div>
-                                <h1 className="text-3xl md:text-4xl font-bold mb-2">Tìm kiếm người hiến máu</h1>
+                            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
+                                <Users className="w-4 h-4" />
+                                <span className="text-sm font-medium">Cộng đồng hiến máu</span>
                             </div>
-                            <p className="text-red-100 text-lg ml-17">
-                                Kết nối với những người có cùng nhóm máu và sẵn sàng giúp đỡ
-                            </p>
+                            <h1 className="text-3xl md:text-4xl font-bold mb-2">Tìm kiếm người hiến máu</h1>
+                            <p className="text-red-100 text-lg">Kết nối với những người có cùng nhóm máu và sẵn sàng giúp đỡ</p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                            <button
+                                onClick={() => navigate("/friend-list")}
+                                className="group flex items-center gap-2 px-5 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-300 backdrop-blur-sm"
+                            >
+                                <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                <span className="font-medium">Danh sách bạn bè</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="flex flex-wrap gap-4 mt-8">
+                        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300">
+                            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <Users className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold">{totalDonors}</div>
+                                <div className="text-sm text-white/80">Người hiến máu</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -470,24 +483,25 @@ const DonorList = () => {
                     </svg>
                 </div>
             </div>
+
             {/* Message Toast */}
             {message.text && (
-                <div className="fixed top-24 right-4 z-50 animate-slideIn">
-                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
+                <div className="fixed top-24 right-4 z-50 animate-slideInRight">
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-red-500 text-white'
                         }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
                         }
-                        <span>{message.text}</span>
+                        <span className="font-medium">{message.text}</span>
                     </div>
                 </div>
             )}
 
             {/* Search & Filter Section */}
-            <div className="sticky top-[64px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                         {/* Search Bar */}
@@ -496,10 +510,10 @@ const DonorList = () => {
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
+                                    placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
                                     value={searchTerm}
                                     onChange={handleSearchChange}
-                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300"
                                 />
                                 {searchTerm && (
                                     <button
@@ -515,19 +529,19 @@ const DonorList = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <Filter className="h-5 w-5" />
-                                <span>Bộ lọc</span>
+                                <span className="font-medium">Bộ lọc</span>
                             </button>
 
                             {/* View Mode Toggle */}
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                            ? 'bg-white text-red-600 shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng lưới"
                                 >
@@ -537,9 +551,9 @@ const DonorList = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                            ? 'bg-white text-red-600 shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng danh sách"
                                 >
@@ -553,12 +567,12 @@ const DonorList = () => {
 
                     {/* Mobile Filters */}
                     {showFilters && (
-                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold">Sắp xếp</h3>
+                                <h3 className="font-semibold text-gray-900">Bộ lọc</h3>
                                 <button
                                     onClick={() => setShowFilters(false)}
-                                    className="p-2 hover:bg-gray-200 rounded-lg"
+                                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -572,10 +586,13 @@ const DonorList = () => {
                                     </label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
-                                            onClick={() => setViewMode('grid')}
+                                            onClick={() => {
+                                                setViewMode('grid');
+                                                setShowFilters(false);
+                                            }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
-                                                ? 'border-red-500 bg-red-50 text-red-600'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-red-500 bg-red-50 text-red-600'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -584,10 +601,13 @@ const DonorList = () => {
                                             <span>Dạng lưới</span>
                                         </button>
                                         <button
-                                            onClick={() => setViewMode('list')}
+                                            onClick={() => {
+                                                setViewMode('list');
+                                                setShowFilters(false);
+                                            }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
-                                                ? 'border-red-500 bg-red-50 text-red-600'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-red-500 bg-red-50 text-red-600'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -601,21 +621,19 @@ const DonorList = () => {
                         </div>
                     )}
 
-                    {/* Active Filters */}
+                    {/* Active Search Indicator */}
                     {searchTerm && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            {searchTerm && (
-                                <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
-                                    <Search className="h-4 w-4" />
-                                    <span>Tìm kiếm: "{searchTerm}"</span>
-                                    <button
-                                        onClick={handleClearSearch}
-                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-                                    >
-                                        <X className="h-3 w-3" />
-                                    </button>
-                                </span>
-                            )}
+                        <div className="mt-4">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
+                                <Search className="h-4 w-4" />
+                                <span>Tìm kiếm: "{searchTerm}"</span>
+                                <button
+                                    onClick={handleClearSearch}
+                                    className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -628,7 +646,7 @@ const DonorList = () => {
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
-                                <span className="font-bold">{totalDonors}</span>
+                                <span className="font-bold text-lg">{totalDonors}</span>
                             </div>
                             <span className="text-gray-600">
                                 người hiến máu {searchTerm && "phù hợp với tìm kiếm"}
@@ -642,12 +660,12 @@ const DonorList = () => {
                     <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid-cols-1 gap-4'}`}>
                         {[...Array(6)].map((_, i) => (
                             <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
-                                <div className="p-4">
+                                <div className="p-6">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                                        <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
                                         <div className="flex-1">
-                                            <div className="h-5 bg-gray-200 rounded-lg mb-2"></div>
-                                            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                                            <div className="h-5 bg-gray-200 rounded-lg w-32 mb-2"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-24"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -671,22 +689,22 @@ const DonorList = () => {
                                         <div
                                             key={donor.id}
                                             onClick={() => handleViewDetail(donor.id)}
-                                            className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                                            className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-red-200"
                                         >
                                             {/* Status Badge */}
-                                            {status === 'friend' && (
-                                                <div className="absolute top-4 left-4 z-10">
-                                                    <span className="bg-green-500 text-white px-2 py-1 rounded-lg text-xs">
+                                            <div className="absolute top-4 left-4 z-10">
+                                                {status === 'friend' && donor.last_login && (
+                                                    <span className="inline-flex items-center gap-1 bg-green-500 text-white px-2.5 py-1 rounded-lg text-xs font-medium shadow-md">
+                                                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                                                         Online {formatRelativeTime(donor.last_login)}
                                                     </span>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
 
-                                            {/* Content */}
                                             <div className="p-6">
-                                                <div className="flex flex-col items-center text-center mb-4">
-                                                    <div className="relative mb-3">
-                                                        <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
+                                                <div className="flex flex-col items-center text-center">
+                                                    <div className="relative mb-4">
+                                                        <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                                                             {donor.avatar ? (
                                                                 <img
                                                                     src={getImageUrl(donor.avatar)}
@@ -694,78 +712,71 @@ const DonorList = () => {
                                                                     className="w-full h-full rounded-full object-cover"
                                                                 />
                                                             ) : (
-                                                                <User className="w-8 h-8 text-red-600" />
+                                                                <User className="w-10 h-10 text-red-600" />
                                                             )}
                                                         </div>
                                                         {donor.can_donation && (
-                                                            <div className="absolute -bottom-0.5 -right-0.5 bg-red-500 rounded-full p-1 border-2 border-white">
+                                                            <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 rounded-full p-1.5 border-2 border-white shadow-md">
                                                                 <Droplet className="w-3 h-3 text-white" />
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    <h3 className="font-bold text-gray-900 text-lg group-hover:text-red-600 transition-colors">
+                                                    <h3 className="font-bold text-lg text-gray-900 group-hover:text-red-600 transition-colors mb-2">
                                                         {getFullName(donor)}
                                                     </h3>
 
-                                                    <div className="flex flex-wrap items-center justify-center gap-2 mb-3 mt-2">
-                                                        {donor.blood_type && donor.rh_factor ? (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-medium">
-                                                                <Droplet className="w-3 h-3 fill-current" />
-                                                                {getBloodTypeDisplay(donor.blood_type, donor.rh_factor)}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-medium">
-                                                                <Droplet className="w-3 h-3 fill-current" />
-                                                                Chưa cập nhật
-                                                            </span>
-                                                        )}
-
-                                                        {donor.points >= 0 && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-600 rounded-lg text-xs font-medium">
-                                                                <Award className="w-3 h-3 fill-current" />
-                                                                {donor.points} điểm
-                                                            </span>
-                                                        )}
-
+                                                    <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-medium">
+                                                            <Droplet className="w-3 h-3" />
+                                                            {getBloodTypeDisplay(donor.blood_type, donor.rh_factor)}
+                                                        </span>
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-yellow-50 text-yellow-600 rounded-lg text-xs font-medium">
+                                                            <Award className="w-3 h-3" />
+                                                            {donor.points || 0} điểm
+                                                        </span>
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${levelBg} ${levelColor}`}>
+                                                            <DonationIcon className="w-3 h-3" />
+                                                            {donor.donation_count || 0} lần
+                                                        </span>
                                                         {status === 'friend' && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium">
+                                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium">
                                                                 <UserCheck className="w-3 h-3" />
                                                                 Bạn bè
                                                             </span>
                                                         )}
                                                         {status === 'pending_sent' && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-600 rounded-lg text-xs font-medium">
+                                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-yellow-50 text-yellow-600 rounded-lg text-xs font-medium">
                                                                 <Send className="w-3 h-3" />
-                                                                Đã gửi lời mời
+                                                                Đã gửi
                                                             </span>
                                                         )}
                                                         {status === 'pending_received' && (
-                                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-medium">
+                                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-medium">
                                                                 <UserPlus className="w-3 h-3" />
                                                                 Chờ phản hồi
                                                             </span>
                                                         )}
                                                     </div>
 
-                                                    <div className="w-full space-y-2 text-left">
-                                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                            <Mail className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                                    <div className="w-full space-y-2 text-left mb-4">
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Mail className="w-4 h-4 text-red-400 flex-shrink-0" />
                                                             <span className="truncate">{donor.email || 'Chưa cập nhật'}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                            <Phone className="w-3 h-3 text-red-500 flex-shrink-0" />
-                                                            <span className="truncate">{donor.phone || 'Chưa cập nhật'}</span>
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Phone className="w-4 h-4 text-red-400 flex-shrink-0" />
+                                                            <span>{donor.phone || 'Chưa cập nhật'}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                            <MapPin className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <MapPin className="w-4 h-4 text-red-400 flex-shrink-0" />
                                                             <span className="truncate">{donor.province || 'Chưa cập nhật'}</span>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div onClick={(e) => e.stopPropagation()}>
-                                                    {renderActionButtons(donor)}
+                                                    <div onClick={(e) => e.stopPropagation()} className="w-full">
+                                                        {renderActionButtons(donor)}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -781,11 +792,11 @@ const DonorList = () => {
                                         <div
                                             key={donor.id}
                                             onClick={() => handleViewDetail(donor.id)}
-                                            className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden"
+                                            className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-red-200"
                                         >
                                             <div className="p-4">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="relative">
+                                                    <div className="relative flex-shrink-0">
                                                         <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
                                                             {donor.avatar ? (
                                                                 <img
@@ -797,96 +808,69 @@ const DonorList = () => {
                                                                 <User className="w-6 h-6 text-red-600" />
                                                             )}
                                                         </div>
-
-                                                        {donor.last_login && status === 'friend' && (
-                                                            <span className="absolute -bottom-1 -right-1 bg-green-500 text-white px-1.5 py-[3px] rounded text-[4px] shadow">
-                                                                Online {formatRelativeTime(donor.last_login)}
-                                                            </span>
+                                                        {donor.can_donation && (
+                                                            <div className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-0.5 border border-white">
+                                                                <Droplet className="w-2 h-2 text-white" />
+                                                            </div>
                                                         )}
                                                     </div>
 
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-1">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                             <h3 className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
                                                                 {getFullName(donor)}
                                                             </h3>
-                                                            {donor.can_donation && (
-                                                                <div className="border-2 border-white rounded-full bg-red-500 w-5 h-5 flex items-center justify-center">
-                                                                    <Droplet className="w-3 h-3 text-white" />
-                                                                </div>
+                                                            {status === 'friend' && donor.last_login && (
+                                                                <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                                                    {formatRelativeTime(donor.last_login)}
+                                                                </span>
                                                             )}
-                                                            {status === 'friend' && (
-                                                                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full">
-                                                                    Bạn bè
+                                                        </div>
+
+                                                        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                                            <span className="flex items-center gap-1">
+                                                                <Droplet className="w-3 h-3 text-red-500" />
+                                                                {getBloodTypeDisplay(donor.blood_type, donor.rh_factor)}
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Award className="w-3 h-3 text-yellow-500" />
+                                                                {donor.points || 0} điểm
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Droplet className="w-3 h-3 text-blue-500" />
+                                                                {donor.donation_count || 0} lần hiến
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Mail className="w-3 h-3 text-gray-400" />
+                                                                {donor.email || 'Chưa cập nhật'}
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <Phone className="w-3 h-3 text-gray-400" />
+                                                                {donor.phone || 'Chưa cập nhật'}
+                                                            </span>
+                                                            {donor.province && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <MapPin className="w-3 h-3 text-gray-400" />
+                                                                    {donor.province}
                                                                 </span>
                                                             )}
                                                             {status === 'pending_sent' && (
-                                                                <span className="px-2 py-0.5 bg-yellow-50 text-yellow-600 text-xs rounded-full">
-                                                                    Đã gửi lời mời
+                                                                <span className="flex items-center gap-1 text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">
+                                                                    <Send className="w-3 h-3" />
+                                                                    Đã gửi
                                                                 </span>
                                                             )}
                                                             {status === 'pending_received' && (
-                                                                <span className="px-2 py-0.5 bg-green-50 text-green-600 text-xs rounded-full">
+                                                                <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                                                    <UserPlus className="w-3 h-3" />
                                                                     Chờ phản hồi
                                                                 </span>
                                                             )}
                                                         </div>
-
-                                                        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
-                                                            {donor.blood_type && donor.rh_factor ? (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Droplet className="w-3 h-3 text-red-500 fill-current" />
-                                                                    {getBloodTypeDisplay(donor.blood_type, donor.rh_factor)}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Droplet className="w-3 h-3 text-red-500 fill-current" />
-                                                                    Chưa cập nhật
-                                                                </span>
-                                                            )}
-                                                            {donor.points >= 0 && (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Award className="w-3 h-3 text-yellow-500 fill-current" />
-                                                                    {donor.points} điểm
-                                                                </span>
-                                                            )}
-                                                            {donor.email ? (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Mail className="w-3 h-3 text-red-500" />
-                                                                    {donor.email}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Mail className="w-3 h-3 text-red-500" />
-                                                                    Chưa cập nhật
-                                                                </span>
-                                                            )}
-                                                            {donor.phone ? (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Phone className="w-3 h-3 text-red-500" />
-                                                                    {donor.phone}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Phone className="w-3 h-3 text-red-500" />
-                                                                    Chưa cập nhật
-                                                                </span>
-                                                            )}
-                                                            {donor.province ? (
-                                                                <span className="flex items-center gap-1">
-                                                                    <MapPin className="w-3 h-3 text-red-500" />
-                                                                    {donor.province}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="flex items-center gap-1">
-                                                                    <MapPin className="w-3 h-3 text-red-500" />
-                                                                    Chưa cập nhật
-                                                                </span>
-                                                            )}
-                                                        </div>
                                                     </div>
 
-                                                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
+                                                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-300" />
                                                 </div>
                                             </div>
                                         </div>
@@ -901,16 +885,17 @@ const DonorList = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
                                             <>
-                                                <Loader className="w-5 h-5 animate-spin" />
+                                                <Loader2 className="w-5 h-5 animate-spin" />
                                                 <span>Đang tải thêm...</span>
                                             </>
                                         ) : (
                                             <>
+                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm người hiến máu</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>
@@ -923,10 +908,10 @@ const DonorList = () => {
                 ) : !loading && (
                     <div className="text-center py-20">
                         <div className="relative inline-block">
-                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform">
+                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg">
                                 <Users className="h-16 w-16 text-red-600" />
                             </div>
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
                                 0
                             </div>
                         </div>
@@ -937,18 +922,27 @@ const DonorList = () => {
                                 : 'Chưa có người hiến máu nào'}
                         </h3>
 
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
                             {searchTerm
-                                ? 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'
-                                : 'Hãy kết nối với mọi người trong cộng đồng'}
+                                ? 'Thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc tìm kiếm'
+                                : 'Hãy kết nối với mọi người trong cộng đồng để lan tỏa yêu thương'}
                         </p>
 
-                        {searchTerm && (
+                        {searchTerm ? (
                             <button
                                 onClick={handleClearSearch}
-                                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                Xóa tất cả bộ lọc
+                                <X className="w-5 h-5" />
+                                Xóa tìm kiếm
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => navigate('/friend-list')}
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                            >
+                                <Users className="w-5 h-5" />
+                                Xem danh sách bạn bè
                             </button>
                         )}
                     </div>
@@ -958,29 +952,25 @@ const DonorList = () => {
             {/* Detail Modal */}
             {showDialog && selectedDonor && (
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn"
                     onClick={handleCloseDialog}
                 >
                     <div
-                        className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col"
+                        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Modal Header - Fixed */}
-                        <div className="relative bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white p-8 rounded-t-2xl flex-shrink-0">
-                            <div className="absolute inset-0 opacity-10">
-                                <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                            </div>
-
+                        {/* Modal Header */}
+                        <div className="relative bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white p-6 rounded-t-2xl flex-shrink-0">
                             <button
                                 onClick={handleCloseDialog}
-                                className="absolute top-4 right-4 z-50 p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-xl transition-colors z-10"
                             >
                                 <XCircle className="w-5 h-5" />
                             </button>
 
-                            <div className="relative flex items-center gap-6">
+                            <div className="flex items-center gap-5">
                                 <div className="relative">
-                                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center border-4 border-white/30">
+                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center border-4 border-white/30 shadow-lg">
                                         {selectedDonor.account?.avatar ? (
                                             <img
                                                 src={getImageUrl(selectedDonor.account.avatar)}
@@ -988,22 +978,21 @@ const DonorList = () => {
                                                 className="w-full h-full rounded-full object-cover"
                                             />
                                         ) : (
-                                            <User className="w-10 h-10 text-red-600" />
+                                            <User className="w-8 h-8 text-red-600" />
                                         )}
                                     </div>
                                     {selectedDonor.can_donation && (
-                                        <div className="absolute -bottom-1 -right-1 bg-red-500 items-center justify-center flex rounded-full p-1 border-2 border-white">
-                                            <Droplet className="w-5 h-5 text-white" />
+                                        <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 rounded-full p-1 border-2 border-white">
+                                            <Droplet className="w-3 h-3 text-white" />
                                         </div>
                                     )}
                                 </div>
 
                                 <div>
-                                    <h2 className="text-2xl font-bold">
+                                    <h2 className="text-xl font-bold">
                                         {selectedDonor.account?.last_name} {selectedDonor.account?.first_name}
                                     </h2>
-
-                                    <div className="flex gap-2 mt-3">
+                                    <div className="flex gap-2 mt-2">
                                         <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs">
                                             {selectedDonor.donation_count || 0} lần hiến máu
                                         </span>
@@ -1015,37 +1004,37 @@ const DonorList = () => {
                             </div>
                         </div>
 
-                        {/* Modal Tabs - Fixed */}
+                        {/* Modal Tabs */}
                         <div className="border-b border-gray-200 px-6 flex-shrink-0">
                             <div className="flex gap-6">
                                 <button
                                     onClick={() => setActiveTab('info')}
                                     className={`py-4 px-2 font-medium transition-all relative ${activeTab === 'info'
-                                        ? 'text-red-600'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                            ? 'text-red-600'
+                                            : 'text-gray-500 hover:text-gray-700'
                                         }`}
                                 >
                                     Thông tin cơ bản
                                     {activeTab === 'info' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-500 rounded-full"></div>
                                     )}
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('health')}
                                     className={`py-4 px-2 font-medium transition-all relative ${activeTab === 'health'
-                                        ? 'text-red-600'
-                                        : 'text-gray-500 hover:text-gray-700'
+                                            ? 'text-red-600'
+                                            : 'text-gray-500 hover:text-gray-700'
                                         }`}
                                 >
                                     Sức khỏe
                                     {activeTab === 'health' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
+                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-500 rounded-full"></div>
                                     )}
                                 </button>
                             </div>
                         </div>
 
-                        {/* Modal Content - Scrollable Area */}
+                        {/* Modal Content */}
                         <div className="flex-1 overflow-y-auto p-6">
                             {loadingDetail ? (
                                 <div className="flex justify-center py-12">
@@ -1056,182 +1045,85 @@ const DonorList = () => {
                                 </div>
                             ) : (
                                 <>
-                                    {/* Info Tab */}
                                     {activeTab === 'info' && (
-                                        <div className="space-y-6">
-                                            <div className="space-y-4">
-                                                {/* Contact + Personal */}
-                                                <div>
-                                                    <div className="flex items-center justify-between py-2">
-                                                        <div className="flex items-center gap-2 text-gray-500">
-                                                            <span className="text-sm">Email</span>
-                                                        </div>
-                                                        <span className="text-sm font-medium text-gray-900">
-                                                            {selectedDonor.account?.email || 'Chưa cập nhật'}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between py-2">
-                                                        <div className="flex items-center gap-2 text-gray-500">
-                                                            <span className="text-sm">Số điện thoại</span>
-                                                        </div>
-                                                        <span className="text-sm font-medium text-gray-900">
-                                                            {selectedDonor.account?.phone || 'Chưa cập nhật'}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between py-2">
-                                                        <div className="flex items-center gap-2 text-gray-500">
-                                                            <span className="text-sm">Ngày sinh</span>
-                                                        </div>
-                                                        <span className="text-sm font-medium text-gray-900">
-                                                            {formatDate(selectedDonor.account?.birth_date) || 'Chưa cập nhật'}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between py-2">
-                                                        <div className="flex items-center gap-2 text-gray-500">
-                                                            <span className="text-sm">Giới tính</span>
-                                                        </div>
-                                                        <span className="text-sm font-medium text-gray-900">
-                                                            {getGenderText(selectedDonor.account?.gender) || 'Chưa cập nhật'}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Address */}
-                                                    {(selectedDonor.permanent_address || selectedDonor.province) ? (
-                                                        <div className="pt-2 justify-between items-center flex py-2">
-                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
-                                                                <span className="text-sm">Địa chỉ</span>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-gray-900">
-                                                                {selectedDonor.permanent_address}
-                                                                {selectedDonor.sub_district && `, ${selectedDonor.sub_district}`}
-                                                                {selectedDonor.province && `, ${selectedDonor.province}`}
-                                                            </p>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="pt-2 justify-between items-center flex py-2">
-                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
-                                                                <span className="text-sm">Địa chỉ</span>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-gray-900">
-                                                                Chưa cập nhật
-                                                            </p>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Work */}
-                                                    {(selectedDonor.career || selectedDonor.organization) ? (
-                                                        <div className="pt-2 justify-between items-center flex py-2">
-                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
-                                                                <span className="text-sm">Công việc</span>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-gray-900">
-                                                                {selectedDonor.career}
-                                                                {selectedDonor.organization && ` tại ${selectedDonor.organization}`}
-                                                            </p>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="pt-2 justify-between items-center flex py-2">
-                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
-                                                                <span className="text-sm">Công việc</span>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-gray-900">
-                                                                Chưa cập nhật
-                                                            </p>
-                                                        </div>
-                                                    )}
-
-                                                    {(selectedDonor.last_donation) ? (
-                                                        <div className="pt-2 justify-between items-center flex py-2">
-                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
-                                                                <span className="text-sm">Lần cuối hiến máu</span>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-gray-900">
-                                                                {formatDate(selectedDonor.last_donation)}
-                                                            </p>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="pt-2 justify-between items-center flex py-2">
-                                                            <div className="flex items-start gap-2 text-gray-500 mb-1">
-                                                                <span className="text-sm">Lần cuối hiến máu</span>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-gray-900">
-                                                                Chưa cập nhật
-                                                            </p>
-                                                        </div>
-                                                    )}
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="p-4 bg-gray-50 rounded-xl">
+                                                    <p className="text-xs text-gray-500 mb-1">Email</p>
+                                                    <p className="font-medium text-gray-900">{selectedDonor.account?.email || 'Chưa cập nhật'}</p>
+                                                </div>
+                                                <div className="p-4 bg-gray-50 rounded-xl">
+                                                    <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
+                                                    <p className="font-medium text-gray-900">{selectedDonor.account?.phone || 'Chưa cập nhật'}</p>
+                                                </div>
+                                                <div className="p-4 bg-gray-50 rounded-xl">
+                                                    <p className="text-xs text-gray-500 mb-1">Ngày sinh</p>
+                                                    <p className="font-medium text-gray-900">{formatDate(selectedDonor.account?.birth_date)}</p>
+                                                </div>
+                                                <div className="p-4 bg-gray-50 rounded-xl">
+                                                    <p className="text-xs text-gray-500 mb-1">Giới tính</p>
+                                                    <p className="font-medium text-gray-900">{getGenderText(selectedDonor.account?.gender)}</p>
+                                                </div>
+                                                <div className="col-span-2 p-4 bg-gray-50 rounded-xl">
+                                                    <p className="text-xs text-gray-500 mb-1">Địa chỉ</p>
+                                                    <p className="font-medium text-gray-900">
+                                                        {selectedDonor.permanent_address || selectedDonor.sub_district || selectedDonor.province
+                                                            ? `${selectedDonor.permanent_address || ''}${selectedDonor.sub_district ? `, ${selectedDonor.sub_district}` : ''}${selectedDonor.province ? `, ${selectedDonor.province}` : ''}`
+                                                            : 'Chưa cập nhật'}
+                                                    </p>
+                                                </div>
+                                                <div className="col-span-2 p-4 bg-gray-50 rounded-xl">
+                                                    <p className="text-xs text-gray-500 mb-1">Công việc</p>
+                                                    <p className="font-medium text-gray-900">
+                                                        {selectedDonor.career
+                                                            ? `${selectedDonor.career}${selectedDonor.organization ? ` tại ${selectedDonor.organization}` : ''}`
+                                                            : 'Chưa cập nhật'}
+                                                    </p>
+                                                </div>
+                                                <div className="col-span-2 p-4 bg-gray-50 rounded-xl">
+                                                    <p className="text-xs text-gray-500 mb-1">Lần cuối hiến máu</p>
+                                                    <p className="font-medium text-gray-900">{formatDate(selectedDonor.last_donation)}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* Health Tab */}
                                     {activeTab === 'health' && (
                                         <div className="space-y-6">
-                                            {/* Blood Type */}
-                                            <div>
-                                                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <div className="p-1.5 bg-red-100 rounded-lg">
-                                                        <Droplet className="w-4 h-4 text-red-600" />
-                                                    </div>
-                                                    Nhóm máu
-                                                </h3>
-                                                <div className="p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl text-center">
-                                                    <div className="text-4xl font-bold text-red-600 mb-2">
-                                                        {getBloodTypeDisplay(selectedDonor.blood_type, selectedDonor.rh_factor)}
-                                                    </div>
-                                                    <p className="text-sm text-red-700">
-                                                        {selectedDonor.can_donation
-                                                            ? 'Sẵn sàng hiến máu'
-                                                            : 'Không sẵn sàng'}
-                                                    </p>
-                                                </div>
+                                            <div className="p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl text-center">
+                                                <p className="text-sm text-gray-600 mb-2">Nhóm máu</p>
+                                                <p className="text-4xl font-bold text-red-600 mb-2">
+                                                    {getBloodTypeDisplay(selectedDonor.blood_type, selectedDonor.rh_factor)}
+                                                </p>
+                                                <p className={`text-sm font-medium ${selectedDonor.can_donation ? 'text-green-600' : 'text-red-600'}`}>
+                                                    {selectedDonor.can_donation ? '✓ Sẵn sàng hiến máu' : '✗ Không sẵn sàng hiến máu'}
+                                                </p>
                                             </div>
 
-                                            {/* Physical Info */}
                                             <div>
                                                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <div className="p-1.5 bg-red-100 rounded-lg">
-                                                        <Activity className="w-4 h-4 text-red-600" />
-                                                    </div>
+                                                    <Activity className="w-5 h-5 text-red-500" />
                                                     Thông số cơ thể
                                                 </h3>
                                                 <div className="grid grid-cols-3 gap-4">
-                                                    {selectedDonor.weight ? (
-                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                            <div className="text-xm text-gray-500">Cân nặng</div>
-                                                            <div className="text-lg font-bold text-gray-900">{selectedDonor.weight} kg</div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                            <div className="text-xm text-gray-500">Cân nặng</div>
-                                                            <div className="text-xs font-bold text-gray-900 mt-2">Chưa cập nhật</div>
-                                                        </div>
-                                                    )}
-                                                    {selectedDonor.height ? (
-                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                            <div className="text-xm text-gray-500">Chiều cao</div>
-                                                            <div className="text-lg font-bold text-gray-900">{selectedDonor.height} cm</div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                            <div className="text-xm text-gray-500">Chiều cao</div>
-                                                            <div className="text-xs font-bold text-gray-900 mt-2">Chưa cập nhật</div>
-                                                        </div>
-                                                    )}
-                                                    {selectedDonor.bmi ? (
-                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                            <div className="text-xm text-gray-500">Chỉ số BMI</div>
-                                                            <div className="text-lg font-bold text-gray-900">{selectedDonor.bmi.toFixed(1)}</div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="p-4 bg-gray-50 rounded-xl text-center">
-                                                            <div className="text-xm text-gray-500">Chỉ số BMI</div>
-                                                            <div className="text-xs font-bold text-gray-900 mt-2">Chưa cập nhật</div>
-                                                        </div>
-                                                    )}
+                                                    <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                        <p className="text-xs text-gray-500 mb-1">Cân nặng</p>
+                                                        <p className="text-lg font-bold text-gray-900">
+                                                            {selectedDonor.weight ? `${selectedDonor.weight} kg` : '---'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                        <p className="text-xs text-gray-500 mb-1">Chiều cao</p>
+                                                        <p className="text-lg font-bold text-gray-900">
+                                                            {selectedDonor.height ? `${selectedDonor.height} cm` : '---'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="p-4 bg-gray-50 rounded-xl text-center">
+                                                        <p className="text-xs text-gray-500 mb-1">BMI</p>
+                                                        <p className="text-lg font-bold text-gray-900">
+                                                            {selectedDonor.bmi ? selectedDonor.bmi.toFixed(1) : '---'}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1240,15 +1132,56 @@ const DonorList = () => {
                             )}
                         </div>
 
-                        {/* Action Buttons - Fixed */}
+                        {/* Action Buttons */}
                         {!loadingDetail && (
-                            <div className="border-t border-gray-200 p-6 flex gap-3 mt-1 flex-shrink-0">
+                            <div className="border-t border-gray-200 p-6 flex gap-3 flex-shrink-0">
                                 {renderActionButtons(selectedDonor)}
                             </div>
                         )}
                     </div>
                 </div>
             )}
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-slideInRight {
+                    animation: slideInRight 0.3s ease-out;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.2s ease-out;
+                }
+            `}</style>
         </div>
     );
 };

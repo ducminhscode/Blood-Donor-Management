@@ -103,7 +103,7 @@ class AccountViewSet(viewsets.ViewSet):
         try:
             user = Account.objects.get(username=username, email=email)
         except Account.DoesNotExist:
-            return Response({"error": "Username hoặc email không đúng."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Username hoặc email không đúng."}, status=status.HTTP_404_NOT_FOUND)
 
         otp = f"{random.randint(100000, 999999)}"
         cache_key = f"reset_password_{user.email}"

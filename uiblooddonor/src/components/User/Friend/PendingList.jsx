@@ -9,14 +9,13 @@ import {
     Clock as ClockIcon, CalendarDays, UserCog,
     MoreHorizontal, Share2, Copy, Facebook, MessageSquare,
     Gift, Target, Medal, Trophy, Bell, BellRing,
-    VenusAndMars
+    VenusAndMars, Loader2, Send, Filter, TrendingUp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authApis, endpoints } from '../../../configs/APIs';
 import { getImageUrl } from '../../../utils/Image';
 import debounce from 'lodash.debounce';
 import { UserContexts } from '../../../configs/UserContexts';
-import '../../../styles/PendingList.css';
 import { formatDate } from '../../../utils/Format';
 
 const PendingList = () => {
@@ -138,7 +137,6 @@ const PendingList = () => {
         } catch (error) {
             console.error("Error fetching donor detail:", error);
             showMessage("Không thể tải thông tin chi tiết", "error");
-        } finally {
         }
     };
 
@@ -278,7 +276,7 @@ const PendingList = () => {
                 </div>
 
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -286,34 +284,32 @@ const PendingList = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <UserPlus className="w-8 h-8 text-white opacity-10" />
+                            <UserPlus className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-26">
-                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Danh sách bạn bè</span>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
+                        <button
+                            onClick={() => navigate("/friend-list")}
+                            className="hover:text-white transition-colors"
+                        >
+                            Danh sách bạn bè
+                        </button>
                         <span>/</span>
-                        <span className='text-white'>Lời mời kết bạn</span>
-                    </nav>
-                    <button
-                        onClick={() => navigate("/friend-list")}
-                        className="flex p-2 mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
-                    >
-                        <ChevronRight className="w-6 h-6 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Danh sách bạn bè</span>
-                    </button>
+                        <span className="text-white font-medium">Lời mời kết bạn</span>
+                    </div>
 
-                    {/* Flex container for title and stat card */}
-                    <div className="flex items-start justify-between gap-8">
-                        {/* Left side - Title */}
+                    {/* Title and Stats */}
+                    <div className="flex flex-col md:flex-row items-start justify-between gap-6">
                         <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
                                     <UserPlus className="w-8 h-8" />
                                 </div>
                                 <h1 className="text-3xl md:text-4xl font-bold">Lời mời kết bạn</h1>
@@ -323,9 +319,8 @@ const PendingList = () => {
                             </p>
                         </div>
 
-                        {/* Right side - Stats Card */}
-                        <div className="hidden md:block flex-shrink-0">
-                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all">
+                        <div className="flex-shrink-0">
+                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20 hover:bg-white/20 transition-all duration-300">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-white/20 rounded-xl">
                                         <BellRing className="w-6 h-6" />
@@ -350,34 +345,35 @@ const PendingList = () => {
 
             {/* Message Toast */}
             {message.text && (
-                <div className="fixed top-24 right-4 z-50 animate-slideIn">
-                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
-                        }`}>
+                <div className="fixed top-24 right-4 z-50 animate-slideInRight">
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
+                        message.type === 'success'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-red-500 text-white'
+                    }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
                         }
-                        <span>{message.text}</span>
+                        <span className="font-medium">{message.text}</span>
                     </div>
                 </div>
             )}
 
             {/* Search & Filter Section */}
-            <div className="sticky top-[64px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                         {/* Search Bar */}
                         <div className="w-full lg:w-[500px]">
                             <div className="relative group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm theo tên, email hoặc số điện thoại"
+                                    placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
                                     value={searchTerm}
                                     onChange={handleSearchChange}
-                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300"
                                 />
                                 {searchTerm && (
                                     <button
@@ -390,24 +386,28 @@ const PendingList = () => {
                             </div>
                         </div>
 
-                        {/* Filter Tabs */}
+                        {/* Sort Tabs */}
                         <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1">
                             <button
                                 onClick={() => handleSortChange('recent')}
-                                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1 ${sortBy === 'recent'
-                                    ? 'bg-white text-red-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                className={`px-5 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium ${
+                                    sortBy === 'recent'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                }`}
                             >
+                                <TrendingUp className="w-4 h-4" />
                                 Mới nhất
                             </button>
                             <button
                                 onClick={() => handleSortChange('oldest')}
-                                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1 ${sortBy === 'oldest'
-                                    ? 'bg-white text-red-600 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                className={`px-5 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium ${
+                                    sortBy === 'oldest'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                }`}
                             >
+                                <ClockIcon className="w-4 h-4" />
                                 Cũ nhất
                             </button>
                         </div>
@@ -415,8 +415,8 @@ const PendingList = () => {
 
                     {/* Search Result Info */}
                     {searchTerm && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
+                        <div className="mt-4">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                 <Search className="h-4 w-4" />
                                 <span>Tìm kiếm: "{searchTerm}"</span>
                                 <button
@@ -425,7 +425,7 @@ const PendingList = () => {
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
-                            </span>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -438,7 +438,7 @@ const PendingList = () => {
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
-                                <span className="font-bold">{totalRequests}</span>
+                                <span className="font-bold text-lg">{totalRequests}</span>
                             </div>
                             <span className="text-gray-600">
                                 lời mời kết bạn {searchTerm && "phù hợp với tìm kiếm"}
@@ -472,134 +472,139 @@ const PendingList = () => {
                 {!loading && requests.length > 0 ? (
                     <>
                         <div className="space-y-4">
-                            {requests.map((request) => {
-
-                                return (
-                                    <div
-                                        key={request.id}
-                                        className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
-                                        onClick={() => handleViewDetail(request.id)}
-                                    >
-                                        <div className="p-6">
-                                            <div className="flex flex-col md:flex-row gap-6">
-                                                {/* Avatar */}
-                                                <div className="flex-shrink-0">
-                                                    <div className="relative">
-                                                        <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center">
-                                                            {request.avatar ? (
-                                                                <img
-                                                                    src={getImageUrl(request.avatar)}
-                                                                    alt={getFullName(request)}
-                                                                    className="w-full h-full rounded-full object-cover"
-                                                                />
-                                                            ) : (
-                                                                <User className="w-10 h-10 text-red-600" />
-                                                            )}
-                                                        </div>
-                                                        {request.can_donation && (
-                                                            <div className="absolute -bottom-1 -right-1 bg-red-500 items-center justify-between rounded-full p-1 border-2 border-white">
-                                                                <Droplet className="w-4 h-4 text-white" />
-                                                            </div>
+                            {requests.map((request) => (
+                                <div
+                                    key={request.id}
+                                    className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-red-200"
+                                    onClick={() => handleViewDetail(request.id)}
+                                >
+                                    <div className="p-6">
+                                        <div className="flex flex-col lg:flex-row gap-6">
+                                            {/* Avatar */}
+                                            <div className="flex-shrink-0">
+                                                <div className="relative">
+                                                    <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center shadow-lg">
+                                                        {request.avatar ? (
+                                                            <img
+                                                                src={getImageUrl(request.avatar)}
+                                                                alt={getFullName(request)}
+                                                                className="w-full h-full rounded-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <User className="w-10 h-10 text-red-600" />
                                                         )}
+                                                    </div>
+                                                    {request.can_donation && (
+                                                        <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 rounded-full p-1.5 border-2 border-white shadow-md">
+                                                            <Droplet className="w-3 h-3 text-white" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Info */}
+                                            <div className="flex-1">
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-3 flex-wrap">
+                                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                                            {getFullName(request)}
+                                                        </h3>
+                                                        <span className="inline-flex items-center gap-1 bg-green-500 text-white px-2.5 py-1 rounded-lg text-xs font-medium shadow-sm">
+                                                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                                                            Online {formatRelativeTime(request.last_login)}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-1.5 rounded-lg">
+                                                        <ClockIcon className="w-4 h-4 text-gray-400" />
+                                                        <span className="text-gray-600">
+                                                            {formatDateInvite(request.requested_at)}
+                                                        </span>
                                                     </div>
                                                 </div>
 
-                                                {/* Info */}
-                                                <div className="flex-1">
-                                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
-                                                                {getFullName(request)}
-                                                            </h3>
-                                                            <span className="flex items-center gap-1 bg-green-500 text-white px-2 py-1 rounded-lg text-xs font-medium">
-                                                                Online {formatRelativeTime(request.last_login)}
-                                                            </span>
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-1.5 rounded-lg">
-                                                            <span className="text-gray-600">
-                                                                {formatDateInvite(request.requested_at)}
-                                                            </span>
-                                                        </div>
+                                                {/* Contact Info Grid */}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                                                        <Mail className="w-4 h-4 text-red-400" />
+                                                        <span className="truncate">{request.email || 'Chưa cập nhật'}</span>
                                                     </div>
-                                                    {/* Contact Info */}
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <Mail className="w-4 h-4 text-red-400" />
-                                                            <span className="truncate">{request.email || 'Chưa cập nhật'}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <Phone className="w-4 h-4 text-red-400" />
-                                                            <span>{request.phone || 'Chưa cập nhật'}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <Calendar className="w-4 h-4 text-red-400" />
-                                                            <span>{formatDate(request.birth_date) || 'Chưa cập nhật'}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <VenusAndMars className="w-4 h-4 text-red-400" />
-                                                            <span>{getGenderText(request.gender) || 'Chưa cập nhật'}</span>
-                                                        </div>
-                                                        {(request.career) ? (
-                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                                <Briefcase className="w-4 h-4 text-red-400" />
-                                                                <span>{request.career} {request.organization && `tại ${request.organization}`}</span>
-                                                            </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                                                        <Phone className="w-4 h-4 text-red-400" />
+                                                        <span>{request.phone || 'Chưa cập nhật'}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                                                        <Calendar className="w-4 h-4 text-red-400" />
+                                                        <span>{formatDate(request.birth_date) || 'Chưa cập nhật'}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                                                        <VenusAndMars className="w-4 h-4 text-red-400" />
+                                                        <span>{getGenderText(request.gender)}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                                                        <Briefcase className="w-4 h-4 text-red-400" />
+                                                        <span>
+                                                            {request.career 
+                                                                ? `${request.career}${request.organization ? ` tại ${request.organization}` : ''}`
+                                                                : 'Chưa cập nhật'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                                                        <MapPin className="w-4 h-4 text-red-400" />
+                                                        <span className="truncate">
+                                                            {request.permanent_address || request.province
+                                                                ? `${request.permanent_address || ''}${request.sub_district ? `, ${request.sub_district}` : ''}${request.province ? `, ${request.province}` : ''}`
+                                                                : 'Chưa cập nhật'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Donation Stats */}
+                                                <div className="flex gap-4 mt-4 pt-3 border-t border-gray-100">
+                                                    <div className="flex items-center gap-2">
+                                                        <Droplet className="w-4 h-4 text-red-500" />
+                                                        <span className="text-sm text-gray-600">
+                                                            Đã hiến: <span className="font-semibold text-gray-900">{request.donation_count || 0}</span> lần
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Award className="w-4 h-4 text-yellow-500" />
+                                                        <span className="text-sm text-gray-600">
+                                                            Điểm: <span className="font-semibold text-gray-900">{request.points || 0}</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Action Buttons */}
+                                                <div className="flex gap-3 mt-5" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleAccept(request.id)}
+                                                        disabled={processingId === request.id}
+                                                        className="flex-1 md:flex-none px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md hover:shadow-lg disabled:from-gray-400 disabled:to-gray-400 flex items-center justify-center gap-2 font-medium"
+                                                    >
+                                                        {processingId === request.id ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
                                                         ) : (
-                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                                <Briefcase className="w-4 h-4 text-red-400" />
-                                                                <span>Chưa cập nhật</span>
-                                                            </div>
+                                                            <>
+                                                                <UserCheck className="w-4 h-4" />
+                                                                Chấp nhận
+                                                            </>
                                                         )}
-
-                                                        {(request.permanent_address || request.province || request.career) ? (
-                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                                <MapPin className="w-4 h-4 text-red-400" />
-                                                                <span>{request.permanent_address}
-                                                                    {request.sub_district && `, ${request.sub_district}`}
-                                                                    {request.province && `, ${request.province}`}</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                                <MapPin className="w-4 h-4 text-red-400" />
-                                                                <span>Chưa cập nhật</span>
-                                                            </div>
-                                                        )}
-
-                                                    </div>
-
-                                                    {/* Action Buttons */}
-                                                    <div className="flex gap-3 mt-6" onClick={(e) => e.stopPropagation()}>
-                                                        <button
-                                                            onClick={() => handleAccept(request.id)}
-                                                            disabled={processingId === request.id}
-                                                            className="flex-1 md:flex-none px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 disabled:from-gray-400 disabled:to-gray-400 flex items-center justify-center gap-2"
-                                                        >
-                                                            {processingId === request.id ? (
-                                                                <Loader className="w-4 h-4 animate-spin" />
-                                                            ) : (
-                                                                <>
-                                                                    <UserCheck className="w-4 h-4" />
-                                                                    Chấp nhận
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleReject(request.id)}
-                                                            disabled={processingId === request.id}
-                                                            className="flex-1 md:flex-none px-6 py-3 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                                        >
-                                                            <UserX className="w-4 h-4" />
-                                                            Từ chối
-                                                        </button>
-                                                    </div>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(request.id)}
+                                                        disabled={processingId === request.id}
+                                                        className="flex-1 md:flex-none px-6 py-2.5 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+                                                    >
+                                                        <UserX className="w-4 h-4" />
+                                                        Từ chối
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
-                                );
-                            })}
+                                </div>
+                            ))}
                         </div>
 
                         {/* Load More */}
@@ -608,16 +613,17 @@ const PendingList = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
                                             <>
-                                                <Loader className="w-5 h-5 animate-spin" />
+                                                <Loader2 className="w-5 h-5 animate-spin" />
                                                 <span>Đang tải thêm...</span>
                                             </>
                                         ) : (
                                             <>
+                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm lời mời</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>
@@ -630,10 +636,10 @@ const PendingList = () => {
                 ) : !loading && (
                     <div className="text-center py-20">
                         <div className="relative inline-block">
-                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform">
+                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg">
                                 <UserPlus className="h-16 w-16 text-red-600" />
                             </div>
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
                                 0
                             </div>
                         </div>
@@ -642,30 +648,58 @@ const PendingList = () => {
                             {searchTerm ? 'Không tìm thấy lời mời' : 'Chưa có lời mời kết bạn'}
                         </h3>
 
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
                             {searchTerm
-                                ? 'Thử tìm kiếm với từ khóa khác'
-                                : 'Khi có ai đó gửi lời mời, họ sẽ xuất hiện ở đây'}
+                                ? 'Thử tìm kiếm với từ khóa khác hoặc kiểm tra lại thông tin tìm kiếm'
+                                : 'Khi có ai đó gửi lời mời kết bạn, họ sẽ xuất hiện ở đây'}
                         </p>
 
                         {searchTerm ? (
                             <button
                                 onClick={handleClearSearch}
-                                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
+                                <X className="w-5 h-5" />
                                 Xóa tìm kiếm
                             </button>
                         ) : (
                             <button
                                 onClick={() => navigate('/search-donor')}
-                                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
+                                <Users className="w-5 h-5" />
                                 Tìm kiếm bạn bè
                             </button>
                         )}
                     </div>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-slideInRight {
+                    animation: slideInRight 0.3s ease-out;
+                }
+            `}</style>
         </div>
     );
 };

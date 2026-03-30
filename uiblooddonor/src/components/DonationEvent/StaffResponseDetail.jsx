@@ -17,118 +17,26 @@ import {
     Share, ExternalLink, ClipboardClock, CalendarCog,
     RefreshCw, Loader2, PlusCircle,
     NotebookPen, Ambulance, Hospital, Syringe,
-    AlertTriangle, HeartHandshake, FlaskConical
+    AlertTriangle, HeartHandshake, FlaskConical,
+    TrendingUp, Award as AwardIcon, Shield as ShieldIcon,
+    Users as UsersIcon, Map as MapIcon, Loader
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import '../../styles/EventList.css';
-
-// Map Component
-const OpenStreetMap = ({ location, province, subDistrict }) => {
-    const [position, setPosition] = useState([10.8231, 106.6297]);
-    const [mapError, setMapError] = useState(false);
-    const [loading, setLoading] = useState(false);
-
-    const fullAddress = `${location || ''} ${subDistrict || ''} ${province || ''}`.trim();
-    const encodedAddress = encodeURIComponent(fullAddress);
-
-    const geocodeAddress = async () => {
-        if (!fullAddress) return;
-
-        setLoading(true);
-        try {
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`
-            );
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-                setPosition([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-                setMapError(false);
-            } else {
-                setMapError(true);
-            }
-        } catch (error) {
-            console.error("Error geocoding address:", error);
-            setMapError(true);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        geocodeAddress();
-    }, [fullAddress]);
-
-    if (typeof L === 'undefined') {
-        return (
-            <div className="w-full h-64 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                <p className="text-gray-500">Đang tải bản đồ...</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-3">
-            <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 group">
-                {loading ? (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                        <p className="text-gray-500 text-sm ml-2">Đang tải bản đồ...</p>
-                    </div>
-                ) : !mapError ? (
-                    <MapContainer
-                        center={position}
-                        zoom={15}
-                        scrollWheelZoom={false}
-                        className="w-full h-full"
-                    >
-                        <TileLayer
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        />
-                        <Marker position={position}>
-                            <Popup>
-                                <div className="text-sm">
-                                    <p className="font-medium">{location}</p>
-                                    <p>{subDistrict}, {province}</p>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    </MapContainer>
-                ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
-                        <MapPin className="w-12 h-12 text-gray-400 mb-2" />
-                        <p className="text-gray-500 text-sm">Không thể xác định vị trí trên bản đồ</p>
-                        <p className="text-gray-400 text-xs mt-1">{fullAddress}</p>
-                    </div>
-                )}
-            </div>
-
-            <div className="flex items-start gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                <MapPin className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                <div>
-                    <p className="font-medium text-gray-900">Địa chỉ:</p>
-                    <p>{location}, {subDistrict}, {province}</p>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // Info Card Component
 const InfoCard = ({ icon: Icon, label, value, className = "" }) => {
     return (
-        <div className={`bg-gray-50 rounded-xl p-4 ${className}`}>
+        <div className={`bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all duration-300 ${className}`}>
             <div className="flex items-start gap-3">
-                <div className="p-2 bg-white rounded-lg">
-                    <Icon className="w-5 h-5 text-gray-600" />
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <Icon className="w-5 h-5 text-red-500" />
                 </div>
                 <div className="flex-1">
                     <p className="text-xs text-gray-500 mb-1">{label}</p>
-                    <p className="text-sm font-medium text-gray-900">{value || 'Chưa cập nhật'}</p>
+                    <p className="text-sm font-semibold text-gray-900">{value || 'Chưa cập nhật'}</p>
                 </div>
             </div>
         </div>
@@ -142,41 +50,53 @@ const ResponseStatusBadge = ({ statusResponse, statusRegistration }) => {
             if (statusRegistration === 4) {
                 return {
                     label: 'Đã hoàn thành',
-                    color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                    icon: ClipboardCheck
+                    color: 'bg-gradient-to-r from-emerald-500 to-green-500',
+                    textColor: 'text-white',
+                    icon: CheckCircle2,
+                    glow: 'shadow-lg shadow-emerald-500/30'
                 };
             }
             if (statusRegistration === 3) {
                 return {
                     label: 'Đã Check-in',
-                    color: 'bg-purple-100 text-purple-700 border-purple-200',
-                    icon: UserCheck
+                    color: 'bg-gradient-to-r from-purple-500 to-purple-600',
+                    textColor: 'text-white',
+                    icon: UserCheck,
+                    glow: 'shadow-lg shadow-purple-500/30'
                 };
             }
             if (statusRegistration === 1) {
                 return {
                     label: 'Đã xác nhận',
-                    color: 'bg-green-100 text-green-700 border-green-200',
-                    icon: CheckCircle2
+                    color: 'bg-gradient-to-r from-green-500 to-emerald-500',
+                    textColor: 'text-white',
+                    icon: CheckCircle2,
+                    glow: 'shadow-lg shadow-green-500/30'
                 };
             }
             return {
                 label: 'Đã chấp nhận',
-                color: 'bg-green-100 text-green-700 border-green-200',
-                icon: CheckCircle2
+                color: 'bg-gradient-to-r from-green-500 to-emerald-500',
+                textColor: 'text-white',
+                icon: CheckCircle2,
+                glow: 'shadow-lg shadow-green-500/30'
             };
         }
         if (statusResponse === 2) {
             return {
                 label: 'Đã từ chối',
-                color: 'bg-red-100 text-red-700 border-red-200',
-                icon: XCircle
+                color: 'bg-gradient-to-r from-red-500 to-red-600',
+                textColor: 'text-white',
+                icon: XCircle,
+                glow: 'shadow-lg shadow-red-500/30'
             };
         }
         return {
             label: 'Đang xử lý',
-            color: 'bg-gray-100 text-gray-700 border-gray-200',
-            icon: Timer
+            color: 'bg-gradient-to-r from-gray-500 to-gray-600',
+            textColor: 'text-white',
+            icon: Timer,
+            glow: 'shadow-lg shadow-gray-500/30'
         };
     };
 
@@ -184,7 +104,7 @@ const ResponseStatusBadge = ({ statusResponse, statusRegistration }) => {
     const Icon = config.icon;
 
     return (
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${config.color}`}>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ${config.color} ${config.textColor} ${config.glow}`}>
             <Icon className="w-4 h-4" />
             {config.label}
         </span>
@@ -196,17 +116,14 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
+                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
@@ -238,15 +155,17 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                     <BadgeCheck className="w-5 h-5 text-blue-500" />
                                 )}
                             </h4>
+                            <p className="text-sm text-gray-500">{staff?.degree || 'Nhân viên y tế'}</p>
                         </div>
 
                         <div className="space-y-3">
-                            <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Hospital className="w-4 h-4 text-red-500" />
                                     Bệnh viện trực thuộc
                                 </h5>
                                 <div className="space-y-2">
-                                    <p className="font-medium text-gray-900">
+                                    <p className="font-semibold text-gray-900">
                                         {staff?.hospital?.name || 'Đang cập nhật'}
                                     </p>
                                     <p className="text-sm text-gray-600 flex items-start gap-1">
@@ -263,38 +182,38 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-gray-50 rounded-xl p-3">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Email</p>
-                                    <span className="text-sm font-medium text-gray-900 flex items-center gap-1 truncate">
+                                    <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
                                         <Mail className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.email || 'Chưa cập nhật'}
                                     </span>
                                 </div>
-                                <div className="bg-gray-50 rounded-xl p-3">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
-                                    <span className="text-sm font-medium text-gray-900 flex items-center gap-1 truncate">
+                                    <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
                                         <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-gray-600">Khoa</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.department || 'Khoa'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-gray-600">Chuyên môn</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.degree || 'Đa khoa'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">Kinh nghiệm</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.experience_years || 0} năm
                                     </span>
                                 </div>
@@ -324,7 +243,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
         is_pregnant: false,
         is_breast_feeding: false,
         last_donation: '',
-        is_eligible: false,
+        is_eligible: true,
         doctor: '',
         medical_note: ''
     });
@@ -347,17 +266,14 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
     const today = new Date().toISOString().split('T')[0];
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
+                                <NotebookPen className="w-5 h-5" />
                                 Tạo phiếu khám sức khỏe
                             </h3>
                             <button
@@ -371,7 +287,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
 
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
                         {/* Thông tin bác sĩ */}
-                        <div>
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <User className="w-4 h-4 text-red-600" />
                                 Thông tin bác sĩ
@@ -387,13 +303,13 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     onChange={handleChange}
                                     required
                                     placeholder="Nhập tên bác sĩ khám"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                 />
                             </div>
                         </div>
 
                         {/* Chỉ số cơ bản */}
-                        <div>
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <Activity className="w-4 h-4 text-red-600" />
                                 Chỉ số sức khỏe
@@ -410,7 +326,8 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         step="0.1"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        placeholder="Ví dụ: 65"
                                     />
                                 </div>
                                 <div>
@@ -424,7 +341,8 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         step="0.1"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        placeholder="Ví dụ: 170"
                                     />
                                 </div>
                                 <div>
@@ -438,7 +356,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         placeholder="120/80"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
                                 </div>
                                 <div>
@@ -451,7 +369,8 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         value={formData.heart_rate}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        placeholder="Ví dụ: 72"
                                     />
                                 </div>
                                 <div>
@@ -465,7 +384,8 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         step="0.1"
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        placeholder="Ví dụ: 36.5"
                                     />
                                 </div>
                                 <div>
@@ -478,14 +398,15 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         value={formData.hemoglobin_level}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        placeholder="Ví dụ: 135"
                                     />
                                 </div>
                             </div>
                         </div>
 
                         {/* Lần hiến gần nhất */}
-                        <div>
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <CalendarClock className="w-4 h-4 text-red-600" />
                                 Lịch sử hiến máu
@@ -500,7 +421,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     value={formData.last_donation}
                                     max={today}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
                                     * Nếu chưa từng hiến máu, để trống
@@ -509,13 +430,13 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                         </div>
 
                         {/* Tiền sử bệnh lý */}
-                        <div>
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <FileText className="w-4 h-4 text-red-600" />
                                 Tiền sử bệnh lý
                             </h4>
                             <div className="grid grid-cols-2 gap-3">
-                                <label className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="has_infectious"
@@ -525,7 +446,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     />
                                     <span className="text-sm text-gray-700">Bệnh truyền nhiễm</span>
                                 </label>
-                                <label className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="has_chronic"
@@ -535,7 +456,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     />
                                     <span className="text-sm text-gray-700">Bệnh mãn tính</span>
                                 </label>
-                                <label className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="recent_surgery"
@@ -545,7 +466,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     />
                                     <span className="text-sm text-gray-700">Phẫu thuật gần đây</span>
                                 </label>
-                                <label className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="recent_tattoo"
@@ -555,7 +476,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     />
                                     <span className="text-sm text-gray-700">Xăm hình gần đây</span>
                                 </label>
-                                <label className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="is_drug"
@@ -565,7 +486,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     />
                                     <span className="text-sm text-gray-700">Sử dụng chất kích thích</span>
                                 </label>
-                                <label className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="is_pregnant"
@@ -575,7 +496,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     />
                                     <span className="text-sm text-gray-700">Đang mang thai</span>
                                 </label>
-                                <label className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="is_breast_feeding"
@@ -589,7 +510,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                         </div>
 
                         {/* Kết luận */}
-                        <div>
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <ClipboardCheck className="w-4 h-4 text-red-600" />
                                 Kết luận
@@ -602,7 +523,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     name="is_eligible"
                                     value={formData.is_eligible}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                 >
                                     <option value={true}>Đủ điều kiện</option>
                                     <option value={false}>Không đủ điều kiện</option>
@@ -611,7 +532,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                         </div>
 
                         {/* Ghi chú y tế */}
-                        <div>
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <MessageSquare className="w-4 h-4 text-red-600" />
                                 Ghi chú y tế
@@ -622,7 +543,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                 onChange={handleChange}
                                 rows="3"
                                 placeholder="Nhập ghi chú y tế (nếu có)..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                             />
                         </div>
 
@@ -630,7 +551,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -638,14 +559,17 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         <span>Đang tạo...</span>
                                     </>
                                 ) : (
-                                    <span>Tạo phiếu khám</span>
+                                    <>
+                                        <PlusCircle className="w-5 h-5" />
+                                        <span>Tạo phiếu khám</span>
+                                    </>
                                 )}
                             </button>
                             <button
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50"
+                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -662,14 +586,10 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
@@ -688,10 +608,10 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                     <div className="p-6">
                         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
                             <div className="flex items-start gap-3">
-                                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="text-sm text-yellow-700 font-medium mb-1">{title}</p>
-                                    <p className="text-xs text-yellow-600">{message}</p>
+                                    <p className="text-sm text-yellow-800 font-semibold mb-1">{title}</p>
+                                    <p className="text-xs text-yellow-700">{message}</p>
                                 </div>
                             </div>
                         </div>
@@ -700,7 +620,7 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                             <button
                                 onClick={onConfirm}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
                             >
                                 {loading ? (
                                     <>
@@ -708,14 +628,17 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                         <span>Đang xử lý...</span>
                                     </>
                                 ) : (
-                                    <span>Xác nhận</span>
+                                    <>
+                                        <CheckCircle className="w-5 h-5" />
+                                        <span>Xác nhận</span>
+                                    </>
                                 )}
                             </button>
                             <button
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50"
+                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -774,24 +697,9 @@ const StaffResponseDetail = () => {
                     .replace('${response_id}', response_id);
                 const checkupResponse = await authApis().get(checkupUrl);
                 setMedicalCheckup(checkupResponse.data);
-
-                // Try to fetch blood donation
-                if (checkupResponse.data.id) {
-                    try {
-                        const donationUrl = endpoints.emergency_blood_donation
-                            .replace('${id}', id)
-                            .replace('${response_id}', response_id)
-                            .replace('${medical_check_up_id}', checkupResponse.data.id);
-                        const donationResponse = await authApis().get(donationUrl);
-                        setBloodDonation(donationResponse.data);
-                    } catch (err) {
-                        console.log("No blood donation found");
-                    }
-                }
             } catch (err) {
                 console.log("No medical checkup found");
             }
-
         } catch (err) {
             console.error("Error fetching response detail:", err);
             setError("Không thể tải thông tin phản hồi. Vui lòng thử lại sau.");
@@ -847,22 +755,22 @@ const StaffResponseDetail = () => {
 
     const openConfirmDialog = (newStatus) => {
         const statusConfig = {
-            3: { title: 'Check-in', message: 'Bạn có chắc chắn muốn check-in cho người dùng này? Hành động này xác nhận người dùng đã đến tham gia.' },
-            4: { title: 'Hoàn thành', message: 'Bạn có chắc chắn muốn đánh dấu hoàn thành? Người dùng đã hoàn tất quá trình hiến máu.' }
+            3: { title: 'Xác nhận Check-in', message: 'Bạn có chắc chắn muốn check-in cho người dùng này? Hành động này xác nhận người dùng đã đến tham gia.' },
+            4: { title: 'Xác nhận Hoàn thành', message: 'Bạn có chắc chắn muốn đánh dấu hoàn thành? Người dùng đã hoàn tất quá trình hiến máu.' }
         };
 
         setConfirmDialog({
             isOpen: true,
             newStatus,
-            title: statusConfig[newStatus]?.title || 'Cập nhật trạng thái',
+            title: statusConfig[newStatus]?.title || 'Xác nhận cập nhật',
             message: statusConfig[newStatus]?.message || 'Bạn có chắc chắn muốn cập nhật trạng thái này?'
         });
     };
 
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
+        if (bloodType === undefined || rhFactor === undefined) return 'Chưa cập nhật';
         const bloodTypeMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
-        const rh = rhFactor ? '+' : '-';
-        return `${bloodTypeMap[bloodType]}${rh}`;
+        return `${bloodTypeMap[bloodType]}${rhFactor === 0 ? '-' : '+'}`;
     };
 
     const getDonationTypeText = (type) => {
@@ -929,7 +837,7 @@ const StaffResponseDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-500/25"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại danh sách phản hồi
@@ -948,29 +856,30 @@ const StaffResponseDetail = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Message Toast */}
             {message.text && (
-                <div className="fixed top-24 right-4 z-[1000] animate-slideIn">
-                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
-                        }`}>
+                <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
+                        message.type === 'success'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-red-500 text-white'
+                    }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
                         }
-                        <span>{message.text}</span>
+                        <span className="font-medium">{message.text}</span>
                     </div>
                 </div>
             )}
 
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white pb-8">
+            <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-300 rounded-full blur-3xl"></div>
                 </div>
 
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -978,42 +887,54 @@ const StaffResponseDetail = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <Ambulance className="w-8 h-8 text-white opacity-10" />
+                            <Ambulance className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Quản lý yêu cầu</span>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
+                        <button
+                            onClick={() => navigate("/staff-emergency-request")}
+                            className="hover:text-white transition-colors"
+                        >
+                            Quản lý yêu cầu
+                        </button>
                         <span>/</span>
-                        <span>Danh sách phản hồi</span>
+                        <button
+                            onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
+                            className="hover:text-white transition-colors"
+                        >
+                            Danh sách phản hồi
+                        </button>
                         <span>/</span>
-                        <span className="text-white">Chi tiết phản hồi</span>
-                    </nav>
+                        <span className="text-white font-medium">Chi tiết phản hồi</span>
+                    </div>
 
                     <button
                         onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
-                        className="flex p-1 relative z-20 items-center mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
+                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
-                        <div className="rotate-180 p-2 group-hover:-translate-x-1 transition-transform">
-                            <ChevronRight className="w-5 h-5" />
-                        </div>
-                        <span className='mr-1'>Danh sách phản hồi</span>
+                        <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Quay lại danh sách phản hồi</span>
                     </button>
 
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                        <div>
-                            <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                                Chi tiết phản hồi cấp cứu
-                            </h1>
-                        </div>
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
+                            <Ambulance className="w-8 h-8" />
+                            Chi tiết phản hồi cấp cứu
+                        </h1>
+                        <p className="text-red-100 text-lg">
+                            {donorAccount.last_name} {donorAccount.first_name}
+                        </p>
                     </div>
                 </div>
 
+                {/* Wave Separator */}
                 <div className="absolute bottom-0 left-0 right-0">
                     <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
                         <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F9FAFB" />
@@ -1026,98 +947,77 @@ const StaffResponseDetail = () => {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Left Column - Main Info */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Title Section */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                                        {donorAccount.last_name} {donorAccount.first_name}
-                                    </h1>
-                                    <div className="flex items-center gap-3 mt-4 mb-4 flex-wrap">
-                                        <ResponseStatusBadge 
-                                            statusResponse={statusResponse} 
-                                            statusRegistration={statusRegistration}
-                                        />
-                                        {emergency?.critical && !emergency?.is_expire && (
-                                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 animate-pulse">
-                                                <AlertTriangle className="w-4 h-4" />
-                                                Cấp cứu khẩn cấp
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-3 mt-3 flex-wrap">
-                                        {medicalCheckup && (
-                                            <button
-                                                onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                                            >
-                                                <Stethoscope className="w-4 h-4" />
-                                                <span>Kết quả khám sức khỏe</span>
-                                            </button>
-                                        )}
-                                        {!medicalCheckup && canCreateMedicalCheckup() && (
-                                            <button
-                                                onClick={() => setShowCreateMedicalDialog(true)}
-                                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                                            >
-                                                <NotebookPen className="w-4 h-4" />
-                                                <span>Tạo phiếu khám sức khỏe</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+                        {/* Status Section */}
+                        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                            <div className="flex flex-wrap items-center gap-3 mb-4">
+                                <ResponseStatusBadge 
+                                    statusResponse={statusResponse} 
+                                    statusRegistration={statusRegistration}
+                                />
+                                {emergency?.critical && !emergency?.is_expire && (
+                                    <span className="bg-red-100 text-red-700 px-3 py-1.5 rounded-full text-sm font-semibold flex items-center gap-1 animate-pulse">
+                                        <AlertTriangle className="w-4 h-4" />
+                                        Cấp cứu khẩn cấp
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="flex flex-wrap gap-3">
+                                {medicalCheckup && (
+                                    <button
+                                        onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                    >
+                                        <Stethoscope className="w-4 h-4" />
+                                        Xem kết quả khám
+                                    </button>
+                                )}
+                                {!medicalCheckup && canCreateMedicalCheckup() && (
+                                    <button
+                                        onClick={() => setShowCreateMedicalDialog(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                    >
+                                        <NotebookPen className="w-4 h-4" />
+                                        Tạo phiếu khám
+                                    </button>
+                                )}
                             </div>
                         </div>
 
                         {/* Tabs */}
-                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
                             <div className="border-b border-gray-200 px-6">
                                 <div className="flex gap-6 overflow-x-auto">
-                                    <button
-                                        onClick={() => setActiveTab('info')}
-                                        className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap ${activeTab === 'info'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
+                                    {[
+                                        { id: 'info', label: 'Thông tin phản hồi', icon: FileText },
+                                        { id: 'donor', label: 'Thông tin người hiến', icon: User },
+                                        { id: 'emergency', label: 'Thông tin yêu cầu', icon: AlertTriangle }
+                                    ].map(tab => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${
+                                                activeTab === tab.id
+                                                    ? 'text-red-600'
+                                                    : 'text-gray-500 hover:text-gray-700'
                                             }`}
-                                    >
-                                        Thông tin phản hồi
-                                        {activeTab === 'info' && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                        )}
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('donor')}
-                                        className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap ${activeTab === 'donor'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
-                                            }`}
-                                    >
-                                        Thông tin người hiến
-                                        {activeTab === 'donor' && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                        )}
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('emergency')}
-                                        className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap ${activeTab === 'emergency'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
-                                            }`}
-                                    >
-                                        Thông tin yêu cầu
-                                        {activeTab === 'emergency' && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                        )}
-                                    </button>
+                                        >
+                                            <tab.icon className="w-4 h-4" />
+                                            {tab.label}
+                                            {activeTab === tab.id && (
+                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-500 rounded-full"></div>
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
                             <div className="p-6">
                                 {activeTab === 'info' && (
                                     <div className="space-y-6">
-                                        {/* Thông tin phản hồi */}
                                         <div>
                                             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                                <Clock className="w-5 h-5 text-red-500" />
                                                 Thông tin phản hồi
                                             </h3>
                                             <div className="grid md:grid-cols-2 gap-4">
@@ -1147,9 +1047,9 @@ const StaffResponseDetail = () => {
 
                                 {activeTab === 'donor' && donor && (
                                     <div className="space-y-6">
-                                        {/* Thông tin cá nhân */}
                                         <div>
                                             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                                <User className="w-5 h-5 text-red-500" />
                                                 Thông tin cá nhân
                                             </h3>
                                             <div className="grid md:grid-cols-2 gap-4">
@@ -1174,7 +1074,7 @@ const StaffResponseDetail = () => {
                                                     value={donor?.blood_type !== undefined ? getBloodTypeDisplay(donor.blood_type, donor.rh_factor) : 'Chưa cập nhật'}
                                                 />
                                                 <InfoCard
-                                                    icon={Award}
+                                                    icon={AwardIcon}
                                                     label="Số lần hiến máu"
                                                     value={`${donor.donation_count || 0} lần`}
                                                 />
@@ -1192,9 +1092,9 @@ const StaffResponseDetail = () => {
 
                                 {activeTab === 'emergency' && emergency && (
                                     <div className="space-y-6">
-                                        {/* Thông tin bệnh nhân */}
                                         <div>
                                             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                                <Heart className="w-5 h-5 text-red-500" />
                                                 Thông tin bệnh nhân
                                             </h3>
                                             <div className="grid md:grid-cols-2 gap-4">
@@ -1231,27 +1131,27 @@ const StaffResponseDetail = () => {
                                             </div>
                                         </div>
 
-                                        {/* Ghi chú cấp cứu */}
                                         {emergency.emergency_note && (
                                             <div>
                                                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                                    <FileText className="w-5 h-5 text-red-500" />
                                                     Ghi chú cấp cứu
                                                 </h3>
-                                                <div className="bg-red-50 rounded-xl p-4">
-                                                    <p className="text-red-700 whitespace-pre-line">
+                                                <div className="bg-red-50 rounded-xl p-4 border border-red-100">
+                                                    <p className="text-red-800 whitespace-pre-line">
                                                         {emergency.emergency_note}
                                                     </p>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* Nhân viên y tế */}
                                         {emergency.staff && (
                                             <div>
                                                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                                    <Stethoscope className="w-5 h-5 text-red-500" />
                                                     Nhân viên y tế phụ trách
                                                 </h3>
-                                                <div className="bg-gray-50 rounded-xl p-4">
+                                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center overflow-hidden">
@@ -1267,7 +1167,7 @@ const StaffResponseDetail = () => {
                                                             </div>
                                                             <div>
                                                                 <div className="flex items-center gap-2 mb-1">
-                                                                    <span className="font-medium text-gray-900">
+                                                                    <span className="font-semibold text-gray-900">
                                                                         {`${emergency.staff.account?.last_name || ''} ${emergency.staff.account?.first_name || ''}`}
                                                                     </span>
                                                                     {emergency.staff.is_verified && (
@@ -1281,7 +1181,7 @@ const StaffResponseDetail = () => {
                                                         </div>
                                                         <button
                                                             onClick={() => setIsStaffDialogOpen(true)}
-                                                            className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1"
+                                                            className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1 transition-colors"
                                                         >
                                                             Xem chi tiết
                                                             <ChevronRight className="w-4 h-4" />
@@ -1298,7 +1198,7 @@ const StaffResponseDetail = () => {
 
                     {/* Right Column - Summary Card */}
                     <div className="space-y-6">
-                        <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-24">
+                        <div className="bg-white rounded-2xl shadow-md p-6 sticky top-24 border border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <FileText className="w-5 h-5 text-red-500" />
                                 Tổng quan
@@ -1315,14 +1215,14 @@ const StaffResponseDetail = () => {
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Người hiến</span>
-                                    <span className="font-medium text-gray-900">
+                                    <span className="font-semibold text-gray-900">
                                         {donorAccount.last_name} {donorAccount.first_name}
                                     </span>
                                 </div>
 
                                 <div className="flex items-start justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Số điện thoại</span>
-                                    <span className="font-medium text-gray-900">{donorAccount.phone || 'Chưa cập nhật'}</span>
+                                    <span className="font-semibold text-gray-900">{donorAccount.phone || 'Chưa cập nhật'}</span>
                                 </div>
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
@@ -1334,7 +1234,7 @@ const StaffResponseDetail = () => {
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Bệnh nhân</span>
-                                    <span className="font-medium text-gray-900">{emergency?.patient_name}</span>
+                                    <span className="font-semibold text-gray-900">{emergency?.patient_name}</span>
                                 </div>
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
@@ -1348,7 +1248,7 @@ const StaffResponseDetail = () => {
                                     <span className="text-gray-600">Ngày phản hồi</span>
                                     <div className="text-right">
                                         <p className="text-sm text-gray-500">{formatTime(response.created_at)}</p>
-                                        <p className="font-medium text-gray-900">{formatDate(response.created_at)}</p>
+                                        <p className="font-semibold text-gray-900">{formatDate(response.created_at)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -1357,33 +1257,33 @@ const StaffResponseDetail = () => {
                             <div className="mt-6 space-y-3">
                                 {canUpdateStatus() && (
                                     <div className="space-y-2">
-                                        <p className="text-gray-600">Cập nhật trạng thái:</p>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {statusRegistration === 1 && (
-                                                <button
-                                                    onClick={() => openConfirmDialog(3)}
-                                                    disabled={updatingStatus}
-                                                    className="col-span-2 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
-                                                >
-                                                    Check-in
-                                                </button>
-                                            )}
-                                            {statusRegistration === 3 && (
-                                                <button
-                                                    onClick={() => openConfirmDialog(4)}
-                                                    disabled={updatingStatus}
-                                                    className="col-span-2 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50"
-                                                >
-                                                    Hoàn thành
-                                                </button>
-                                            )}
-                                        </div>
+                                        <p className="text-gray-600 text-sm">Cập nhật trạng thái:</p>
+                                        {statusRegistration === 1 && (
+                                            <button
+                                                onClick={() => openConfirmDialog(3)}
+                                                disabled={updatingStatus}
+                                                className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl hover:from-purple-700 hover:to-purple-600 transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md disabled:opacity-50"
+                                            >
+                                                <UserCheck className="w-5 h-5" />
+                                                Check-in
+                                            </button>
+                                        )}
+                                        {statusRegistration === 3 && (
+                                            <button
+                                                onClick={() => openConfirmDialog(4)}
+                                                disabled={updatingStatus}
+                                                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-500 text-white rounded-xl hover:from-emerald-700 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md disabled:opacity-50"
+                                            >
+                                                <CheckCircle className="w-5 h-5" />
+                                                Hoàn thành
+                                            </button>
+                                        )}
                                     </div>
                                 )}
 
                                 <button
                                     onClick={() => window.print()}
-                                    className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                                    className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2"
                                 >
                                     <Printer className="w-5 h-5" />
                                     In thông tin
@@ -1391,7 +1291,7 @@ const StaffResponseDetail = () => {
                             </div>
 
                             {/* Note */}
-                            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
                                 <p className="text-xs text-blue-700 flex items-start gap-2">
                                     <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                                     <span>
@@ -1429,6 +1329,47 @@ const StaffResponseDetail = () => {
                 message={confirmDialog.message}
                 loading={updatingStatus}
             />
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-slideInRight {
+                    animation: slideInRight 0.3s ease-out;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.2s ease-out;
+                }
+            `}</style>
         </div>
     );
 };

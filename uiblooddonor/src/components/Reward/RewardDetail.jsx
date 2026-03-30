@@ -9,12 +9,12 @@ import {
     ChevronLeft,
     Droplet,
     ChevronRight,
-    Bookmark
+    Bookmark, ArrowRight, Loader2, Send, TrendingUp, Award as AwardIcon,
+    HeartHandshake, Gem, Zap, ShoppingCart, TruckIcon, RotateCcw
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { UserContexts } from '../../configs/UserContexts';
-import '../../styles/RewardDetail.css'
 
 const RewardDetail = () => {
     const { id, reward_id } = useParams();
@@ -106,7 +106,6 @@ const RewardDetail = () => {
         const { name, value, type, checked } = e.target;
         setRedeemForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
 
-        // Clear error for this field when user starts typing
         if (formErrors[name]) {
             setFormErrors(prev => ({ ...prev, [name]: '' }));
         }
@@ -184,7 +183,7 @@ const RewardDetail = () => {
         try {
             const url = endpoints.redeem_reward.replace('${id}', reward_id);
 
-            const response = await authApis().post(url, {
+            await authApis().post(url, {
                 quantity: redeemForm.quantity,
                 last_name: redeemForm.last_name,
                 first_name: redeemForm.first_name,
@@ -259,7 +258,7 @@ const RewardDetail = () => {
                         <p className="text-gray-600 mb-6">Quà tặng bạn đang tìm không tồn tại hoặc đã bị xóa</p>
                         <button
                             onClick={() => navigate(-1)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-500/25"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại
@@ -276,29 +275,31 @@ const RewardDetail = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="bg-white rounded-3xl shadow-xl p-12 max-w-md mx-auto text-center">
                         <div className="relative">
-                            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                            <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
                                 <CheckCircle className="w-12 h-12 text-green-600" />
                             </div>
                         </div>
 
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Đổi quà thành công</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Đổi quà thành công!</h2>
+                        <p className="text-gray-600 mb-4">Cảm ơn bạn đã tham gia chương trình</p>
 
                         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 mb-6">
                             <div className="flex items-center justify-center gap-2 text-green-700">
                                 <BadgeCheck className="w-5 h-5" />
-                                <span className="font-medium">Bạn đã đổi thành công {redeemForm.quantity} {reward.name}</span>
+                                <span className="font-medium">Đã đổi {redeemForm.quantity} {reward.name}</span>
                             </div>
                         </div>
 
                         <div className="space-y-2 text-sm text-gray-500 mb-6">
                             <p>Quà tặng sẽ được gửi đến bạn trong vòng 5-7 ngày làm việc</p>
                             <p className="flex items-center justify-center gap-1">
+                                <Loader2 className="w-4 h-4 animate-spin" />
                                 Đang chuyển hướng...
                             </p>
                         </div>
 
                         <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                            <div className="bg-green-600 h-2 rounded-full animate-progress"></div>
+                            <div className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full animate-progress"></div>
                         </div>
                     </div>
                 </div>
@@ -308,7 +309,7 @@ const RewardDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            {/* Hero Section với gradient */}
+            {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -316,7 +317,7 @@ const RewardDetail = () => {
                 </div>
 
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -324,37 +325,41 @@ const RewardDetail = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <Droplet className="w-8 h-8 text-white opacity-10" />
+                            <Gift className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
                     {/* Breadcrumb */}
-                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Danh mục</span>
+                    <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
+                        <button
+                            onClick={() => navigate("/reward-category")}
+                            className="hover:text-white transition-colors"
+                        >
+                            Danh mục
+                        </button>
                         <span>/</span>
-                        <span>
-                            {reward?.reward_category.name || 'Quà tặng'}
-                        </span>
-                        <span>/</span>
-                        <span className="text-white">Chi tiết</span>
-                    </nav>
-
-                    <div className="flex items-center justify-between">
                         <button
                             onClick={() => navigate(`/reward-category/${reward?.reward_category?.id}`)}
-                            className="flex p-1 relative z-20 items-center mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
+                            className="hover:text-white transition-colors"
                         >
-                            <div className="rotate-180 p-2 group-hover:-translate-x-1 transition-transform">
-                                <ChevronRight className="w-5 h-5" />
-                            </div>
-                            <span className='mr-1'>{reward?.reward_category.name || 'Quà tặng'}</span>
+                            {reward?.reward_category?.name || 'Quà tặng'}
                         </button>
+                        <span>/</span>
+                        <span className="text-white font-medium">Chi tiết</span>
                     </div>
+
+                    <button
+                        onClick={() => navigate(`/reward-category/${reward?.reward_category?.id}`)}
+                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                    >
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span>Quay lại {reward?.reward_category?.name}</span>
+                    </button>
                 </div>
 
                 {/* Wave Separator */}
@@ -366,10 +371,9 @@ const RewardDetail = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
                 {!showForm ? (
                     // Product Detail View
-                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                         <div className="grid lg:grid-cols-2">
                             {/* Image Section */}
                             <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 p-8 lg:p-12">
@@ -377,7 +381,8 @@ const RewardDetail = () => {
                                     {/* Badges */}
                                     <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                                         {reward.remaining_stock > 0 && reward.remaining_stock <= 10 && (
-                                            <span className="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 shadow-lg">
+                                            <span className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-lg animate-pulse">
+                                                <Clock className="w-3 h-3" />
                                                 Sắp hết quà
                                             </span>
                                         )}
@@ -403,9 +408,9 @@ const RewardDetail = () => {
                             {/* Info Section */}
                             <div className="p-8 lg:p-12">
                                 {/* Category Tag */}
-                                <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm mb-4">
+                                <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-medium mb-4">
                                     <Package className="w-4 h-4" />
-                                    <span>{reward?.reward_category.name || 'Quà tặng'}</span>
+                                    <span>{reward?.reward_category?.name || 'Quà tặng'}</span>
                                 </div>
 
                                 {/* Title */}
@@ -413,31 +418,41 @@ const RewardDetail = () => {
                                     {reward.name}
                                 </h1>
 
+                                {/* Points Display */}
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-xl px-4 py-2">
+                                        <span className="text-2xl font-bold text-red-600">{formatPoints(reward.points_required)}</span>
+                                        <span className="text-sm text-red-500 ml-1">điểm</span>
+                                    </div>
+                                </div>
+
                                 {/* Tabs */}
                                 <div className="border-b border-gray-200 mb-6">
                                     <div className="flex gap-6">
                                         <button
                                             onClick={() => setActiveTab('info')}
-                                            className={`pb-4 px-2 font-medium transition-all relative ${activeTab === 'info'
-                                                ? 'text-red-600'
-                                                : 'text-gray-500 hover:text-gray-700'
-                                                }`}
+                                            className={`pb-4 px-2 font-medium transition-all relative ${
+                                                activeTab === 'info'
+                                                    ? 'text-red-600'
+                                                    : 'text-gray-500 hover:text-gray-700'
+                                            }`}
                                         >
                                             Thông tin quà tặng
                                             {activeTab === 'info' && (
-                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
+                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-500 rounded-full"></div>
                                             )}
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('details')}
-                                            className={`pb-4 px-2 font-medium transition-all relative ${activeTab === 'details'
-                                                ? 'text-red-600'
-                                                : 'text-gray-500 hover:text-gray-700'
-                                                }`}
+                                            className={`pb-4 px-2 font-medium transition-all relative ${
+                                                activeTab === 'details'
+                                                    ? 'text-red-600'
+                                                    : 'text-gray-500 hover:text-gray-700'
+                                            }`}
                                         >
                                             Chi tiết
                                             {activeTab === 'details' && (
-                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
+                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-500 rounded-full"></div>
                                             )}
                                         </button>
                                     </div>
@@ -452,23 +467,23 @@ const RewardDetail = () => {
                                     </div>
                                 ) : (
                                     <div className="space-y-3 mb-6">
-                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                            <Box className="w-5 h-5 text-gray-500" />
-                                            <span className="text-gray-700">Thương hiệu: {reward.brand || 'Đang cập nhật'}</span>
+                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
+                                            <Box className="w-5 h-5 text-red-500" />
+                                            <span className="text-gray-700">Thương hiệu: <span className="font-medium">{reward.brand || 'Đang cập nhật'}</span></span>
                                         </div>
-                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                            <Package className="w-5 h-5 text-gray-500" />
-                                            <span className="text-gray-700">Xuất xứ: {reward.origin || 'Đang cập nhật'}</span>
+                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
+                                            <Package className="w-5 h-5 text-red-500" />
+                                            <span className="text-gray-700">Xuất xứ: <span className="font-medium">{reward.origin || 'Đang cập nhật'}</span></span>
                                         </div>
-                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                                            <Shield className="w-5 h-5 text-gray-500" />
-                                            <span className="text-gray-700">Bảo hành: {reward.warranty || 'Đang cập nhật'}</span>
+                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
+                                            <Shield className="w-5 h-5 text-red-500" />
+                                            <span className="text-gray-700">Bảo hành: <span className="font-medium">{reward.warranty || 'Đang cập nhật'}</span></span>
                                         </div>
                                     </div>
                                 )}
 
                                 {/* Stock Status */}
-                                <div className="flex items-center gap-4 mb-6">
+                                <div className="flex flex-wrap items-center gap-4 mb-6">
                                     {reward.remaining_stock > 0 ? (
                                         <>
                                             <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-xl">
@@ -489,51 +504,51 @@ const RewardDetail = () => {
                                 </div>
 
                                 {/* Quantity Selector */}
-                                <div className="mb-6">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Số lượng
-                                    </label>
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
-                                            <button
-                                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                                disabled={!reward.remaining_stock}
-                                                className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <Minus className="w-4 h-4" />
-                                            </button>
+                                {reward.remaining_stock > 0 && (
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Số lượng
+                                        </label>
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
+                                                <button
+                                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                                    className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-50"
+                                                >
+                                                    <Minus className="w-4 h-4" />
+                                                </button>
+                                                <span className="w-16 h-12 flex items-center justify-center text-gray-900 font-medium border-x-2 border-gray-200">
+                                                    {quantity}
+                                                </span>
+                                                <button
+                                                    onClick={() => setQuantity(Math.min(reward.remaining_stock, quantity + 1))}
+                                                    disabled={quantity >= reward.remaining_stock}
+                                                    className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-50"
+                                                >
+                                                    <Plus className="w-4 h-4" />
+                                                </button>
+                                            </div>
 
-                                            <span className="w-16 h-12 flex items-center justify-center text-gray-900 font-medium border-x-2 border-gray-200">
-                                                {quantity}
-                                            </span>
-
-                                            <button
-                                                onClick={() => setQuantity(Math.min(reward.remaining_stock, quantity + 1))}
-                                                disabled={!reward.remaining_stock || quantity >= reward.remaining_stock}
-                                                className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <Plus className="w-4 h-4" />
-                                            </button>
-                                        </div>
-
-                                        <div className="flex-1 bg-gray-50 rounded-xl p-3">
-                                            <span className="text-sm text-gray-600">Tổng điểm:</span>
-                                            <span className="ml-2 text-lg font-bold text-red-600">
-                                                {formatPoints(reward.points_required * quantity)} điểm
-                                            </span>
+                                            <div className="flex-1 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-3">
+                                                <span className="text-sm text-gray-600">Tổng điểm:</span>
+                                                <span className="ml-2 text-lg font-bold text-red-600">
+                                                    {formatPoints(reward.points_required * quantity)} điểm
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* Action Buttons */}
                                 <div className="flex gap-4">
                                     <button
                                         onClick={handleContinue}
                                         disabled={!reward.remaining_stock || reward.remaining_stock < quantity}
-                                        className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl text-white font-semibold transition-all transform hover:scale-105 ${reward.remaining_stock >= quantity
-                                            ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25'
-                                            : 'bg-gray-400 cursor-not-allowed'
-                                            }`}
+                                        className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-105 ${
+                                            reward.remaining_stock >= quantity
+                                                ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25'
+                                                : 'bg-gray-400 cursor-not-allowed'
+                                        }`}
                                     >
                                         {user_current ? (
                                             <>
@@ -557,9 +572,9 @@ const RewardDetail = () => {
                                 )}
 
                                 {/* Shipping Info */}
-                                <div className="mt-8 p-4 bg-gray-50 rounded-xl">
+                                <div className="mt-8 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
                                     <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                        <Truck className="w-5 h-5" />
+                                        <Truck className="w-5 h-5 text-red-500" />
                                         Thông tin vận chuyển
                                     </h4>
                                     <ul className="space-y-2 text-sm text-gray-600">
@@ -573,7 +588,7 @@ const RewardDetail = () => {
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                                            <span>Kiểm tra hàng trước khi đổi điểm</span>
+                                            <span>Kiểm tra hàng trước khi nhận</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -583,15 +598,15 @@ const RewardDetail = () => {
                 ) : (
                     // Redeem Form View
                     <div className="max-w-3xl mx-auto">
-                        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+                        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                             <div className="bg-gradient-to-r from-red-600 to-red-500 text-white p-8">
                                 <h2 className="text-2xl font-bold mb-2">Thông tin nhận quà</h2>
                                 <p className="text-red-50">Vui lòng điền đầy đủ thông tin để hoàn tất đổi quà</p>
 
                                 {/* Progress Steps */}
                                 <div className="flex items-center gap-2 mt-6">
-                                    <div className={`flex-1 h-2 rounded-full ${formStep >= 1 ? 'bg-white' : 'bg-white/30'}`}></div>
-                                    <div className={`flex-1 h-2 rounded-full ${formStep >= 2 ? 'bg-white' : 'bg-white/30'}`}></div>
+                                    <div className={`flex-1 h-2 rounded-full transition-all duration-300 ${formStep >= 1 ? 'bg-white' : 'bg-white/30'}`}></div>
+                                    <div className={`flex-1 h-2 rounded-full transition-all duration-300 ${formStep >= 2 ? 'bg-white' : 'bg-white/30'}`}></div>
                                 </div>
                                 <div className="flex justify-between text-sm mt-2">
                                     <span className={formStep >= 1 ? 'font-medium' : 'text-white/70'}>Thông tin cá nhân</span>
@@ -601,7 +616,7 @@ const RewardDetail = () => {
 
                             <form onSubmit={handleRedeem} className="p-8">
                                 {error && (
-                                    <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                                    <div className="mb-6 bg-red-50 border-2 border-red-200 rounded-xl p-4 animate-shake">
                                         <div className="flex items-center gap-3">
                                             <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
                                             <p className="text-sm text-red-700">{error}</p>
@@ -614,7 +629,7 @@ const RewardDetail = () => {
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                     Họ và tên đệm <span className="text-red-500">*</span>
                                                 </label>
                                                 <div className="relative">
@@ -624,10 +639,11 @@ const RewardDetail = () => {
                                                         name="last_name"
                                                         value={redeemForm.last_name}
                                                         onChange={handleInputChange}
-                                                        className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${formErrors.last_name
-                                                            ? 'border-red-500 focus:ring-red-500/20'
-                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
-                                                            }`}
+                                                        className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                            formErrors.last_name
+                                                                ? 'border-red-500 focus:ring-red-500/20'
+                                                                : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
+                                                        }`}
                                                         placeholder="Họ và tên đệm"
                                                     />
                                                 </div>
@@ -637,7 +653,7 @@ const RewardDetail = () => {
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                     Tên <span className="text-red-500">*</span>
                                                 </label>
                                                 <div className="relative">
@@ -647,10 +663,11 @@ const RewardDetail = () => {
                                                         name="first_name"
                                                         value={redeemForm.first_name}
                                                         onChange={handleInputChange}
-                                                        className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${formErrors.first_name
-                                                            ? 'border-red-500 focus:ring-red-500/20'
-                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
-                                                            }`}
+                                                        className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                            formErrors.first_name
+                                                                ? 'border-red-500 focus:ring-red-500/20'
+                                                                : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
+                                                        }`}
                                                         placeholder="Tên"
                                                     />
                                                 </div>
@@ -661,7 +678,7 @@ const RewardDetail = () => {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Số điện thoại <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
@@ -671,10 +688,11 @@ const RewardDetail = () => {
                                                     name="phone"
                                                     value={redeemForm.phone}
                                                     onChange={handleInputChange}
-                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${formErrors.phone
-                                                        ? 'border-red-500 focus:ring-red-500/20'
-                                                        : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
-                                                        }`}
+                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                        formErrors.phone
+                                                            ? 'border-red-500 focus:ring-red-500/20'
+                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
+                                                    }`}
                                                     placeholder="Số điện thoại"
                                                 />
                                             </div>
@@ -684,7 +702,7 @@ const RewardDetail = () => {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Email <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
@@ -694,10 +712,11 @@ const RewardDetail = () => {
                                                     name="email"
                                                     value={redeemForm.email}
                                                     onChange={handleInputChange}
-                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${formErrors.email
-                                                        ? 'border-red-500 focus:ring-red-500/20'
-                                                        : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
-                                                        }`}
+                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                        formErrors.email
+                                                            ? 'border-red-500 focus:ring-red-500/20'
+                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
+                                                    }`}
                                                     placeholder="Email"
                                                 />
                                             </div>
@@ -707,7 +726,7 @@ const RewardDetail = () => {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Số CMND/CCCD
                                             </label>
                                             <div className="relative">
@@ -727,7 +746,7 @@ const RewardDetail = () => {
                                             <button
                                                 type="button"
                                                 onClick={handleNextStep}
-                                                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
+                                                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                                             >
                                                 Tiếp tục
                                                 <ArrowRight className="w-5 h-5" />
@@ -740,7 +759,7 @@ const RewardDetail = () => {
                                 {formStep === 2 && (
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Tỉnh/Thành phố <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
@@ -749,10 +768,11 @@ const RewardDetail = () => {
                                                     name="province"
                                                     value={redeemForm.province}
                                                     onChange={handleProvinceChange}
-                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all appearance-none ${formErrors.province
-                                                        ? 'border-red-500 focus:ring-red-500/20'
-                                                        : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
-                                                        }`}
+                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all appearance-none ${
+                                                        formErrors.province
+                                                            ? 'border-red-500 focus:ring-red-500/20'
+                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
+                                                    }`}
                                                 >
                                                     <option value="">Chọn tỉnh/thành phố</option>
                                                     {provinces.map(p => (
@@ -766,7 +786,7 @@ const RewardDetail = () => {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Quận/Huyện <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
@@ -776,10 +796,11 @@ const RewardDetail = () => {
                                                     value={redeemForm.sub_district}
                                                     onChange={handleInputChange}
                                                     disabled={!selectedProvince}
-                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all appearance-none ${formErrors.sub_district
-                                                        ? 'border-red-500 focus:ring-red-500/20'
-                                                        : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20 disabled:bg-gray-100'
-                                                        }`}
+                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all appearance-none ${
+                                                        formErrors.sub_district
+                                                            ? 'border-red-500 focus:ring-red-500/20'
+                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20 disabled:bg-gray-100'
+                                                    }`}
                                                 >
                                                     <option value="">Chọn quận/huyện</option>
                                                     {districts.map(d => (
@@ -793,7 +814,7 @@ const RewardDetail = () => {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Địa chỉ nhận hàng <span className="text-red-500">*</span>
                                             </label>
                                             <div className="relative">
@@ -803,10 +824,11 @@ const RewardDetail = () => {
                                                     name="recipient_address"
                                                     value={redeemForm.recipient_address}
                                                     onChange={handleInputChange}
-                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${formErrors.recipient_address
-                                                        ? 'border-red-500 focus:ring-red-500/20'
-                                                        : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
-                                                        }`}
+                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                        formErrors.recipient_address
+                                                            ? 'border-red-500 focus:ring-red-500/20'
+                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
+                                                    }`}
                                                     placeholder="Số nhà, tên đường, phường/xã"
                                                 />
                                             </div>
@@ -816,7 +838,7 @@ const RewardDetail = () => {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Ghi chú
                                             </label>
                                             <div className="relative">
@@ -838,33 +860,36 @@ const RewardDetail = () => {
                                                 name="agree_terms"
                                                 checked={redeemForm.agree_terms}
                                                 onChange={handleInputChange}
-                                                className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                                                className="mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 cursor-pointer"
                                             />
-                                            <label className="text-sm text-gray-600">
+                                            <label className="text-sm text-gray-600 cursor-pointer">
                                                 Tôi đồng ý với các điều khoản và điều kiện đổi quà của chương trình
                                             </label>
                                         </div>
 
                                         {/* Order Summary */}
                                         <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mt-4">
-                                            <h4 className="font-semibold text-gray-900 mb-3">Tóm tắt đơn hàng</h4>
+                                            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                                <ShoppingCart className="w-4 h-4 text-red-500" />
+                                                Tóm tắt đơn hàng
+                                            </h4>
                                             <div className="space-y-2 text-sm">
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-600">Tên quà tặng:</span>
-                                                    <span className="font-medium">{reward.name}</span>
+                                                    <span className="font-medium text-gray-900">{reward.name}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-600">Số lượng:</span>
-                                                    <span className="font-medium">{quantity}</span>
+                                                    <span className="font-medium text-gray-900">{quantity}</span>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <span className="text-gray-600">Điểm:</span>
-                                                    <span className="font-medium">{formatPoints(reward.points_required)} điểm</span>
+                                                    <span className="text-gray-600">Điểm cần:</span>
+                                                    <span className="font-medium text-gray-900">{formatPoints(reward.points_required)} điểm</span>
                                                 </div>
                                                 <div className="border-t border-gray-200 my-2"></div>
-                                                <div className="flex justify-between text-base font-bold">
-                                                    <span className="text-gray-900">Tổng điểm:</span>
-                                                    <span className="text-red-600">{formatPoints(reward.points_required * quantity)} điểm</span>
+                                                <div className="flex justify-between text-base">
+                                                    <span className="font-semibold text-gray-900">Tổng điểm:</span>
+                                                    <span className="text-xl font-bold text-red-600">{formatPoints(reward.points_required * quantity)} điểm</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -873,23 +898,24 @@ const RewardDetail = () => {
                                             <button
                                                 type="button"
                                                 onClick={handlePrevStep}
-                                                className="flex-1 px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
+                                                className="flex-1 px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold"
                                             >
                                                 Quay lại
                                             </button>
                                             <button
                                                 type="submit"
                                                 disabled={redeeming || !redeemForm.agree_terms}
-                                                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed shadow-lg shadow-red-500/25"
+                                                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed shadow-lg"
                                             >
                                                 {redeeming ? (
                                                     <>
-                                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                        <Loader2 className="w-5 h-5 animate-spin" />
                                                         <span>Đang xử lý...</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span>Xác nhận đổi quà</span>
+                                                        <CheckCircle className="w-5 h-5" />
+                                                        Xác nhận đổi quà
                                                     </>
                                                 )}
                                             </button>
@@ -900,8 +926,8 @@ const RewardDetail = () => {
                         </div>
 
                         {/* Product Summary Card */}
-                        <div className="bg-white rounded-2xl shadow-lg p-4 mt-4 flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                        <div className="bg-white rounded-2xl shadow-lg p-4 mt-4 flex items-center gap-4 border border-gray-100">
+                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden flex-shrink-0">
                                 {reward.image_url ? (
                                     <img src={getImageUrl(reward.image_url)} alt={reward.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -920,27 +946,38 @@ const RewardDetail = () => {
                     </div>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+                
+                @keyframes progress {
+                    0% { width: 0%; }
+                    100% { width: 100%; }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-shake {
+                    animation: shake 0.5s ease-in-out;
+                }
+                
+                .animate-progress {
+                    animation: progress 3s ease-out forwards;
+                }
+            `}</style>
         </div>
     );
 };
-
-// Add missing ArrowRight icon
-const ArrowRight = (props) => (
-    <svg
-        {...props}
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M5 12h14" />
-        <path d="m12 5 7 7-7 7" />
-    </svg>
-);
 
 export default RewardDetail;

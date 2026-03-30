@@ -11,27 +11,24 @@ import {
     NotepadText, InfoIcon, VenusAndMars, Edit, Trash2,
     Save, Upload, Image as ImageIcon, Ambulance, Hospital,
     Syringe, AlertOctagon, HeartHandshake, Timer,
-    CheckCircle2, AlertTriangle, ExternalLink
+    CheckCircle2, AlertTriangle, ExternalLink, Send,
+    Grid, List, Filter as FilterIcon, TrendingUp,
+    Stethoscope, BadgeCheck, Shield
 } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import debounce from 'lodash.debounce';
-import '../../styles/EventList.css';
 
 // Confirm Delete Dialog
 const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loading }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
@@ -50,10 +47,10 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                     <div className="p-6">
                         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
                             <div className="flex items-start gap-3">
-                                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="text-sm text-yellow-700 font-medium mb-1">{message}</p>
-                                    <p className="text-xs text-yellow-600">Hành động này không thể hoàn tác.</p>
+                                    <p className="text-sm text-yellow-800 font-semibold mb-1">{message}</p>
+                                    <p className="text-xs text-yellow-700">Hành động này không thể hoàn tác.</p>
                                 </div>
                             </div>
                         </div>
@@ -62,7 +59,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                             <button
                                 onClick={onConfirm}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -70,14 +67,17 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                         <span>Đang xử lý...</span>
                                     </>
                                 ) : (
-                                    <span>Xác nhận xóa</span>
+                                    <>
+                                        <Trash2 className="w-5 h-5" />
+                                        <span>Xác nhận xóa</span>
+                                    </>
                                 )}
                             </button>
                             <button
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50"
+                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -109,12 +109,10 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
     const [loadingHospitals, setLoadingHospitals] = useState(false);
     const [selectedHospital, setSelectedHospital] = useState('');
 
-    // Fetch hospitals on mount
     useEffect(() => {
         fetchHospitals();
     }, []);
 
-    // Reset form when dialog opens or emergency changes
     useEffect(() => {
         if (isOpen && emergency) {
             setFormData({
@@ -220,14 +218,10 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full transform transition-all max-h-[90vh] overflow-y-auto">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
@@ -245,7 +239,7 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
 
                     <form onSubmit={handleSubmit} className="p-6 space-y-5">
                         {error && (
-                            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 animate-shake">
                                 <div className="flex items-start gap-2">
                                     <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                                     <p className="text-sm text-red-600">{error}</p>
@@ -253,113 +247,119 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </div>
                         )}
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Tên bệnh nhân <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.patient_name}
-                                    onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
-                                    placeholder="Nhập tên bệnh nhân"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Số điện thoại <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="tel"
-                                    required
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    maxLength={10}
-                                    placeholder="Nhập số điện thoại liên hệ"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Nhóm máu <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    required
-                                    value={formData.blood_type}
-                                    onChange={(e) => setFormData({ ...formData, blood_type: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
-                                >
-                                    <option value="">Chọn nhóm máu</option>
-                                    <option value="0">O</option>
-                                    <option value="1">A</option>
-                                    <option value="2">B</option>
-                                    <option value="3">AB</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Yếu tố Rh
-                                </label>
-                                <label className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl">
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Tên bệnh nhân <span className="text-red-500">*</span>
+                                    </label>
                                     <input
-                                        type="checkbox"
-                                        checked={formData.rh_factor}
-                                        onChange={(e) => setFormData({ ...formData, rh_factor: e.target.checked })}
-                                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                        type="text"
+                                        required
+                                        value={formData.patient_name}
+                                        onChange={(e) => setFormData({ ...formData, patient_name: e.target.value })}
+                                        placeholder="Nhập tên bệnh nhân"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
-                                    <span className="text-sm text-gray-700">Rh(+)</span>
-                                </label>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Số điện thoại <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        required
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        maxLength={10}
+                                        placeholder="Nhập số điện thoại liên hệ"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Loại hiến máu <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    required
-                                    value={formData.donation_type}
-                                    onChange={(e) => setFormData({ ...formData, donation_type: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
-                                >
-                                    <option value="">Chọn loại hiến máu</option>
-                                    <option value="0">Máu toàn phần</option>
-                                    <option value="1">Tiểu cầu</option>
-                                    <option value="2">Huyết tương</option>
-                                    <option value="3">Bạch cầu</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Thể tích máu cần (ml) <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    value={formData.blood_volume}
-                                    onChange={(e) => setFormData({ ...formData, blood_volume: e.target.value })}
-                                    placeholder="VD: 350"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
-                                />
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Nhóm máu <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        required
+                                        value={formData.blood_type}
+                                        onChange={(e) => setFormData({ ...formData, blood_type: e.target.value })}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                    >
+                                        <option value="">Chọn nhóm máu</option>
+                                        <option value="0">O</option>
+                                        <option value="1">A</option>
+                                        <option value="2">B</option>
+                                        <option value="3">AB</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Yếu tố Rh
+                                    </label>
+                                    <label className="flex items-center gap-3 px-4 py-2.5 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.rh_factor}
+                                            onChange={(e) => setFormData({ ...formData, rh_factor: e.target.checked })}
+                                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Rh(+)</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Loại hiến máu <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        required
+                                        value={formData.donation_type}
+                                        onChange={(e) => setFormData({ ...formData, donation_type: e.target.value })}
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                    >
+                                        <option value="">Chọn loại hiến máu</option>
+                                        <option value="0">Máu toàn phần</option>
+                                        <option value="1">Tiểu cầu</option>
+                                        <option value="2">Huyết tương</option>
+                                        <option value="3">Bạch cầu</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Thể tích máu cần (ml) <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        value={formData.blood_volume}
+                                        onChange={(e) => setFormData({ ...formData, blood_volume: e.target.value })}
+                                        placeholder="VD: 350"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Bệnh viện tiếp nhận
                             </label>
                             <select
                                 value={selectedHospital}
                                 onChange={handleHospitalChange}
                                 disabled={loadingHospitals}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                             >
                                 <option value="">Chọn bệnh viện</option>
                                 {loadingHospitals ? (
@@ -374,36 +374,34 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             </select>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Mức độ khẩn cấp
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Mức độ khẩn cấp
+                            </label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        checked={formData.critical === true}
+                                        onChange={() => setFormData({ ...formData, critical: true })}
+                                        className="rounded-full border-gray-300 text-red-600 focus:ring-red-500"
+                                    />
+                                    <span className="text-sm text-gray-700">Khẩn cấp</span>
                                 </label>
-                                <div className="flex gap-4">
-                                    <label className="flex items-center gap-2">
-                                        <input
-                                            type="radio"
-                                            checked={formData.critical === true}
-                                            onChange={() => setFormData({ ...formData, critical: true })}
-                                            className="rounded-full border-gray-300 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className="text-sm text-gray-700">Khẩn cấp</span>
-                                    </label>
-                                    <label className="flex items-center gap-2">
-                                        <input
-                                            type="radio"
-                                            checked={formData.critical === false}
-                                            onChange={() => setFormData({ ...formData, critical: false })}
-                                            className="rounded-full border-gray-300 text-red-600 focus:ring-red-500"
-                                        />
-                                        <span className="text-sm text-gray-700">Bình thường</span>
-                                    </label>
-                                </div>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        checked={formData.critical === false}
+                                        onChange={() => setFormData({ ...formData, critical: false })}
+                                        className="rounded-full border-gray-300 text-red-600 focus:ring-red-500"
+                                    />
+                                    <span className="text-sm text-gray-700">Bình thường</span>
+                                </label>
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Ghi chú
                             </label>
                             <textarea
@@ -411,11 +409,11 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                                 onChange={(e) => setFormData({ ...formData, emergency_note: e.target.value })}
                                 placeholder="Nhập thông tin bổ sung (nếu có)..."
                                 rows="3"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                             />
                         </div>
 
-                        <div className="items-center p-4 bg-gray-50 rounded-xl">
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -423,20 +421,20 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                                     onChange={(e) => setFormData({ ...formData, is_expire: e.target.checked })}
                                     className="w-5 h-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
                                 />
-                                <span className="text-sm font-medium text-gray-700">
+                                <span className="text-sm font-semibold text-gray-700">
                                     Đánh dấu yêu cầu đã hết hạn
                                 </span>
                             </label>
-                            <p className="text-xs text-gray-500 mt-3">
+                            <p className="text-xs text-gray-500 mt-2">
                                 Khi đánh dấu, yêu cầu sẽ không hiển thị cho người dùng tìm kiếm và phản hồi
                             </p>
                         </div>
 
-                        <div className="flex gap-3 pt-4 sticky bottom-0 bg-white pb-2">
+                        <div className="flex gap-3 pt-4">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -454,7 +452,7 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50"
+                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -485,12 +483,12 @@ const StaffEmergencyRequestDetail = () => {
     const [hasNextPage, setHasNextPage] = useState(true);
     const [totalResponses, setTotalResponses] = useState(0);
 
-    // Dialog states
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
+        if (bloodType === undefined || rhFactor === undefined) return 'Chưa cập nhật';
         const bloodTypeMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
         const rh = rhFactor ? '+' : '-';
         return `${bloodTypeMap[bloodType]}${rh}`;
@@ -502,9 +500,9 @@ const StaffEmergencyRequestDetail = () => {
     };
 
     const getStatusColor = (emergency) => {
-        if (emergency?.is_expire === true) return 'bg-gray-500';
-        if (emergency?.critical) return 'bg-red-500 animate-pulse';
-        return 'bg-yellow-500';
+        if (emergency?.is_expire === true) return 'bg-gradient-to-r from-gray-500 to-gray-600';
+        if (emergency?.critical) return 'bg-gradient-to-r from-red-500 to-red-600 animate-pulse';
+        return 'bg-gradient-to-r from-yellow-500 to-yellow-600';
     };
 
     const getStatusText = (emergency) => {
@@ -513,7 +511,6 @@ const StaffEmergencyRequestDetail = () => {
         return 'Đang chờ';
     };
 
-    // Load emergency detail
     const loadEmergencyDetail = async () => {
         try {
             const url = endpoints.staff_emergency_request_detail.replace('${id}', id);
@@ -525,7 +522,6 @@ const StaffEmergencyRequestDetail = () => {
         }
     };
 
-    // Load responses for the emergency
     const loadResponses = async (isLoadMore = false) => {
         const currentPage = isLoadMore ? page : 1;
 
@@ -671,20 +667,16 @@ const StaffEmergencyRequestDetail = () => {
     const formatResponseDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
-
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
         const diffDays = Math.round((today - target) / (1000 * 60 * 60 * 24));
 
         if (diffDays === 0) return 'Hôm nay';
         if (diffDays === 1) return 'Hôm qua';
         if (diffDays < 7) return `${diffDays} ngày trước`;
-
         return formatDate(dateString);
     };
 
-    // Helper để lấy thông tin donor từ response
     const getDonorInfo = (response) => {
         const donor = response.donor;
         const account = donor?.account || {};
@@ -705,14 +697,14 @@ const StaffEmergencyRequestDetail = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white pb-8">
+            <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-300 rounded-full blur-3xl"></div>
                 </div>
 
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -720,45 +712,55 @@ const StaffEmergencyRequestDetail = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <HeartPulse className="w-8 h-8 text-white opacity-10" />
+                            <HeartPulse className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Quản lý yêu cầu</span>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
+                        <button
+                            onClick={() => navigate("/staff-emergency-request")}
+                            className="hover:text-white transition-colors"
+                        >
+                            Quản lý yêu cầu
+                        </button>
                         <span>/</span>
-                        <span className='text-white'>Chi tiết yêu cầu</span>
-                    </nav>
+                        <span className="text-white font-medium">Chi tiết yêu cầu</span>
+                    </div>
+
                     <button
                         onClick={() => navigate("/staff-emergency-request")}
-                        className="flex p-2 mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
+                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
-                        <ChevronRight className="w-6 h-6 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
                         <span>Quay lại danh sách</span>
                     </button>
 
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
                         <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                            <div className="flex items-center gap-3 mb-3 flex-wrap">
+                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
+                                    <Ambulance className="w-8 h-8" />
+                                </div>
                                 <h1 className="text-3xl md:text-4xl font-bold">
                                     Yêu cầu hiến máu khẩn cấp
                                 </h1>
-                                <span className={`${getStatusColor(emergency)} text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg`}>
+                                <span className={`${getStatusColor(emergency)} text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md`}>
                                     {getStatusText(emergency)}
                                 </span>
                                 {emergency?.critical && !emergency?.is_expire && (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-red-600 text-white animate-pulse">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-red-600 text-white animate-pulse shadow-md">
                                         <AlertOctagon className="w-4 h-4" />
                                         KHẨN CẤP
                                     </span>
                                 )}
                                 {emergency?.is_expire && (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-gray-600 text-white">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-600 text-white">
                                         <Timer className="w-4 h-4" />
                                         ĐÃ HẾT HẠN
                                     </span>
@@ -766,19 +768,19 @@ const StaffEmergencyRequestDetail = () => {
                             </div>
                             {emergency && (
                                 <div className="flex flex-wrap gap-4 text-red-100">
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1.5">
                                         <Droplet className="w-4 h-4" />
                                         Nhóm máu: {getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor)}
                                     </span>
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1.5">
                                         <Syringe className="w-4 h-4" />
                                         {getDonationTypeText(emergency.donation_type)} - {emergency.blood_volume} ml
                                     </span>
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1.5">
                                         <Hospital className="w-4 h-4" />
                                         {emergency.hospital?.name || 'Chưa có'}
                                     </span>
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1.5">
                                         <Calendar className="w-4 h-4" />
                                         Tạo lúc: {formatDateTime(emergency.created_at)}
                                     </span>
@@ -790,120 +792,118 @@ const StaffEmergencyRequestDetail = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={handleEditEmergency}
-                                className="flex items-center gap-2 px-5 py-3 bg-white/20 backdrop-blur-md rounded-xl hover:bg-white/30 transition-all border border-white/20"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all duration-300 border border-white/20"
                             >
                                 <Edit className="w-5 h-5" />
-                                <span>Chỉnh sửa</span>
+                                <span className="font-medium">Chỉnh sửa</span>
                             </button>
                             <button
                                 onClick={() => setShowDeleteDialog(true)}
-                                className="flex items-center gap-2 px-5 py-3 bg-red-600/80 backdrop-blur-md rounded-xl hover:bg-red-700 transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-red-600/80 backdrop-blur-sm rounded-xl hover:bg-red-700 transition-all duration-300"
                             >
                                 <Trash2 className="w-5 h-5" />
-                                <span>Xóa</span>
+                                <span className="font-medium">Xóa</span>
                             </button>
                         </div>
                     </div>
 
-                    {emergency && (
-                        <div className="flex gap-4 mt-6 overflow-x-auto pb-2">
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-5 border border-white/20 min-w-[160px]">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <User className="w-5 h-5 text-white" />
-                                    </div>
-                                    <p className="text-sm text-white/70">Bệnh nhân</p>
+                    {/* Stats Cards */}
+                    <div className="flex flex-wrap gap-4 mt-8">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <User className="w-6 h-6" />
                                 </div>
-                                <h3 className="text-xl font-bold leading-none truncate max-w-[200px]">{emergency.patient_name}</h3>
-                            </div>
-
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-5 border border-white/20 min-w-[160px]">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <Phone className="w-5 h-5 text-white" />
-                                    </div>
-                                    <p className="text-sm text-white/70">Số điện thoại</p>
+                                <div>
+                                    <div className="text-2xl font-bold truncate max-w-[200px]">{emergency?.patient_name || '---'}</div>
+                                    <div className="text-sm text-white/80">Bệnh nhân</div>
                                 </div>
-                                <h3 className="text-xl font-bold leading-none">{emergency.phone}</h3>
-                            </div>
-
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-5 border border-white/20 min-w-[160px]">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <Droplet className="w-5 h-5 text-white" />
-                                    </div>
-                                    <p className="text-sm text-white/70">Nhóm máu</p>
-                                </div>
-                                <h3 className="text-xl font-bold leading-none">{getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor)}</h3>
-                            </div>
-
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-5 border border-white/20 min-w-[160px]">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <Syringe className="w-5 h-5 text-white" />
-                                    </div>
-                                    <p className="text-sm text-white/70">Thể tích máu</p>
-                                </div>
-                                <h3 className="text-xl font-bold leading-none">{emergency.blood_volume} ml</h3>
-                            </div>
-
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-5 border border-white/20 min-w-[160px]">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <Hospital className="w-5 h-5 text-white" />
-                                    </div>
-                                    <p className="text-sm text-white/70">Bệnh viện</p>
-                                </div>
-                                <h3 className="text-xl font-bold leading-none truncate max-w-[200px]" title={emergency.hospital?.name || 'Chưa có'}>
-                                    {emergency.hospital?.name || 'Chưa có'}
-                                </h3>
-                            </div>
-
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-5 border border-white/20 min-w-[160px]">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <HeartHandshake className="w-5 h-5 text-white" />
-                                    </div>
-                                    <p className="text-sm text-white/70">Lượt phản hồi</p>
-                                </div>
-                                <h3 className="text-xl font-bold leading-none">{totalResponses || '0'}</h3>
                             </div>
                         </div>
-                    )}
+
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <Phone className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="text-2xl font-bold">{emergency?.phone || '---'}</div>
+                                    <div className="text-sm text-white/80">Số điện thoại</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <Droplet className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="text-2xl font-bold">{emergency ? getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor) : '---'}</div>
+                                    <div className="text-sm text-white/80">Nhóm máu</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <Syringe className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="text-2xl font-bold">{emergency?.blood_volume || '---'} ml</div>
+                                    <div className="text-sm text-white/80">Thể tích máu</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                    <HeartHandshake className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <div className="text-2xl font-bold">{totalResponses || '0'}</div>
+                                    <div className="text-sm text-white/80">Lượt phản hồi</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Emergency Note */}
                     {emergency?.emergency_note && (
-                        <div className="mt-4 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20">
+                        <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20">
                             <div className="flex items-center gap-2 mb-2">
                                 <NotepadText className="w-5 h-5" />
-                                <p className="text-sm font-medium">Ghi chú</p>
+                                <p className="text-sm font-semibold">Ghi chú</p>
                             </div>
                             <p className="text-white/90">{emergency.emergency_note}</p>
                         </div>
                     )}
                 </div>
 
+                {/* Wave Separator */}
                 <div className="absolute bottom-0 left-0 right-0">
                     <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
                         <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F9FAFB" />
                     </svg>
                 </div>
-            </section>
+            </div>
 
             {/* Search & Filter Section */}
-            <section className="sticky top-[64px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                         {/* Search Bar */}
-                        <div className="w-full lg:w-[450px]">
+                        <div className="w-full lg:w-[500px]">
                             <div className="relative group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm theo tên người phản hồi"
+                                    placeholder="Tìm kiếm theo tên người phản hồi..."
                                     value={searchTerm}
                                     onChange={handleSearchChange}
-                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300"
                                 />
                                 {searchTerm && (
                                     <button
@@ -921,62 +921,55 @@ const StaffEmergencyRequestDetail = () => {
                             </div>
                         </div>
 
-                        {/* Filter Buttons - Desktop */}
-                        <div className="hidden lg:flex items-center gap-3">
-                            {/* Date Filter Button */}
+                        <div className="flex items-center gap-3 w-full lg:w-auto">
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                            >
+                                <FilterIcon className="h-5 w-5" />
+                                <span className="font-medium">Bộ lọc</span>
+                            </button>
+
+                            {/* Date Filter */}
                             <button
                                 onClick={() => setShowDatePicker(!showDatePicker)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                className="hidden lg:flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                             >
                                 <Calendar className="w-4 h-4" />
-                                <span>Ngày phản hồi</span>
+                                <span className="font-medium">Ngày phản hồi</span>
                             </button>
 
                             {/* View Mode Toggle */}
-                            <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
+                            <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                    className={`p-2 rounded-lg transition-all duration-300 ${
+                                        viewMode === 'grid'
+                                            ? 'bg-white text-red-600 shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                                     title="Xem dạng lưới"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                    </svg>
+                                    <Grid className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all ${viewMode === 'list'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                    className={`p-2 rounded-lg transition-all duration-300 ${
+                                        viewMode === 'list'
+                                            ? 'bg-white text-red-600 shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
                                     title="Xem dạng danh sách"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                    </svg>
+                                    <List className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>
-
-                        {/* Mobile Filter Button */}
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="lg:hidden flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors w-full justify-center"
-                        >
-                            <Filter className="h-5 w-5" />
-                            <span>Bộ lọc</span>
-                            {(dateRange.from || dateRange.to) && (
-                                <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                            )}
-                        </button>
                     </div>
 
                     {/* Date Picker */}
                     {showDatePicker && (
-                        <div className="hidden lg:block mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="hidden lg:block mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center gap-4">
                                 <div className="flex-1">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
@@ -984,7 +977,7 @@ const StaffEmergencyRequestDetail = () => {
                                         type="date"
                                         value={dateRange.from}
                                         onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -993,12 +986,12 @@ const StaffEmergencyRequestDetail = () => {
                                         type="date"
                                         value={dateRange.to}
                                         onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
                                 </div>
                                 <button
                                     onClick={() => setShowDatePicker(false)}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
+                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Áp dụng
                                 </button>
@@ -1008,9 +1001,9 @@ const StaffEmergencyRequestDetail = () => {
 
                     {/* Mobile Filters */}
                     {showFilters && (
-                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold">Bộ lọc</h3>
+                                <h3 className="font-semibold text-gray-900">Bộ lọc</h3>
                                 <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-200 rounded-lg">
                                     <X className="w-4 h-4" />
                                 </button>
@@ -1018,61 +1011,58 @@ const StaffEmergencyRequestDetail = () => {
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Ngày phản hồi</label>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Ngày phản hồi</label>
                                     <div className="space-y-2">
                                         <input
                                             type="date"
                                             value={dateRange.from}
                                             onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                             placeholder="Từ ngày"
                                         />
                                         <input
                                             type="date"
                                             value={dateRange.to}
                                             onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                                            className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                             placeholder="Đến ngày"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Chế độ xem</label>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Chế độ xem</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
-                                            onClick={() => setViewMode('grid')}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
-                                                ? 'border-red-500 bg-red-50 text-red-600'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
+                                            onClick={() => {
+                                                setViewMode('grid');
+                                                setShowFilters(false);
+                                            }}
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
+                                                viewMode === 'grid'
+                                                    ? 'border-red-500 bg-red-50 text-red-600'
+                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                            }`}
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                            </svg>
+                                            <Grid className="w-4 h-4" />
                                             <span>Dạng lưới</span>
                                         </button>
                                         <button
-                                            onClick={() => setViewMode('list')}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
-                                                ? 'border-red-500 bg-red-50 text-red-600'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
+                                            onClick={() => {
+                                                setViewMode('list');
+                                                setShowFilters(false);
+                                            }}
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
+                                                viewMode === 'list'
+                                                    ? 'border-red-500 bg-red-50 text-red-600'
+                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                            }`}
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                            </svg>
+                                            <List className="w-4 h-4" />
                                             <span>Dạng danh sách</span>
                                         </button>
                                     </div>
                                 </div>
-
-                                <button
-                                    onClick={() => setShowFilters(false)}
-                                    className="w-full px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
-                                >
-                                    Áp dụng bộ lọc
-                                </button>
                             </div>
                         </div>
                     )}
@@ -1116,328 +1106,316 @@ const StaffEmergencyRequestDetail = () => {
                         </div>
                     )}
                 </div>
-            </section>
+            </div>
 
             {/* Main Content */}
-            <section className="py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Loading Skeleton */}
-                    {loading && (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
-                                    <div className="h-32 bg-gray-200"></div>
-                                    <div className="p-6">
-                                        <div className="h-6 bg-gray-200 rounded-lg mb-2"></div>
-                                        <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                                        <div className="space-y-2 mb-4">
-                                            <div className="h-4 bg-gray-200 rounded"></div>
-                                            <div className="h-4 bg-gray-200 rounded"></div>
-                                            <div className="h-4 bg-gray-200 rounded"></div>
-                                        </div>
-                                        <div className="h-10 bg-gray-200 rounded-lg"></div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Loading Skeleton */}
+                {loading && (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
+                                <div className="h-32 bg-gray-200"></div>
+                                <div className="p-5">
+                                    <div className="h-6 bg-gray-200 rounded-lg w-3/4 mb-3"></div>
+                                    <div className="space-y-2 mb-4">
+                                        <div className="h-4 bg-gray-200 rounded"></div>
+                                        <div className="h-4 bg-gray-200 rounded"></div>
+                                        <div className="h-4 bg-gray-200 rounded"></div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Error Message */}
-                    {error && !loading && (
-                        <div className="max-w-2xl mx-auto mb-6">
-                            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                        <AlertCircle className="h-6 w-6 text-red-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-red-800 mb-1">Đã xảy ra lỗi</h3>
-                                        <p className="text-red-600">{error}</p>
-                                    </div>
-                                    <button
-                                        onClick={handleRefresh}
-                                        className="ml-auto px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
-                                    >
-                                        Thử lại
-                                    </button>
+                                    <div className="h-10 bg-gray-200 rounded-lg"></div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
+                )}
 
-                    {/* Empty State */}
-                    {!loading && !error && responses.length === 0 && (
-                        <div className="text-center py-20">
-                            <div className="relative inline-block">
-                                <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform">
-                                    <HeartHandshake className="h-16 w-16 text-red-600" />
+                {/* Error State */}
+                {error && !loading && (
+                    <div className="max-w-2xl mx-auto mb-6">
+                        <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 animate-shake">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <AlertCircle className="h-6 w-6 text-red-600" />
                                 </div>
-                                <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                    0
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-red-800 mb-1">Đã xảy ra lỗi</h3>
+                                    <p className="text-red-600">{error}</p>
                                 </div>
-                            </div>
-
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                                {searchTerm || dateRange.from || dateRange.to
-                                    ? "Không tìm thấy phản hồi phù hợp"
-                                    : "Chưa có phản hồi nào cho yêu cầu này"}
-                            </h3>
-
-                            <p className="text-gray-600 mb-6">
-                                {searchTerm || dateRange.from || dateRange.to
-                                    ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác"
-                                    : "Hãy đợi người dùng phản hồi yêu cầu hiến máu khẩn cấp"}
-                            </p>
-
-                            {(searchTerm || dateRange.from || dateRange.to) && (
                                 <button
-                                    onClick={handleClearFilters}
-                                    className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25"
+                                    onClick={handleRefresh}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
-                                    Xóa tất cả bộ lọc
+                                    Thử lại
                                 </button>
-                            )}
+                            </div>
                         </div>
-                    )}
+                    </div>
+                )}
 
-                    {/* Results */}
-                    {!loading && !error && responses.length > 0 && (
-                        <>
-                            {/* Results Header */}
-                            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
-                                        <span className="font-bold">{responses.length}</span>
-                                    </div>
-                                    <span className="text-gray-600">
-                                        phản hồi {(searchTerm || dateRange.from || dateRange.to) && "phù hợp"}
-                                    </span>
-                                </div>
+                {/* Empty State */}
+                {!loading && !error && responses.length === 0 && (
+                    <div className="text-center py-20">
+                        <div className="relative inline-block">
+                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg">
+                                <HeartHandshake className="h-16 w-16 text-red-600" />
+                            </div>
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                                0
+                            </div>
+                        </div>
 
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handleRefresh}
-                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
-                                        disabled={loading}
-                                    >
-                                        <svg
-                                            className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`}
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                        <span>Làm mới</span>
-                                    </button>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                            {searchTerm || dateRange.from || dateRange.to
+                                ? "Không tìm thấy phản hồi phù hợp"
+                                : "Chưa có phản hồi nào cho yêu cầu này"}
+                        </h3>
+
+                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                            {searchTerm || dateRange.from || dateRange.to
+                                ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác"
+                                : "Hãy đợi người dùng phản hồi yêu cầu hiến máu khẩn cấp"}
+                        </p>
+
+                        {(searchTerm || dateRange.from || dateRange.to) && (
+                            <button
+                                onClick={handleClearFilters}
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                            >
+                                <X className="w-5 h-5" />
+                                Xóa tất cả bộ lọc
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Results */}
+                {!loading && !error && responses.length > 0 && (
+                    <>
+                        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
+                                    <span className="font-bold text-lg">{totalResponses}</span>
                                 </div>
+                                <span className="text-gray-600">
+                                    phản hồi {(searchTerm || dateRange.from || dateRange.to) && "phù hợp"}
+                                </span>
                             </div>
 
-                            {/* Grid View */}
-                            {viewMode === 'grid' ? (
-                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {responses.map((response) => {
-                                        const donorInfo = getDonorInfo(response);
+                            <button
+                                onClick={handleRefresh}
+                                disabled={loading}
+                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                            >
+                                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                                <span>Làm mới</span>
+                            </button>
+                        </div>
 
-                                        return (
-                                            <div
-                                                key={response.id}
-                                                className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-                                                onClick={() => handleViewResponseDetail(response)}
-                                            >
-                                                {/* User Avatar */}
-                                                <div className="relative h-32 bg-gradient-to-r from-red-500 to-red-500 flex items-center justify-center">
-                                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                                        <User className="w-10 h-10 text-red-600" />
-                                                    </div>
+                        {/* Grid View */}
+                        {viewMode === 'grid' ? (
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {responses.map((response) => {
+                                    const donorInfo = getDonorInfo(response);
 
-                                                    {/* Status Badge */}
-                                                    <div className="absolute top-4 left-4">
-                                                        <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold ${donorInfo.statusResponse === 1
-                                                            ? 'bg-red-500 text-white'
+                                    return (
+                                        <div
+                                            key={response.id}
+                                            onClick={() => handleViewResponseDetail(response)}
+                                            className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 hover:border-red-200"
+                                        >
+                                            {/* Header */}
+                                            <div className="relative h-32 bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+                                                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                                    <User className="w-10 h-10 text-red-600" />
+                                                </div>
+
+                                                {/* Status Badge */}
+                                                <div className="absolute top-4 left-4">
+                                                    <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold shadow-md ${
+                                                        donorInfo.statusResponse === 1
+                                                            ? 'bg-green-500 text-white'
                                                             : donorInfo.statusResponse === 2
                                                                 ? 'bg-red-500 text-white'
                                                                 : 'bg-gray-500 text-white'
-                                                            }`}>
-                                                            {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
-                                                                donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Response Date */}
-                                                    <div className="absolute top-4 right-4">
-                                                        <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold">
-                                                            {formatResponseDate(donorInfo.createdAt)}
-                                                        </span>
-                                                    </div>
+                                                    }`}>
+                                                        {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
+                                                            donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
+                                                    </span>
                                                 </div>
 
-                                                {/* Content */}
-                                                <div className="p-6">
-                                                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
-                                                        {donorInfo.fullName}
-                                                    </h3>
-
-                                                    {/* Personal Info */}
-                                                    <div className="space-y-2 mb-4">
-                                                        <div className="flex items-center text-sm text-gray-600">
-                                                            <Phone className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
-                                                            <span className="truncate">{donorInfo.phone || 'Chưa cập nhật'}</span>
-                                                        </div>
-                                                        <div className="flex items-center text-sm text-gray-600">
-                                                            <Mail className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
-                                                            <span className="truncate">{donorInfo.email || 'Chưa cập nhật'}</span>
-                                                        </div>
-                                                        {donorInfo.bloodType !== undefined && (
-                                                            <div className="flex items-center text-sm text-gray-600">
-                                                                <Droplet className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
-                                                                <span>Nhóm máu: {getBloodTypeDisplay(donorInfo.bloodType, donorInfo.rhFactor)}</span>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex items-center text-sm text-gray-600">
-                                                            <Award className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
-                                                            <span>Đã hiến: {donorInfo.donationCount} lần</span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Status Registration */}
-                                                    {donorInfo.statusRegistration !== undefined && donorInfo.statusRegistration !== -1 && (
-                                                        <div className="mb-4 p-2 bg-gray-50 rounded-lg">
-                                                            <p className="text-xs text-gray-600 flex items-center gap-1">
-                                                                <CheckCircle2 className="w-3 h-3 text-red-500" />
-                                                                Trạng thái: {
-                                                                    donorInfo.statusRegistration === 4 ? 'Đã hoàn thành' :
-                                                                        donorInfo.statusRegistration === 3 ? 'Đã Check-in' :
-                                                                            donorInfo.statusRegistration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
-                                                                }
-                                                            </p>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Action Button */}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleViewResponseDetail(response);
-                                                        }}
-                                                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group/btn bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25"
-                                                    >
-                                                        <span className="font-medium">Xem chi tiết</span>
-                                                        <ChevronRight className="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" />
-                                                    </button>
+                                                {/* Response Date */}
+                                                <div className="absolute top-4 right-4">
+                                                    <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold">
+                                                        {formatResponseDate(donorInfo.createdAt)}
+                                                    </span>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            ) : (
-                                // List View
-                                <div className="space-y-4">
-                                    {responses.map((response) => {
-                                        const donorInfo = getDonorInfo(response);
 
-                                        return (
-                                            <div
-                                                key={response.id}
-                                                className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-                                                onClick={() => handleViewResponseDetail(response)}
-                                            >
-                                                <div className="p-6">
-                                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-3 mb-2">
-                                                                <h3 className="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">
-                                                                    {donorInfo.fullName}
-                                                                </h3>
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${donorInfo.statusResponse === 1
-                                                                    ? 'bg-red-100 text-red-700'
+                                            {/* Content */}
+                                            <div className="p-5">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
+                                                    {donorInfo.fullName}
+                                                </h3>
+
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex items-center text-sm text-gray-600">
+                                                        <Phone className="w-4 h-4 text-red-500 mr-2 flex-shrink-0" />
+                                                        <span className="truncate">{donorInfo.phone || 'Chưa cập nhật'}</span>
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-gray-600">
+                                                        <Mail className="w-4 h-4 text-red-500 mr-2 flex-shrink-0" />
+                                                        <span className="truncate">{donorInfo.email || 'Chưa cập nhật'}</span>
+                                                    </div>
+                                                    {donorInfo.bloodType !== undefined && (
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Droplet className="w-4 h-4 text-red-500 mr-2 flex-shrink-0" />
+                                                            <span>Nhóm máu: {getBloodTypeDisplay(donorInfo.bloodType, donorInfo.rhFactor)}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center text-sm text-gray-600">
+                                                        <Award className="w-4 h-4 text-red-500 mr-2 flex-shrink-0" />
+                                                        <span>Đã hiến: {donorInfo.donationCount} lần</span>
+                                                    </div>
+                                                </div>
+
+                                                {donorInfo.statusRegistration !== undefined && donorInfo.statusRegistration !== -1 && (
+                                                    <div className="mb-4 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                                        <p className="text-xs text-gray-600 flex items-center gap-1">
+                                                            <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                                            Trạng thái: {
+                                                                donorInfo.statusRegistration === 4 ? 'Đã hoàn thành' :
+                                                                    donorInfo.statusRegistration === 3 ? 'Đã Check-in' :
+                                                                        donorInfo.statusRegistration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleViewResponseDetail(response);
+                                                    }}
+                                                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg"
+                                                >
+                                                    <span className="font-medium">Xem chi tiết</span>
+                                                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            // List View
+                            <div className="space-y-3">
+                                {responses.map((response) => {
+                                    const donorInfo = getDonorInfo(response);
+
+                                    return (
+                                        <div
+                                            key={response.id}
+                                            onClick={() => handleViewResponseDetail(response)}
+                                            className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-red-200"
+                                        >
+                                            <div className="p-5">
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                                                                {donorInfo.fullName}
+                                                            </h3>
+                                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                                                donorInfo.statusResponse === 1
+                                                                    ? 'bg-green-100 text-green-700'
                                                                     : donorInfo.statusResponse === 2
                                                                         ? 'bg-red-100 text-red-700'
                                                                         : 'bg-gray-100 text-gray-700'
-                                                                    }`}>
-                                                                    {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
-                                                                        donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
-                                                                </span>
-                                                            </div>
-                                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                                                <div className="flex items-center text-gray-600">
-                                                                    <Phone className="w-4 h-4 text-red-600 mr-2" />
-                                                                    <span>{donorInfo.phone || 'Chưa cập nhật'}</span>
-                                                                </div>
-                                                                <div className="flex items-center text-gray-600">
-                                                                    <Mail className="w-4 h-4 text-red-600 mr-2" />
-                                                                    <span className="truncate">{donorInfo.email || 'Chưa cập nhật'}</span>
-                                                                </div>
-                                                                {donorInfo.bloodType !== undefined && (
-                                                                    <div className="flex items-center text-gray-600">
-                                                                        <Droplet className="w-4 h-4 text-red-600 mr-2" />
-                                                                        <span>{getBloodTypeDisplay(donorInfo.bloodType, donorInfo.rhFactor)}</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap">
-                                                                {formatResponseDate(donorInfo.createdAt)}
+                                                            }`}>
+                                                                {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
+                                                                    donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
                                                             </span>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleViewResponseDetail(response);
-                                                                }}
-                                                                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 text-sm flex items-center gap-2 whitespace-nowrap"
-                                                            >
-                                                                <Eye className="w-4 h-4" />
-                                                                <span>Chi tiết</span>
-                                                            </button>
                                                         </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                                                            <div className="flex items-center text-gray-600">
+                                                                <Phone className="w-4 h-4 text-red-500 mr-2" />
+                                                                <span>{donorInfo.phone || 'Chưa cập nhật'}</span>
+                                                            </div>
+                                                            <div className="flex items-center text-gray-600">
+                                                                <Mail className="w-4 h-4 text-red-500 mr-2" />
+                                                                <span className="truncate">{donorInfo.email || 'Chưa cập nhật'}</span>
+                                                            </div>
+                                                            {donorInfo.bloodType !== undefined && (
+                                                                <div className="flex items-center text-gray-600">
+                                                                    <Droplet className="w-4 h-4 text-red-500 mr-2" />
+                                                                    <span>{getBloodTypeDisplay(donorInfo.bloodType, donorInfo.rhFactor)}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap">
+                                                            {formatResponseDate(donorInfo.createdAt)}
+                                                        </span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleViewResponseDetail(response);
+                                                            }}
+                                                            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md text-sm flex items-center gap-2 whitespace-nowrap"
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                            <span>Chi tiết</span>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
 
-                            {/* Load More */}
-                            {hasNextPage && (
-                                <div className="flex justify-center mt-12">
-                                    <button
-                                        onClick={handleLoadMore}
-                                        disabled={loadingMore}
-                                        className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-xl disabled:from-red-400 disabled:to-red-400 disabled:cursor-not-allowed overflow-hidden"
-                                    >
-                                        <span className="relative z-10 flex items-center gap-2">
-                                            {loadingMore ? (
-                                                <>
-                                                    <Loader2 className="animate-spin h-5 w-5" />
-                                                    <span>Đang tải thêm...</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>Xem thêm phản hồi</span>
-                                                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                                </>
-                                            )}
-                                        </span>
-                                    </button>
-                                </div>
-                            )}
+                        {/* Load More */}
+                        {hasNextPage && (
+                            <div className="flex justify-center mt-12">
+                                <button
+                                    onClick={handleLoadMore}
+                                    disabled={loadingMore}
+                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                >
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        {loadingMore ? (
+                                            <>
+                                                <Loader2 className="animate-spin w-5 h-5" />
+                                                <span>Đang tải thêm...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send className="w-5 h-5" />
+                                                <span>Xem thêm phản hồi</span>
+                                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </span>
+                                </button>
+                            </div>
+                        )}
 
-                            {!hasNextPage && responses.length > 0 && (
-                                <div className="text-center mt-12">
-                                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
-                                        <NotepadText className="w-5 h-5" />
-                                        <span>Đã hiển thị tất cả phản hồi</span>
-                                    </div>
+                        {!hasNextPage && responses.length > 0 && (
+                            <div className="text-center mt-12">
+                                <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
+                                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                    <span>Đã hiển thị tất cả {totalResponses} phản hồi</span>
                                 </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            </section>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
 
-            {/* Update Emergency Dialog */}
+            {/* Dialogs */}
             <UpdateEmergencyDialog
                 isOpen={showEditDialog}
                 onClose={() => setShowEditDialog(false)}
@@ -1445,7 +1423,6 @@ const StaffEmergencyRequestDetail = () => {
                 emergency={emergency}
             />
 
-            {/* Delete Confirmation Dialog */}
             <ConfirmDeleteDialog
                 isOpen={showDeleteDialog}
                 onClose={() => setShowDeleteDialog(false)}
@@ -1454,6 +1431,42 @@ const StaffEmergencyRequestDetail = () => {
                 message={`Bạn có chắc chắn muốn xóa yêu cầu hiến máu cho bệnh nhân "${emergency?.patient_name}"? Tất cả phản hồi liên quan cũng sẽ bị xóa.`}
                 loading={deleting}
             />
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out;
+                }
+                
+                .animate-shake {
+                    animation: shake 0.5s ease-in-out;
+                }
+            `}</style>
         </div>
     );
 };

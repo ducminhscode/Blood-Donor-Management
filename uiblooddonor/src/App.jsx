@@ -41,6 +41,7 @@ import StaffEventMedicalCheckUpDetail from "./components/DonationEvent/StaffEven
 import StaffEventBloodDonationDetail from "./components/DonationEvent/StaffEventBloodDonationDetail";
 import StaffEmergencyMedicalCheckUpDetail from "./components/DonationEvent/StaffEmergencyMedicalCheckUpDetail";
 import StaffEmergencyBloodDonationDetail from "./components/DonationEvent/StaffEmergencyBloodDonationDetail";
+import ChatBox from "./components/User/ChatBox/ChatBox";
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -118,6 +119,7 @@ function App() {
                     <Route path="/staff-emergency-request/:id/responses/:response_id" element={user ? (user.role === 2 && <StaffResponseDetail />) : <Login />} />
                     <Route path="/staff-emergency-request/:id/responses/:response_id/medical-checkup" element={user ? (user.role === 2 && <StaffEmergencyMedicalCheckUpDetail />) : <Login />} />
                     <Route path="/staff-emergency-request/:id/responses/:response_id/medical-checkup/:medical_check_up_id/blood-donation" element={user ? (user.role === 2 && <StaffEmergencyBloodDonationDetail />) : <Login />} />
+                    <Route path="/chat" element={user ? (user.role === 1 && <ChatBox />) : <Login />} />
                   </Routes>
                 </div>
                 {user && <Footer />}

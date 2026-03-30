@@ -1,17 +1,12 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import {
-    Gift, Package, Search, Grid, List, ChevronRight, X, Filter,
-    AlertCircle, Sparkles, SlidersHorizontal, ArrowUpDown, Tag,
-    Layers, Heart, Star, Clock, TrendingUp,
-    User,
-    Award,
-    TrendingDown
+    Gift, Package, Search, Grid, List, ChevronRight, X, Filter, AlertCircle, Award, Loader2, Send, ChevronDown, HeartHandshake
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authApis, endpoints } from '../../configs/APIs';
 import debounce from 'lodash.debounce';
 import { UserContexts } from '../../configs/UserContexts';
-import '../../styles/Category.css';
+import { Helmet } from "react-helmet-async";
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
@@ -23,6 +18,7 @@ const Category = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [sortBy, setSortBy] = useState('name');
     const [nameOrder, setNameOrder] = useState('asc');
+    const [rewardsOrder, setRewardsOrder] = useState('desc');
 
     const [page, setPage] = useState(1);
     const [hasNextPage, setHasNextPage] = useState(true);
@@ -36,9 +32,23 @@ const Category = () => {
 
     const [donorInfo, setDonorInfo] = useState(null);
 
-    const [rewardsOrder, setRewardsOrder] = useState('desc');
+    const [showNameDropdown, setShowNameDropdown] = useState(false);
+    const [showRewardsDropdown, setShowRewardsDropdown] = useState(false);
+    const [nameSortOption, setNameSortOption] = useState('name-asc');
+    const [rewardsSortOption, setRewardsSortOption] = useState('rewards-desc');
+    const [hoverTimeout, setHoverTimeout] = useState(null);
 
     const navigate = useNavigate();
+
+    const nameSortOptions = [
+        { value: 'name-asc', label: 'Tên a-z', sortBy: 'name', order: 'asc' },
+        { value: 'name-desc', label: 'Tên z-a', sortBy: 'name', order: 'desc' }
+    ];
+
+    const rewardsSortOptions = [
+        { value: 'rewards-desc', label: 'Giảm dần', sortBy: 'rewards', order: 'desc' },
+        { value: 'rewards-asc', label: 'Tăng dần', sortBy: 'rewards', order: 'asc' }
+    ];
 
     const getSortedCategories = () => {
         if (!categories.length) return [];
@@ -66,14 +76,30 @@ const Category = () => {
         return sorted;
     };
 
-    const toggleRewardsSort = () => {
-        setSortBy('rewards');
-        setRewardsOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    const handleNameSortSelect = (option) => {
+        setNameSortOption(option.value);
+        setSortBy(option.sortBy);
+        setNameOrder(option.order);
+        setShowNameDropdown(false);
+        setPage(1);
     };
 
-    const toggleNameSort = () => {
-        setSortBy('name');
-        setNameOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    const handleRewardsSortSelect = (option) => {
+        setRewardsSortOption(option.value);
+        setSortBy(option.sortBy);
+        setRewardsOrder(option.order);
+        setShowRewardsDropdown(false);
+        setPage(1);
+    };
+
+    const getNameSortLabel = () => {
+        const current = nameSortOptions.find(opt => opt.value === nameSortOption);
+        return current ? current.label : 'A-Z';
+    };
+
+    const getRewardsSortLabel = () => {
+        const current = rewardsSortOptions.find(opt => opt.value === rewardsSortOption);
+        return current ? current.label : 'Nhiều nhất';
     };
 
     const sortedCategories = getSortedCategories();
@@ -243,86 +269,81 @@ const Category = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
-            {/* Hero Section với hiệu ứng hiện đại */}
+            <Helmet>
+                <title>Đổi thưởng | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
-                {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-300 rounded-full blur-3xl"></div>
                 </div>
 
-                {/* Animated elements */}
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
                             style={{
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
-                                animationDelay: `${i * 0.5}s`,
-                                animationDuration: '20s'
+                                animationDelay: `${i * 0.3}s`,
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <Gift className="w-12 h-12 text-white opacity-10" />
+                            <Package className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="text-center md:text-left">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 pb-20">
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+                        <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                                <Sparkles className="w-4 h-4" />
-                                <span className="text-sm font-medium">Chương trình đổi thưởng hấp dẫn</span>
+                                <HeartHandshake className="w-4 h-4" />
+                                <span className="text-sm font-medium">Tri ân người hiến máu</span>
                             </div>
 
-                            <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
+                            <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
                                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Gift className="w-10 h-10" />
+                                    <Package className="w-10 h-10" />
                                 </div>
-                                <h1 className="text-4xl md:text-5xl font-bold">
-                                    Đổi thưởng
-                                </h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Kho đổi thưởng</h1>
                             </div>
 
-                            <p className="text-lg text-white/90 max-w-2xl mx-auto md:mx-0">
-                                Đổi điểm thưởng của bạn lấy những phần quà hấp dẫn
+                            <p className="text-lg text-red-100 max-w-2xl">
+                                Mỗi giọt máu bạn cho đi chúng tôi gửi lại những món quà ý nghĩa
                             </p>
 
-                            {/* Stats */}
-                            <div className="flex flex-wrap gap-6 mt-8 justify-center md:justify-start">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
+                                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-2xl p-3 hover:bg-white/20 transition-all duration-300">
+                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                                         <Package className="w-5 h-5" />
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold">{originalTotalCategories}</div>
-                                        <div className="text-sm text-white/80">Danh mục</div>
+                                        <div className="text-xs text-white/80">Tổng danh mục</div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-2xl p-3 hover:bg-white/20 transition-all duration-300">
+                                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                                         <Gift className="w-5 h-5" />
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold">{totalRewards}</div>
-                                        <div className="text-sm text-white/80">Quà tặng</div>
+                                        <div className="text-xs text-white/80">Tổng quà tặng</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* 3D Card Element */}
-                        <div className="hidden md:block transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
+                        <div className="transform rotate-2 hover:rotate-0 transition-all duration-500">
+                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-xl">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                                        <Award className="w-8 h-8" />
+                                    <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+                                        <Award className="w-7 h-7 text-white" />
                                     </div>
                                     <div>
-                                        <div className="text-sm opacity-80">Tổng điểm của bạn</div>
+                                        <div className="text-sm text-white/80">Tổng điểm của bạn</div>
                                         <div className="text-3xl font-bold">{donorInfo?.points?.toLocaleString() || '0'}</div>
                                     </div>
                                 </div>
@@ -331,7 +352,6 @@ const Category = () => {
                     </div>
                 </div>
 
-                {/* Wave Separator */}
                 <div className="absolute bottom-0 left-0 right-0">
                     <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
                         <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F9FAFB" />
@@ -339,8 +359,7 @@ const Category = () => {
                 </div>
             </div>
 
-            {/* Search & Filter Section - Hiện đại hơn */}
-            <section className="sticky top-[64px] z-20 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+            <div className="sticky top-20 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                         <form onSubmit={handleSearch} className="w-full lg:w-[500px]">
@@ -348,19 +367,18 @@ const Category = () => {
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm danh mục quà tặng"
+                                    placeholder="Tìm kiếm danh mục theo tên"
                                     value={searchTerm}
                                     onChange={handleSearchChange}
-                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all"
+                                    className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300"
                                 />
                                 {searchTerm && (
                                     <button
                                         type="button"
                                         onClick={handleClearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors group/clear"
-                                        title="Xóa tìm kiếm"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
-                                        <X className="h-4 w-4 text-gray-400 group-hover/clear:text-gray-600" />
+                                        <X className="h-4 w-4 text-gray-400" />
                                     </button>
                                 )}
                             </div>
@@ -369,60 +387,111 @@ const Category = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <Filter className="h-5 w-5" />
-                                <span>Bộ lọc</span>
+                                <span className="font-medium">Bộ lọc</span>
                             </button>
 
-                            {/* Sort Dropdown */}
-                            <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-xl p-1">
+                            <div
+                                className="relative name-dropdown"
+                                onMouseEnter={() => {
+                                    clearTimeout(hoverTimeout);
+                                    setShowNameDropdown(true);
+                                }}
+                                onMouseLeave={() => {
+                                    const timeout = setTimeout(() => setShowNameDropdown(false), 100);
+                                    setHoverTimeout(timeout);
+                                }}
+                            >
                                 <button
-                                    onClick={toggleNameSort}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${sortBy === 'name'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
+                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[100px] justify-between"
                                 >
-                                    <Tag className="w-4 h-4" />
-                                    <span>
-                                        {sortBy === 'name'
-                                            ? (nameOrder === 'asc' ? 'A-Z' : 'Z-A')
-                                            : 'Tên'
-                                        }
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-700 font-medium">{getNameSortLabel()}</span>
+                                    </div>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showNameDropdown ? 'rotate-180' : ''}`} />
                                 </button>
 
-                                <button
-                                    onClick={toggleRewardsSort}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${sortBy === 'rewards'
-                                        ? 'bg-white text-red-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
-                                >
-                                    {sortBy === 'rewards' && rewardsOrder === 'desc' ? (
-                                        <>
-                                            <TrendingUp className='w-4 h-4' />
-                                            <span>Giảm dần</span>
-                                        </>
-                                    ) : sortBy === 'rewards' && rewardsOrder === 'asc' ? (
-                                        <>
-                                            <TrendingDown className='w-4 h-4' />
-                                            <span>Tăng dần</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Gift className="w-4 h-4" />
-                                            <span>Số lượng</span>
-                                        </>
-                                    )}
-                                </button>
+                                {showNameDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn"
+                                        onMouseEnter={() => {
+                                            clearTimeout(hoverTimeout);
+                                            setShowNameDropdown(true);
+                                        }}
+                                        onMouseLeave={() => {
+                                            const timeout = setTimeout(() => setShowNameDropdown(false), 100);
+                                            setHoverTimeout(timeout);
+                                        }}
+                                    >
+                                        {nameSortOptions.map((option) => {
+                                            const isSelected = nameSortOption === option.value;
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() => handleNameSortSelect(option)}
+                                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    <span>{option.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
-                            <div className="hidden md:flex gap-2 bg-gray-100 rounded-xl p-1">
+
+                            <div
+                                className="relative rewards-dropdown"
+                                onMouseEnter={() => {
+                                    clearTimeout(hoverTimeout);
+                                    setShowRewardsDropdown(true);
+                                }}
+                                onMouseLeave={() => {
+                                    const timeout = setTimeout(() => setShowRewardsDropdown(false), 100);
+                                    setHoverTimeout(timeout);
+                                }}
+                            >
+                                <button
+                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[120px] justify-between"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-700 font-medium">{getRewardsSortLabel()}</span>
+                                    </div>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showRewardsDropdown ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {showRewardsDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn"
+                                        onMouseEnter={() => {
+                                            clearTimeout(hoverTimeout);
+                                            setShowRewardsDropdown(true);
+                                        }}
+                                        onMouseLeave={() => {
+                                            const timeout = setTimeout(() => setShowRewardsDropdown(false), 100);
+                                            setHoverTimeout(timeout);
+                                        }}
+                                    >
+                                        {rewardsSortOptions.map((option) => {
+                                            const isSelected = rewardsSortOption === option.value;
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() => handleRewardsSortSelect(option)}
+                                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    <span>{option.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid'
-                                        ? 'bg-white text-red-600 shadow-sm'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                        ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng lưới"
@@ -431,8 +500,8 @@ const Category = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2.5 rounded-lg transition-all ${viewMode === 'list'
-                                        ? 'bg-white text-red-600 shadow-sm'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                        ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng danh sách"
@@ -443,113 +512,169 @@ const Category = () => {
                         </div>
                     </div>
 
-                    {/* Mobile Filters */}
                     {showFilters && (
-                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold">Bộ lọc</h3>
+                                <h3 className="font-semibold text-gray-900">Bộ lọc & Sắp xếp</h3>
                                 <button
                                     onClick={() => setShowFilters(false)}
-                                    className="p-2 hover:bg-gray-200 rounded-lg"
+                                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    onClick={toggleNameSort}
-                                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${sortBy === 'name'
-                                        ? 'border-red-500 bg-red-50 text-red-600'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                >
-                                    <Tag className="w-4 h-4" />
-                                    <span>
-                                        {sortBy === 'name'
-                                            ? (nameOrder === 'asc' ? 'A-Z' : 'Z-A')
-                                            : 'Tên'
-                                        }
-                                    </span>
-                                </button>
-                                <button
-                                    onClick={toggleRewardsSort}
-                                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${sortBy === 'rewards'
-                                        ? 'border-red-500 bg-red-50 text-red-600'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                >
-                                    {sortBy === 'rewards' && rewardsOrder === 'desc' ? (
-                                        <span>Tăng dần</span>
-                                    ) : sortBy === 'rewards' && rewardsOrder === 'asc' ? (
-                                        <span>Giảm dần</span>
-                                    ) : (
-                                        <span>Số lượng</span>
-                                    )}
-                                </button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
-                                        ? 'border-red-500 bg-red-50 text-red-600'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                >
-                                    <Grid className="w-4 h-4" />
-                                    <span>Dạng lưới</span>
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
-                                        ? 'border-red-500 bg-red-50 text-red-600'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                >
-                                    <List className="w-4 h-4" />
-                                    <span>Dạng sách</span>
-                                </button>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Sắp xếp theo tên</label>
+                                    <div className="space-y-2">
+                                        {nameSortOptions.map((option) => {
+                                            const isSelected = nameSortOption === option.value;
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() => {
+                                                        handleNameSortSelect(option);
+                                                        setShowFilters(false);
+                                                    }}
+                                                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isSelected
+                                                        ? 'border-red-500 bg-red-50 text-red-600'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                        }`}
+                                                >
+                                                    <span>{option.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Sắp xếp theo số lượng</label>
+                                    <div className="space-y-2">
+                                        {rewardsSortOptions.map((option) => {
+                                            const isSelected = rewardsSortOption === option.value;
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() => {
+                                                        handleRewardsSortSelect(option);
+                                                        setShowFilters(false);
+                                                    }}
+                                                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isSelected
+                                                        ? 'border-red-500 bg-red-50 text-red-600'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                        }`}
+                                                >
+                                                    <span>{option.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Chế độ xem</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setViewMode('grid');
+                                                setShowFilters(false);
+                                            }}
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            <Grid className="w-4 h-4" />
+                                            <span>Dạng lưới</span>
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setViewMode('list');
+                                                setShowFilters(false);
+                                            }}
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            <List className="w-4 h-4" />
+                                            <span>Dạng danh sách</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
 
                     {searchTerm && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
+                        <div className="mt-4">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                 <Search className="h-4 w-4" />
                                 <span>Tìm kiếm: "{searchTerm}"</span>
                                 <button
                                     onClick={handleClearSearch}
                                     className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-                                    title="Xóa từ khóa tìm kiếm"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
-                            </span>
+                            </div>
                         </div>
                     )}
                 </div>
-            </section>
+            </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Loading Skeleton */}
+                {/* Results Header */}
+                {!loading && categories.length > 0 && (
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
+                                <span className="font-bold text-lg">{totalCategories}</span>
+                            </div>
+                            <span className="text-gray-600">
+                                danh mục {searchTerm && "phù hợp với tìm kiếm"}
+                            </span>
+                        </div>
+
+                        <button
+                            onClick={handleRefresh}
+                            disabled={loading}
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                        >
+                            <svg
+                                className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Làm mới</span>
+                        </button>
+                    </div>
+                )}
+
                 {loading && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' : 'grid-cols-1 gap-4'}`}>
                         {[...Array(8)].map((_, i) => (
-                            <div key={i} className="bg-white rounded-2xl shadow-sm p-6 animate-pulse">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
-                                    <div className="h-6 bg-gray-200 rounded-lg flex-1"></div>
+                            <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
+                                <div className="p-6">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-14 h-14 bg-gray-200 rounded-xl"></div>
+                                        <div className="flex-1">
+                                            <div className="h-5 bg-gray-200 rounded-lg w-32 mb-2"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                        </div>
+                                    </div>
+                                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                                 </div>
-                                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                                <div className="h-4 bg-gray-200 rounded mb-4 w-2/3"></div>
-                                <div className="h-5 bg-gray-200 rounded w-24"></div>
                             </div>
                         ))}
                     </div>
                 )}
 
                 {error && !loading && (
-                    <div className="max-w-2xl mx-auto mb-6">
+                    <div className="max-w-2xl mx-auto">
                         <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -561,7 +686,7 @@ const Category = () => {
                                 </div>
                                 <button
                                     onClick={handleRefresh}
-                                    className="ml-auto px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
+                                    className="ml-auto px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
                                 </button>
@@ -573,26 +698,30 @@ const Category = () => {
                 {!loading && !error && categories.length === 0 && (
                     <div className="text-center py-20">
                         <div className="relative inline-block">
-                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform">
+                            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg">
                                 <Package className="h-16 w-16 text-red-600" />
                             </div>
-                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
                                 0
                             </div>
                         </div>
+
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            Không tìm thấy danh mục
+                            {searchTerm ? 'Không tìm thấy danh mục' : 'Chưa có danh mục quà tặng'}
                         </h3>
-                        <p className="text-gray-600 mb-6">
+
+                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
                             {searchTerm
-                                ? "Không có danh mục nào phù hợp với tìm kiếm."
-                                : "Hiện tại chưa có danh mục quà tặng nào."}
+                                ? 'Không có danh mục nào phù hợp với tìm kiếm của bạn. Thử tìm kiếm với từ khóa khác.'
+                                : 'Hiện tại chưa có danh mục quà tặng nào. Hãy quay lại sau nhé!'}
                         </p>
+
                         {searchTerm && (
                             <button
                                 onClick={handleClearSearch}
-                                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-xl"
+                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
+                                <X className="w-5 h-5" />
                                 Xóa tìm kiếm
                             </button>
                         )}
@@ -601,54 +730,25 @@ const Category = () => {
 
                 {!loading && !error && categories.length > 0 && (
                     <>
-                        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
-                                    <span className="font-bold">{totalCategories}</span>
-                                </div>
-                                <span className="text-gray-600">
-                                    danh mục {searchTerm && "phù hợp với tìm kiếm"}
-                                </span>
-                            </div>
-
-                            <button
-                                onClick={handleRefresh}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
-                                disabled={loading}
-                                title="Làm mới danh sách"
-                            >
-                                <svg
-                                    className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                <span>Làm mới</span>
-                            </button>
-                        </div>
-
                         {viewMode === 'grid' ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {sortedCategories.map((category) => (
                                     <div
                                         key={category.id}
                                         onClick={() => handleCategoryClick(category.id, category.name)}
-                                        className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                                        className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-red-200"
                                     >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
 
-                                        <div className="relative p-6">
+                                        <div className="p-6">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                                                     <Package className="w-7 h-7 text-white" />
                                                 </div>
 
-                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                                                    Số lượng {rewardsCount[category.id] || 0}
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                                                    <Gift className="w-3 h-3" />
+                                                    {rewardsCount[category.id] || 0} quà tặng
                                                 </span>
                                             </div>
 
@@ -656,13 +756,13 @@ const Category = () => {
                                                 {category.name}
                                             </h3>
 
-                                            <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                                            <p className="text-gray-500 text-sm line-clamp-2 mb-4">
                                                 {category.description || 'Khám phá bộ sưu tập quà tặng hấp dẫn từ danh mục này'}
                                             </p>
 
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-1 text-red-600 font-medium">
-                                                    <span>Xem quà</span>
+                                            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                                <div className="flex items-center gap-1 text-red-600 font-medium text-sm">
+                                                    <span>Xem quà tặng</span>
                                                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                 </div>
                                             </div>
@@ -671,62 +771,64 @@ const Category = () => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {sortedCategories.map((category) => (
                                     <div
                                         key={category.id}
                                         onClick={() => handleCategoryClick(category.id, category.name)}
-                                        className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                                        className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:border-red-200"
                                     >
-                                        <div className="relative p-4 flex items-center gap-4">
-                                            <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                                                <Package className="w-7 h-7 text-white" />
-                                            </div>
-
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
-                                                        {category.name}
-                                                    </h3>
-                                                    <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                                                        {rewardsCount[category.id] || 0} quà
-                                                    </span>
+                                        <div className="p-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                                                    <Package className="w-6 h-6 text-white" />
                                                 </div>
-                                                <p className="text-gray-600 text-sm">
-                                                    {category.description || 'Khám phá bộ sưu tập quà tặng hấp dẫn từ danh mục này'}
-                                                </p>
-                                            </div>
 
-                                            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all" />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                                        <h3 className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
+                                                            {category.name}
+                                                        </h3>
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                                                            <Gift className="w-3 h-3" />
+                                                            {rewardsCount[category.id] || 0} quà tặng
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-gray-500 text-sm truncate">
+                                                        {category.description || 'Khám phá bộ sưu tập quà tặng hấp dẫn từ danh mục này'}
+                                                    </p>
+                                                </div>
+
+                                                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-300" />
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        {/* Load More Button với animation */}
                         {hasNextPage && (
                             <div className="flex justify-center mt-12">
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-xl disabled:from-red-400 disabled:to-red-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
                                             <>
-                                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                                                <Loader2 className="w-5 h-5 animate-spin" />
                                                 <span>Đang tải thêm...</span>
                                             </>
                                         ) : (
                                             <>
+                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm danh mục</span>
-                                                <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}
                                     </span>
 
-                                    {/* Loading Progress Bar */}
                                     {loadingMore && (
                                         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
                                             <div className="h-full bg-white animate-loading-bar"></div>
@@ -736,19 +838,9 @@ const Category = () => {
                             </div>
                         )}
 
-                        {loadingMore && (
-                            <div className="flex justify-center mt-4">
-                                <div className="flex items-center gap-2 text-red-600">
-                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-red-600 border-t-transparent"></div>
-                                    <span>Đang tải thêm dữ liệu...</span>
-                                </div>
-                            </div>
-                        )}
-
                         {!hasNextPage && categories.length > 0 && (
                             <div className="text-center mt-12">
                                 <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
-                                    <Package className="w-5 h-5" />
                                     <span>Đã hiển thị tất cả danh mục</span>
                                 </div>
                             </div>
@@ -756,6 +848,42 @@ const Category = () => {
                     </>
                 )}
             </div>
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                @keyframes loading-bar {
+                    0% { width: 0%; }
+                    50% { width: 70%; }
+                    100% { width: 100%; }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out;
+                }
+                
+                .animate-loading-bar {
+                    animation: loading-bar 1.5s ease-in-out infinite;
+                }
+            `}</style>
         </div>
     );
 };

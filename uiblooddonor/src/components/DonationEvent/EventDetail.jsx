@@ -12,7 +12,10 @@ import {
     CalendarCog,
     BadgeCheck,
     X,
-    FileText
+    FileText, Stethoscope, Hospital, TrendingUp, Loader2,
+    Eye, Send, CheckCircle2, RefreshCw,
+    Home,
+    UserPlus
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -22,10 +25,8 @@ import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import Header from '../Home/layouts/Header';
 import Footer from '../Home/layouts/Footer';
-import "../../styles/EventDetail.css";
 import { UserContexts } from '../../configs/UserContexts';
 
-// Fix cho icon mặc định của Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -41,7 +42,6 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
     const [provinceName, setProvinceName] = useState('');
     const [districtName, setDistrictName] = useState('');
 
-    // Hàm lấy tên tỉnh/thành từ API
     const fetchProvinceName = async (provinceCode) => {
         if (!provinceCode) return;
         try {
@@ -54,7 +54,6 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
         }
     };
 
-    // Hàm lấy tên quận/huyện từ API
     const fetchDistrictName = async (districtCode) => {
         if (!districtCode) return;
         try {
@@ -116,10 +115,10 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
 
     return (
         <div className="space-y-3">
-            <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 group">
+            <div className="relative w-full h-64 rounded-xl overflow-hidden bg-gray-100 group shadow-md">
                 {loading ? (
                     <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                        <Loader2 className="w-8 h-8 animate-spin text-red-500" />
                         <p className="text-gray-500 text-sm ml-2">Đang tải bản đồ...</p>
                     </div>
                 ) : !mapError ? (
@@ -136,8 +135,8 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
                         <Marker position={position}>
                             <Popup>
                                 <div className="text-sm">
-                                    <p className="font-medium">{address}</p>
-                                    <p>{districtName}, {provinceName}</p>
+                                    <p className="font-semibold">{address}</p>
+                                    <p className="text-gray-600">{districtName}, {provinceName}</p>
                                 </div>
                             </Popup>
                         </Marker>
@@ -146,16 +145,16 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
                         <MapPin className="w-12 h-12 text-gray-400 mb-2" />
                         <p className="text-gray-500 text-sm">Không thể xác định vị trí trên bản đồ</p>
-                        <p className="text-gray-400 text-xs mt-1">{fullAddress}</p>
+                        <p className="text-gray-400 text-xs mt-1 max-w-xs text-center">{fullAddress}</p>
                     </div>
                 )}
 
-                <div className="absolute inset-x-0 z-[10000] bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                     <a
                         href={directionsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium shadow-md"
                     >
                         <Navigation className="w-4 h-4" />
                         Chỉ đường (OpenStreetMap)
@@ -163,10 +162,10 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
                 </div>
             </div>
 
-            <div className="flex items-start gap-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+            <div className="flex items-start gap-2 text-sm text-gray-600 bg-gradient-to-r from-gray-50 to-white p-3 rounded-xl border border-gray-100">
                 <MapPin className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
-                    <p className="font-medium text-gray-900">Địa chỉ:</p>
+                    <p className="font-semibold text-gray-900">Địa chỉ:</p>
                     <p>{address}, {districtName}, {provinceName}</p>
                 </div>
             </div>
@@ -177,17 +176,17 @@ const OpenStreetMap = ({ location, province, subDistrict, address }) => {
 // Stat Card Component
 const StatCard = ({ icon: Icon, label, value, color = "red" }) => {
     const colors = {
-        red: 'bg-red-50 text-red-600',
-        blue: 'bg-blue-50 text-blue-600',
-        green: 'bg-green-50 text-green-600',
-        purple: 'bg-purple-50 text-purple-600',
-        orange: 'bg-orange-50 text-orange-600'
+        red: 'bg-gradient-to-r from-red-50 to-red-100 text-red-600',
+        blue: 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-600',
+        green: 'bg-gradient-to-r from-green-50 to-green-100 text-green-600',
+        purple: 'bg-gradient-to-r from-purple-50 to-purple-100 text-purple-600',
+        orange: 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-600'
     };
 
     return (
-        <div className={`${colors[color]} rounded-xl p-4`}>
+        <div className={`${colors[color]} rounded-xl p-4 border border-${color}-100 hover:shadow-md transition-all duration-300`}>
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
                     <Icon className="w-5 h-5" />
                 </div>
                 <div>
@@ -202,9 +201,9 @@ const StatCard = ({ icon: Icon, label, value, color = "red" }) => {
 // Info Row Component
 const InfoRow = ({ icon: Icon, label, value, href }) => {
     const content = (
-        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-            <div className="p-2 bg-white rounded-lg">
-                <Icon className="w-4 h-4 text-gray-600" />
+        <div className="flex items-start gap-3 p-3 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300">
+            <div className="p-2 bg-white rounded-lg shadow-sm">
+                <Icon className="w-4 h-4 text-red-500" />
             </div>
             <div className="flex-1">
                 <p className="text-xs text-gray-500">{label}</p>
@@ -213,13 +212,13 @@ const InfoRow = ({ icon: Icon, label, value, href }) => {
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-red-600 hover:underline flex items-center gap-1"
+                        className="text-sm font-semibold text-red-600 hover:underline flex items-center gap-1"
                     >
                         {value}
                         <ExternalLink className="w-3 h-3" />
                     </a>
                 ) : (
-                    <p className="text-sm font-medium text-gray-900">{value}</p>
+                    <p className="text-sm font-semibold text-gray-900">{value}</p>
                 )}
             </div>
         </div>
@@ -233,17 +232,14 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
+                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
@@ -257,12 +253,12 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 
                     <div className="p-6">
                         <div className="flex flex-col items-center text-center mb-6">
-                            <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-lg">
+                            <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-lg overflow-hidden">
                                 {staff?.account?.avatar ? (
                                     <img
                                         src={getImageUrl(staff.account.avatar)}
                                         alt={`${staff.account.last_name} ${staff.account.first_name}`}
-                                        className="w-full h-full object-cover rounded-full"
+                                        className="w-full h-full object-cover"
                                     />
                                 ) : (
                                     <User className="w-12 h-12 text-red-600" />
@@ -275,15 +271,17 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                     <BadgeCheck className="w-5 h-5 text-blue-500" />
                                 )}
                             </h4>
+                            <p className="text-sm text-gray-500">{staff?.degree || 'Nhân viên y tế'}</p>
                         </div>
 
                         <div className="space-y-3">
-                            <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Hospital className="w-4 h-4 text-red-500" />
                                     Bệnh viện trực thuộc
                                 </h5>
                                 <div className="space-y-2">
-                                    <p className="font-medium text-gray-900">
+                                    <p className="font-semibold text-gray-900">
                                         {staff?.hospital?.name || 'Đang cập nhật'}
                                     </p>
                                     <p className="text-sm text-gray-600 flex items-start gap-1">
@@ -300,42 +298,38 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-gray-50 rounded-xl p-3">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Email</p>
-                                    <span
-                                        className="text-sm font-medium text-gray-900 flex items-center gap-1 truncate"
-                                    >
-                                        <Mail className="w-4 h-4 text-gray-400 mt-0.5" />
+                                    <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
+                                        <Mail className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.email || 'Chưa cập nhật'}
                                     </span>
                                 </div>
-                                <div className="bg-gray-50 rounded-xl p-3">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
-                                    <span
-                                        className="text-sm font-medium text-gray-900 flex items-center gap-1 truncate"
-                                    >
-                                        <Phone className="w-4 h-4 text-gray-400 mt-0.5" />
+                                    <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
+                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-gray-600">Khoa</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.department || 'Khoa'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-gray-600">Chuyên môn</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.degree || 'Đa khoa'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">Kinh nghiệm</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.experience_years || 0} năm
                                     </span>
                                 </div>
@@ -368,7 +362,6 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
     });
     const [loading, setLoading] = useState(false);
 
-    // API tỉnh/thành
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [loadingProvinces, setLoadingProvinces] = useState(false);
@@ -378,12 +371,10 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
     const [provinceName, setProvinceName] = useState('');
     const [districtName, setDistrictName] = useState('');
 
-    // Fetch provinces on mount
     useEffect(() => {
         fetchProvinces();
     }, []);
 
-    // Fetch districts when province changes
     useEffect(() => {
         if (selectedProvince) {
             fetchDistricts(selectedProvince);
@@ -393,21 +384,18 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
         }
     }, [selectedProvince]);
 
-    // Fetch province name for display
     useEffect(() => {
         if (selectedProvince && formData.is_proxy) {
             fetchProvinceName(selectedProvince);
         }
     }, [selectedProvince, formData.is_proxy]);
 
-    // Fetch district name for display
     useEffect(() => {
         if (selectedDistrict && formData.is_proxy) {
             fetchDistrictName(selectedDistrict);
         }
     }, [selectedDistrict, formData.is_proxy]);
 
-    // Reset form when dialog opens
     useEffect(() => {
         if (isOpen) {
             setFormData({
@@ -431,9 +419,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
         }
     }, [isOpen]);
 
-    // CHỈ cập nhật formData từ donorInfo khi KHÔNG phải là proxy
     useEffect(() => {
-        // CHỈ chạy khi không phải proxy và có donorInfo
         if (donorInfo && !formData.is_proxy && isOpen) {
             setFormData(prev => ({
                 ...prev,
@@ -454,12 +440,10 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                 fetchDistrictName(donorInfo.sub_district);
             }
         }
-    }, [donorInfo, formData.is_proxy, isOpen]); // Thêm formData.is_proxy vào dependency array
+    }, [donorInfo, formData.is_proxy, isOpen]);
 
-    // Khi chuyển đổi is_proxy, reset các trường thông tin
     useEffect(() => {
         if (formData.is_proxy) {
-            // Khi chuyển sang proxy, reset tất cả các trường thông tin
             setFormData(prev => ({
                 ...prev,
                 permanent_address: '',
@@ -478,7 +462,6 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
             setSelectedProvince('');
             setSelectedDistrict('');
         } else if (donorInfo) {
-            // Khi chuyển về không proxy, lấy lại thông tin từ donorInfo
             setFormData(prev => ({
                 ...prev,
                 permanent_address: donorInfo.permanent_address || '',
@@ -503,7 +486,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
     const toUTCISOString = (localDateTime) => {
         if (!localDateTime) return null;
         const date = new Date(localDateTime);
-        return date.toISOString(); // convert sang UTC
+        return date.toISOString();
     };
 
     const fetchProvinces = async () => {
@@ -565,14 +548,12 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
         setFormData(prev => ({ ...prev, sub_district: code }));
     };
 
-    // Xử lý khi checkbox thay đổi
     const handleProxyChange = (e) => {
         const isChecked = e.target.checked;
         setFormData(prev => ({
             ...prev,
             is_proxy: isChecked
         }));
-        // Không cần set lại gì thêm vì useEffect ở trên sẽ xử lý
     };
 
     if (!isOpen) return null;
@@ -584,7 +565,6 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
             let submitData;
 
             if (formData.is_proxy) {
-                // Proxy registration - use all entered data
                 submitData = {
                     expected_arrive: toUTCISOString(formData.expected_arrive),
                     permanent_address: formData.permanent_address,
@@ -602,7 +582,6 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                     gender: formData.gender
                 };
             } else {
-                // Self registration - use user and donor info
                 submitData = {
                     expected_arrive: toUTCISOString(formData.expected_arrive),
                     permanent_address: donorInfo?.permanent_address || formData.permanent_address,
@@ -628,14 +607,10 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full transform transition-all max-h-[90vh] overflow-y-auto">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold">Đăng ký tham gia sự kiện</h3>
@@ -658,7 +633,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                     className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
                                 />
                                 <div>
-                                    <span className="text-base font-medium text-gray-900">
+                                    <span className="text-base font-semibold text-gray-900">
                                         Đăng ký thay cho người khác
                                     </span>
                                     <p className="text-sm text-gray-600 mt-1">
@@ -670,8 +645,9 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
 
                         {!formData.is_proxy ? (
                             <>
-                                <div className="bg-gray-50 p-4 rounded-xl">
-                                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                        <User className="w-4 h-4 text-red-500" />
                                         Thông tin cá nhân của bạn
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4">
@@ -683,7 +659,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={user?.last_name || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -694,7 +670,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={user?.first_name || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -705,7 +681,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={user?.phone || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -716,7 +692,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="email"
                                                 value={user?.email || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -727,7 +703,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={donorInfo?.identification || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -738,7 +714,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={formatDate(user?.birth_date) || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -749,7 +725,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={user?.gender === 0 ? 'Nam' : user?.gender === 1 ? 'Nữ' : ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                     </div>
@@ -758,9 +734,9 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                     </p>
                                 </div>
 
-                                {/* Thông tin từ donor profile - DISPLAY ONLY */}
-                                <div className="bg-gray-50 p-4 rounded-xl">
-                                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                        <Home className="w-4 h-4 text-red-500" />
                                         Thông tin từ hồ sơ của bạn
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4">
@@ -772,7 +748,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={provinceName || donorInfo?.province || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -783,7 +759,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={districtName || donorInfo?.sub_district || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div className="col-span-2">
@@ -794,7 +770,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={donorInfo?.permanent_address || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -805,7 +781,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={donorInfo?.career || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                         <div>
@@ -816,7 +792,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                                 type="text"
                                                 value={donorInfo?.organization || ''}
                                                 disabled
-                                                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-600"
+                                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-600"
                                             />
                                         </div>
                                     </div>
@@ -826,200 +802,199 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                 </div>
                             </>
                         ) : (
-                            <>
-                                <div className="bg-blue-50 p-4 rounded-xl">
-                                    <h4 className="font-semibold text-blue-700 mb-3 flex items-center gap-2">
-                                        Thông tin người được đăng ký thay
-                                    </h4>
-                                    <p className="text-sm text-blue-600 mb-4">
-                                        Vui lòng nhập đầy đủ thông tin của người mà bạn đang đăng ký thay
-                                    </p>
+                            <div className="bg-gradient-to-r from-blue-50 to-blue-50/50 rounded-xl p-4 border border-blue-100">
+                                <h4 className="font-semibold text-blue-700 mb-3 flex items-center gap-2">
+                                    <UserPlus className="w-4 h-4" />
+                                    Thông tin người được đăng ký thay
+                                </h4>
+                                <p className="text-sm text-blue-600 mb-4">
+                                    Vui lòng nhập đầy đủ thông tin của người mà bạn đang đăng ký thay
+                                </p>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Họ và tên đệm <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                required
-                                                value={formData.last_name}
-                                                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                                                placeholder="Họ và tên đệm"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Tên <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                required
-                                                value={formData.first_name}
-                                                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                                                placeholder="Tên"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Số điện thoại <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                required
-                                                value={formData.phone}
-                                                maxLength={10}
-                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                placeholder="Số điện thoại"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Email <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="email"
-                                                required
-                                                value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                placeholder="Email"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                CMND/CCCD <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                required
-                                                value={formData.identification}
-                                                onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
-                                                placeholder="Số CMND/CCCD"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Ngày sinh <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="date"
-                                                required
-                                                value={formData.birth_date}
-                                                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                                                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Giới tính <span className="text-red-500">*</span>
-                                            </label>
-                                            <select
-                                                required
-                                                value={formData.gender}
-                                                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            >
-                                                <option value="0">Nam</option>
-                                                <option value="1">Nữ</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Nghề nghiệp <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={formData.career}
-                                                required
-                                                onChange={(e) => setFormData({ ...formData, career: e.target.value })}
-                                                placeholder="Nghề nghiệp"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Đơn vị công tác <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={formData.organization}
-                                                required
-                                                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                                                placeholder="Đơn vị công tác"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Họ và tên đệm <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={formData.last_name}
+                                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                                            placeholder="Họ và tên đệm"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Tên <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={formData.first_name}
+                                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                                            placeholder="Tên"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Số điện thoại <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            required
+                                            value={formData.phone}
+                                            maxLength={10}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                            placeholder="Số điện thoại"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Email <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            placeholder="Email"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            CMND/CCCD <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={formData.identification}
+                                            onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
+                                            placeholder="Số CMND/CCCD"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Ngày sinh <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            required
+                                            value={formData.birth_date}
+                                            onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+                                            max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Giới tính <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            required
+                                            value={formData.gender}
+                                            onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        >
+                                            <option value="0">Nam</option>
+                                            <option value="1">Nữ</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Nghề nghiệp <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.career}
+                                            required
+                                            onChange={(e) => setFormData({ ...formData, career: e.target.value })}
+                                            placeholder="Nghề nghiệp"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Đơn vị công tác <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.organization}
+                                            required
+                                            onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                                            placeholder="Đơn vị công tác"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
+                                    </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Tỉnh/Thành phố <span className="text-red-500">*</span>
-                                            </label>
-                                            <select
-                                                required
-                                                value={selectedProvince}
-                                                onChange={handleProvinceChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            >
-                                                <option value="">Chọn tỉnh/thành phố</option>
-                                                {loadingProvinces ? (
-                                                    <option disabled>Đang tải...</option>
-                                                ) : (
-                                                    provinces.map(province => (
-                                                        <option key={province.code} value={province.code}>
-                                                            {province.name}
-                                                        </option>
-                                                    ))
-                                                )}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Quận/Huyện <span className="text-red-500">*</span>
-                                            </label>
-                                            <select
-                                                required
-                                                value={selectedDistrict}
-                                                onChange={handleDistrictChange}
-                                                disabled={!selectedProvince || loadingDistricts}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                            >
-                                                <option value="">Chọn quận/huyện</option>
-                                                {loadingDistricts ? (
-                                                    <option disabled>Đang tải...</option>
-                                                ) : (
-                                                    districts.map(district => (
-                                                        <option key={district.code} value={district.code}>
-                                                            {district.name}
-                                                        </option>
-                                                    ))
-                                                )}
-                                            </select>
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Địa chỉ thường trú <span className="text-red-500">*</span>
-                                            </label>
-                                            <textarea
-                                                required
-                                                value={formData.permanent_address}
-                                                onChange={(e) => setFormData({ ...formData, permanent_address: e.target.value })}
-                                                placeholder="Số nhà, đường, phường/xã"
-                                                rows="2"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Tỉnh/Thành phố <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            required
+                                            value={selectedProvince}
+                                            onChange={handleProvinceChange}
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        >
+                                            <option value="">Chọn tỉnh/thành phố</option>
+                                            {loadingProvinces ? (
+                                                <option disabled>Đang tải...</option>
+                                            ) : (
+                                                provinces.map(province => (
+                                                    <option key={province.code} value={province.code}>
+                                                        {province.name}
+                                                    </option>
+                                                ))
+                                            )}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Quận/Huyện <span className="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            required
+                                            value={selectedDistrict}
+                                            onChange={handleDistrictChange}
+                                            disabled={!selectedProvince || loadingDistricts}
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                        >
+                                            <option value="">Chọn quận/huyện</option>
+                                            {loadingDistricts ? (
+                                                <option disabled>Đang tải...</option>
+                                            ) : (
+                                                districts.map(district => (
+                                                    <option key={district.code} value={district.code}>
+                                                        {district.name}
+                                                    </option>
+                                                ))
+                                            )}
+                                        </select>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Địa chỉ thường trú <span className="text-red-500">*</span>
+                                        </label>
+                                        <textarea
+                                            required
+                                            value={formData.permanent_address}
+                                            onChange={(e) => setFormData({ ...formData, permanent_address: e.target.value })}
+                                            placeholder="Số nhà, đường, phường/xã"
+                                            rows="2"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        />
                                     </div>
                                 </div>
-                            </>
+                            </div>
                         )}
 
-                        <div className="bg-gray-50 p-4 rounded-xl">
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1031,33 +1006,35 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                         value={formData.expected_arrive}
                                         onChange={(e) => setFormData({ ...formData, expected_arrive: e.target.value })}
                                         min={new Date(event.time_start).toISOString().slice(0, 16)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Buttons */}
-                        <div className="flex gap-3 pt-4 sticky bottom-0 bg-white pb-2">
+                        <div className="flex gap-3 pt-4">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                        <Loader2 className="animate-spin w-5 h-5" />
                                         <span>Đang xử lý...</span>
                                     </>
                                 ) : (
-                                    <span>Xác nhận đăng ký</span>
+                                    <>
+                                        <CheckCircle className="w-5 h-5" />
+                                        <span>Xác nhận đăng ký</span>
+                                    </>
                                 )}
                             </button>
                             <button
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50"
+                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -1086,11 +1063,9 @@ const EventDetail = () => {
 
     const [donorInfo, setDonorInfo] = useState(null);
 
-    // State cho danh sách sự kiện cùng khu vực
     const [relatedEvents, setRelatedEvents] = useState([]);
     const [loadingRelated, setLoadingRelated] = useState(false);
 
-    // State cho tên tỉnh/thành
     const [provinceName, setProvinceName] = useState('');
     const [districtName, setDistrictName] = useState('');
 
@@ -1115,7 +1090,6 @@ const EventDetail = () => {
         fetchEventDetail();
     }, [id]);
 
-    // Fetch tên tỉnh/thành khi có event
     useEffect(() => {
         if (event?.province && !isNaN(event.province)) {
             fetchProvinceName(event.province);
@@ -1125,7 +1099,6 @@ const EventDetail = () => {
         }
     }, [event]);
 
-    // Fetch các sự kiện cùng khu vực khi có event
     useEffect(() => {
         if (event?.province) {
             fetchRelatedEvents(event.province);
@@ -1169,15 +1142,13 @@ const EventDetail = () => {
         }
     };
 
-    // Hàm fetch các sự kiện cùng khu vực (loại trừ sự kiện hiện tại)
     const fetchRelatedEvents = async (province) => {
         setLoadingRelated(true);
         try {
-            // Gọi API lấy danh sách sự kiện theo tỉnh/thành phố
             const response = await authApis().get(endpoints.donation_event, {
                 params: {
                     province: province,
-                    limit: 4, // Lấy nhiều hơn để sau khi filter còn 3
+                    limit: 4,
                 }
             });
 
@@ -1188,9 +1159,8 @@ const EventDetail = () => {
                 events = response.data;
             }
 
-            // Lọc bỏ sự kiện đang xem và giới hạn 3
             const filteredEvents = events
-                .filter(e => e.id !== parseInt(id)) // Loại trừ sự kiện hiện tại
+                .filter(e => e.id !== parseInt(id))
                 .slice(0, 3);
 
             setRelatedEvents(filteredEvents);
@@ -1208,19 +1178,18 @@ const EventDetail = () => {
 
         if (start > now) return 'upcoming';
         if (start <= now) return 'ongoing';
+        return 'ended';
     };
 
     const getStatusColor = (event) => {
         const status = getEventStatus(event.time_start);
-
-        if (status === 'ongoing') return 'bg-green-500';
-        if (status === 'upcoming') return 'bg-blue-500';
-        return 'bg-gray-500';
+        if (status === 'ongoing') return 'bg-gradient-to-r from-green-500 to-emerald-500';
+        if (status === 'upcoming') return 'bg-gradient-to-r from-blue-500 to-blue-600';
+        return 'bg-gradient-to-r from-gray-500 to-gray-600';
     };
 
     const getStatusText = (event) => {
         const status = getEventStatus(event.time_start);
-
         if (status === 'ongoing') return 'Đang diễn ra';
 
         const now = new Date();
@@ -1244,8 +1213,6 @@ const EventDetail = () => {
     const handleSubmitRegistration = async (formData) => {
         setRegisterLoading(true);
         try {
-            console.log("Registration data:", formData);
-
             const url = endpoints.donation_register.replace('${id}', id);
             const response = await authApis().post(url, formData);
 
@@ -1289,59 +1256,6 @@ const EventDetail = () => {
     const showMessage = (text, type) => {
         setMessage({ text, type });
         setTimeout(() => setMessage({ text: '', type: '' }), 3000);
-    };
-
-    const getStatusInfo = () => {
-        if (event?.is_expire) {
-            return {
-                label: 'Đã kết thúc',
-                color: 'bg-gray-500',
-                icon: XCircle,
-                textColor: 'text-gray-500'
-            };
-        }
-        const now = new Date();
-        const eventDate = new Date(event?.time_start);
-        const diffDays = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) {
-            return {
-                label: 'Đã kết thúc',
-                color: 'bg-gray-500',
-                icon: XCircle,
-                textColor: 'text-gray-500'
-            };
-        }
-        if (diffDays === 0) {
-            return {
-                label: 'Diễn ra hôm nay',
-                color: 'bg-orange-500',
-                icon: Clock,
-                textColor: 'text-orange-600'
-            };
-        }
-        if (diffDays <= 3) {
-            return {
-                label: `Còn ${diffDays} ngày`,
-                color: 'bg-orange-500',
-                icon: Clock,
-                textColor: 'text-orange-600'
-            };
-        }
-        if (diffDays <= 7) {
-            return {
-                label: 'Sắp diễn ra',
-                color: 'bg-green-500',
-                icon: Calendar,
-                textColor: 'text-green-600'
-            };
-        }
-        return {
-            label: 'Đang mở đăng ký',
-            color: 'bg-blue-500',
-            icon: CheckCircle,
-            textColor: 'text-blue-600'
-        };
     };
 
     if (loading) {
@@ -1388,7 +1302,7 @@ const EventDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate('/list-event')}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-500/25"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại danh sách
@@ -1400,30 +1314,28 @@ const EventDetail = () => {
         );
     }
 
-    const status = getStatusInfo();
-    const StatusIcon = status.icon;
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Header />
 
             {/* Message Toast */}
             {message.text && (
-                <div className="fixed top-24 right-4 z-[1000] animate-slideIn">
-                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
-                        }`}>
+                <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
+                        message.type === 'success'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-red-500 text-white'
+                    }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
                         }
-                        <span>{message.text}</span>
+                        <span className="font-medium">{message.text}</span>
                     </div>
                 </div>
             )}
 
-            {/* Hero Section với gradient */}
+            {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -1431,7 +1343,7 @@ const EventDetail = () => {
                 </div>
 
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -1439,32 +1351,45 @@ const EventDetail = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <Droplet className="w-8 h-8 text-white opacity-10" />
+                            <Droplet className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
                     {/* Breadcrumb */}
-                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Sự kiện</span>
-                        <span>/</span>
-                        <span className="text-white">{event.title || 'Chi tiết'}</span>
-                    </nav>
-
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/list-event")}
-                            className="flex p-1 relative z-20 items-center mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
+                            className="hover:text-white transition-colors"
                         >
-                            <div className="rotate-180 p-2 group-hover:-translate-x-1 transition-transform">
-                                <ChevronRight className="w-5 h-5" />
-                            </div>
-                            <span className='mr-1'>Sự kiện</span>
+                            Sự kiện
                         </button>
+                        <span>/</span>
+                        <span className="text-white font-medium">{event.title || 'Chi tiết'}</span>
+                    </div>
+
+                    <button
+                        onClick={() => navigate("/list-event")}
+                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                    >
+                        <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Quay lại danh sách sự kiện</span>
+                    </button>
+
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
+                            <Calendar className="w-8 h-8" />
+                            {event.title}
+                        </h1>
+                        <div className="flex items-center gap-3 mt-2">
+                            <span className={`${getStatusColor(event)} text-white px-3 py-1.5 rounded-full text-sm font-semibold shadow-md`}>
+                                {getStatusText(event)}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -1478,85 +1403,42 @@ const EventDetail = () => {
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="grid gap-8">
+                <div className="grid lg:grid-cols-3 gap-8">
                     {/* Left Column - Main Info */}
-                    <div className="space-y-6">
+                    <div className="lg:col-span-2 space-y-6">
                         {/* Title Section */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6">
-                            <div className="flex items-start justify-between mb-4">
+                        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                            <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <span className={`${getStatusColor(event)} text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1`}>
-                                            {getStatusText(event)}
-                                        </span>
-                                    </div>
-                                    <h1 className="text-3xl font-bold text-gray-900">
-                                        {event.title}
-                                    </h1>
-                                </div>
-
-                                {/* Register Button - Desktop */}
-                                <div className="hidden lg:block">
-                                    {!user ? (
-                                        <button
-                                            onClick={() => navigate('/login')}
-                                            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg bg-red-600 text-white hover:bg-red-700 shadow-red-500/25"
-                                        >
-                                            <span>Đăng nhập để tham gia</span>
-                                        </button>
-                                    ) : user.role === 1 && (
-                                        <button
-                                            onClick={handleRegisterClick}
-                                            disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}
-                                            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <span>Tham gia ngay</span>
-                                        </button>
-                                    )}
+                                    <p className="text-gray-600 leading-relaxed">
+                                        {event.description || 'Chưa có mô tả chi tiết cho sự kiện này.'}
+                                    </p>
                                 </div>
                             </div>
 
-                            <p className="text-gray-700 leading-relaxed">
-                                {event.description || 'Chưa có mô tả chi tiết cho sự kiện này.'}
-                            </p>
-
-                            {/* Register Button - Mobile */}
-                            <div className="lg:hidden mt-4">
+                            {/* Register Button */}
+                            <div className="mt-6">
                                 {!user ? (
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg bg-gray-600 text-white hover:bg-gray-700 shadow-gray-500/25"
+                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600"
                                     >
                                         <span>Đăng nhập để tham gia</span>
                                     </button>
-                                ) : (
+                                ) : user.role === 1 && (
                                     <button
                                         onClick={handleRegisterClick}
                                         disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}
-                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-red-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <span>Tham gia ngay</span>
                                     </button>
-                                )}
-
-                                {/* Stats under button - mobile */}
-                                {localStorage.getItem('access_token') && (
-                                    <div className="mt-3 flex justify-between text-sm bg-gray-50 rounded-lg p-2">
-                                        <div className="flex items-center gap-1">
-                                            <Users className="w-4 h-4 text-gray-500" />
-                                            <span className="text-gray-600">Đã ĐK: {event.registered_count || 0}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Target className="w-4 h-4 text-gray-500" />
-                                            <span className="text-gray-600">Chỉ tiêu: {event.target || 200}</span>
-                                        </div>
-                                    </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Image Gallery */}
-                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
                             <div className="aspect-video bg-gradient-to-br from-red-100 to-red-200 relative">
                                 {event.image_url ? (
                                     <img
@@ -1573,45 +1455,30 @@ const EventDetail = () => {
                         </div>
 
                         {/* Tabs */}
-                        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
                             <div className="border-b border-gray-200 px-6">
                                 <div className="flex gap-6">
-                                    <button
-                                        onClick={() => setActiveTab('info')}
-                                        className={`py-4 px-2 font-medium transition-all relative ${activeTab === 'info'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
+                                    {[
+                                        { id: 'info', label: 'Thông tin chi tiết', icon: FileText },
+                                        { id: 'location', label: 'Địa điểm', icon: MapPin },
+                                        { id: 'organizer', label: 'Ban tổ chức', icon: Users }
+                                    ].map(tab => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${
+                                                activeTab === tab.id
+                                                    ? 'text-red-600'
+                                                    : 'text-gray-500 hover:text-gray-700'
                                             }`}
-                                    >
-                                        Thông tin chi tiết
-                                        {activeTab === 'info' && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                        )}
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('location')}
-                                        className={`py-4 px-2 font-medium transition-all relative ${activeTab === 'location'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
-                                            }`}
-                                    >
-                                        Địa điểm
-                                        {activeTab === 'location' && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                        )}
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab('organizer')}
-                                        className={`py-4 px-2 font-medium transition-all relative ${activeTab === 'organizer'
-                                            ? 'text-red-600'
-                                            : 'text-gray-500 hover:text-gray-700'
-                                            }`}
-                                    >
-                                        Ban tổ chức
-                                        {activeTab === 'organizer' && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></div>
-                                        )}
-                                    </button>
+                                        >
+                                            <tab.icon className="w-4 h-4" />
+                                            {tab.label}
+                                            {activeTab === tab.id && (
+                                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-500 rounded-full"></div>
+                                            )}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
@@ -1631,7 +1498,7 @@ const EventDetail = () => {
                                             />
                                             <InfoRow
                                                 icon={CalendarCog}
-                                                label="Ngày lên lịch"
+                                                label="Ngày tạo"
                                                 value={formatDate(event.created_at)}
                                             />
                                             <InfoRow
@@ -1641,22 +1508,27 @@ const EventDetail = () => {
                                             />
                                         </div>
 
-                                        <div className="bg-red-50 rounded-xl p-4">
+                                        <div className="bg-gradient-to-r from-red-50 to-red-50/50 rounded-xl p-4 border border-red-100">
                                             <h4 className="font-semibold text-red-900 mb-3 flex items-center gap-2">
+                                                <Shield className="w-4 h-4" />
                                                 Những lưu ý khi tham gia
                                             </h4>
                                             <ul className="space-y-2 text-sm text-red-700">
                                                 <li className="flex items-start gap-2">
-                                                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                                    <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
                                                     <span>Mang theo CMND/CCCD khi tham gia</span>
                                                 </li>
                                                 <li className="flex items-start gap-2">
-                                                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                                    <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
                                                     <span>Ăn nhẹ trước khi hiến máu</span>
                                                 </li>
                                                 <li className="flex items-start gap-2">
-                                                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                                    <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
                                                     <span>Không sử dụng rượu bia trước khi hiến 24h</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                                    <span>Ngủ đủ giấc trước ngày hiến máu</span>
                                                 </li>
                                             </ul>
                                         </div>
@@ -1675,29 +1547,31 @@ const EventDetail = () => {
 
                                 {activeTab === 'organizer' && (
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                                            <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center overflow-hidden">
-                                                {event.staff?.hospital?.image_url ? (
-                                                    <img
-                                                        src={getImageUrl(event.staff.hospital.image_url)}
-                                                        alt={event.staff.hospital.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <Building2 className="w-8 h-8 text-red-600" />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-gray-900 flex items-center gap-2 mb-2">
-                                                    {event.staff?.hospital?.name || 'Đang cập nhật'}
-                                                </h4>
-                                                <p className="text-sm text-gray-600 line-clamp-1">
-                                                    {[
-                                                        event.staff?.hospital?.hospital_address,
-                                                        event.staff?.hospital?.sub_district,
-                                                        event.staff?.hospital?.province
-                                                    ].filter(Boolean).join(', ') || 'Đang cập nhật địa chỉ'}
-                                                </p>
+                                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-xl flex items-center justify-center overflow-hidden shadow-md">
+                                                    {event.staff?.hospital?.image_url ? (
+                                                        <img
+                                                            src={getImageUrl(event.staff.hospital.image_url)}
+                                                            alt={event.staff.hospital.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <Building2 className="w-8 h-8 text-red-600" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-900 mb-1">
+                                                        {event.staff?.hospital?.name || 'Đang cập nhật'}
+                                                    </h4>
+                                                    <p className="text-sm text-gray-600">
+                                                        {[
+                                                            event.staff?.hospital?.hospital_address,
+                                                            event.staff?.hospital?.sub_district,
+                                                            event.staff?.hospital?.province
+                                                        ].filter(Boolean).join(', ') || 'Đang cập nhật địa chỉ'}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1712,7 +1586,7 @@ const EventDetail = () => {
                                                     >
                                                         <span>{`${event.staff?.account?.last_name || ''} ${event.staff?.account?.first_name || ''}`}</span>
                                                         {event.staff?.is_verified && (
-                                                            <BadgeCheck className="w-4 h-4 text-blue-500 inline-block" />
+                                                            <BadgeCheck className="w-4 h-4 text-blue-500" />
                                                         )}
                                                         <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     </button>
@@ -1721,7 +1595,7 @@ const EventDetail = () => {
                                             <InfoRow
                                                 icon={Phone}
                                                 label="Hotline"
-                                                value={`${event.staff?.emergency_phone || ""}`}
+                                                value={`${event.staff?.emergency_phone || 'Chưa cập nhật'}`}
                                             />
                                         </div>
                                     </div>
@@ -1729,12 +1603,78 @@ const EventDetail = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Right Column - Summary Card */}
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-2xl shadow-md p-6 sticky top-24 border border-gray-100">
+                            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <FileText className="w-5 h-5 text-red-500" />
+                                Tổng quan
+                            </h2>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Trạng thái</span>
+                                    <span className={`${getStatusColor(event)} text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm`}>
+                                        {getStatusText(event)}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Địa điểm</span>
+                                    <span className="font-semibold text-gray-900 text-right">{event.province}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Ngày diễn ra</span>
+                                    <span className="font-semibold text-gray-900">{formatDate(event.time_start)}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Giờ bắt đầu</span>
+                                    <span className="font-semibold text-gray-900">{formatTime(event.time_start)}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Số người đăng ký</span>
+                                    <span className="font-semibold text-red-600">{event.registered_count || 0}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <span className="text-gray-600">Chỉ tiêu dự kiến</span>
+                                    <span className="font-semibold text-gray-900">{event.target || 200}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-600">Ngày tạo</span>
+                                    <span className="font-semibold text-gray-900 text-right">{formatDate(event.created_at)}</span>
+                                </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            {event.registered_count && (
+                                <div className="mt-4">
+                                    <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-gray-600">Đã đăng ký</span>
+                                        <span className="font-semibold text-red-600">{event.registered_count} người</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            className="bg-gradient-to-r from-red-600 to-red-500 h-2 rounded-full"
+                                            style={{ width: `${Math.min((event.registered_count / (event.target || 200)) * 100, 100)}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                {/* Related Events - Sự kiện cùng khu vực */}
+                {/* Related Events */}
                 {relatedEvents.length > 0 && (
                     <div className="mt-12">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <TrendingUp className="w-6 h-6 text-red-500" />
                             Sự kiện cùng khu vực {provinceName && `- ${provinceName}`}
                         </h2>
 
@@ -1755,15 +1695,15 @@ const EventDetail = () => {
                                 {relatedEvents.map((relatedEvent) => (
                                     <div
                                         key={relatedEvent.id}
-                                        className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-1"
+                                        className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 overflow-hidden border border-gray-100 hover:border-red-200"
                                         onClick={() => navigate(`/event/${relatedEvent.id}`)}
                                     >
-                                        <div className="h-32 bg-gradient-to-br from-red-400 to-red-600 rounded-t-xl relative overflow-hidden">
+                                        <div className="h-32 bg-gradient-to-br from-red-400 to-red-600 relative overflow-hidden">
                                             {relatedEvent.image_url ? (
                                                 <img
                                                     src={getImageUrl(relatedEvent.image_url)}
                                                     alt={relatedEvent.title}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
@@ -1771,22 +1711,22 @@ const EventDetail = () => {
                                                 </div>
                                             )}
                                             <div className="absolute top-2 right-2">
-                                                <span className={`${getStatusColor(relatedEvent)} text-white text-xs px-2 py-1 rounded-full`}>
+                                                <span className={`${getStatusColor(relatedEvent)} text-white text-xs px-2 py-1 rounded-full shadow-md`}>
                                                     {getStatusText(relatedEvent)}
                                                 </span>
                                             </div>
                                         </div>
                                         <div className="p-4">
-                                            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                                            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-red-600 transition-colors">
                                                 {relatedEvent.title}
                                             </h3>
-                                            <p className="text-sm text-gray-500 flex items-center gap-1">
+                                            <p className="text-sm text-gray-500 flex items-center gap-1 mt-2">
                                                 <Calendar className="w-3 h-3" />
                                                 {formatDate(relatedEvent.time_start)}
                                             </p>
                                             <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                                                 <MapPin className="w-3 h-3" />
-                                                {relatedEvent.location}, {relatedEvent.sub_district}, {relatedEvent.province}
+                                                {relatedEvent.location}
                                             </p>
                                         </div>
                                     </div>
@@ -1794,12 +1734,11 @@ const EventDetail = () => {
                             </div>
                         )}
 
-                        {/* Nút xem thêm */}
                         {relatedEvents.length > 0 && (
                             <div className="text-center mt-6">
                                 <button
                                     onClick={() => navigate('/list-event', { state: { province: event.province } })}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all shadow-sm"
+                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300 shadow-sm border border-gray-200"
                                 >
                                     Xem thêm sự kiện
                                     <ChevronRight className="w-4 h-4" />
@@ -1827,6 +1766,47 @@ const EventDetail = () => {
             />
 
             <Footer />
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-slideInRight {
+                    animation: slideInRight 0.3s ease-out;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.2s ease-out;
+                }
+            `}</style>
         </div>
     );
 };

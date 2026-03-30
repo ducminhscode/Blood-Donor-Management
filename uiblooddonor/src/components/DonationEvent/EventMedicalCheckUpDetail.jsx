@@ -18,52 +18,59 @@ import {
     ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle,
     User as UserIcon, Calendar as CalendarIcon,
     Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon,
-    FileHeart, NotebookPen
+    FileHeart, NotebookPen, Loader2, Hospital,
+    Stethoscope as StethoscopeIcon, TrendingUp
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
-import "../../styles/EventDetail.css";
 import { UserContexts } from '../../configs/UserContexts';
 
 const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue" }) => {
-    const colors = {
-        normal: {
-            blue: 'bg-blue-50 text-blue-600 border-blue-200',
-            green: 'bg-green-50 text-green-600 border-green-200',
-            red: 'bg-red-50 text-red-600 border-red-200',
-            purple: 'bg-purple-50 text-purple-600 border-purple-200',
-            orange: 'bg-orange-50 text-orange-600 border-orange-200'
-        },
-        warning: {
-            blue: 'bg-yellow-50 text-yellow-600 border-yellow-200',
-            green: 'bg-yellow-50 text-yellow-600 border-yellow-200',
-            red: 'bg-yellow-50 text-yellow-600 border-yellow-200',
-            purple: 'bg-yellow-50 text-yellow-600 border-yellow-200',
-            orange: 'bg-yellow-50 text-yellow-600 border-yellow-200'
-        },
-        danger: {
-            blue: 'bg-red-50 text-red-600 border-red-200',
-            green: 'bg-red-50 text-red-600 border-red-200',
-            red: 'bg-red-50 text-red-600 border-red-200',
-            purple: 'bg-red-50 text-red-600 border-red-200',
-            orange: 'bg-red-50 text-red-600 border-red-200'
-        }
+    const getColorClasses = () => {
+        const baseClasses = {
+            normal: {
+                blue: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200',
+                red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200',
+                green: 'bg-gradient-to-br from-green-50 to-green-100 border-green-200',
+                purple: 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200',
+                orange: 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200'
+            },
+            warning: {
+                blue: 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200',
+                red: 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200',
+                green: 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200',
+                purple: 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200',
+                orange: 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200'
+            },
+            danger: {
+                blue: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200',
+                red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200',
+                green: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200',
+                purple: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200',
+                orange: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+            }
+        };
+        return baseClasses[status][color];
     };
 
-    const bgColor = colors[status][color];
+    const getTextColor = () => {
+        if (status === 'danger') return 'text-red-700';
+        if (status === 'warning') return 'text-yellow-700';
+        return 'text-gray-700';
+    };
 
     return (
-        <div className={`rounded-xl p-4 border ${bgColor}`}>
+        <div className={`rounded-xl p-4 border ${getColorClasses()} hover:shadow-md transition-all duration-300`}>
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg">
-                    <Icon className="w-5 h-5" />
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <Icon className={`w-5 h-5 ${getTextColor()}`} />
                 </div>
                 <div>
-                    <p className="text-xs opacity-80">{label}</p>
+                    <p className="text-xs text-gray-500">{label}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className="text-xl font-bold">{value}</p>
-                        {unit && <span className="text-xs opacity-60">{unit}</span>}
+                        <p className={`text-xl font-bold ${getTextColor()}`}>{value || '---'}</p>
+                        {unit && <span className="text-xs text-gray-400">{unit}</span>}
                     </div>
                 </div>
             </div>
@@ -75,17 +82,17 @@ const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", colo
 const EligibilityBadge = ({ isEligible }) => {
     if (isEligible) {
         return (
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full border border-green-200">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full border border-green-200 shadow-sm">
                 <CheckCircle2 className="w-4 h-4" />
-                <span className="font-medium">Đủ điều kiện hiến máu</span>
+                <span className="font-semibold">Đủ điều kiện hiến máu</span>
             </div>
         );
     }
 
     return (
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full border border-red-200">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-100 to-red-100 text-red-700 rounded-full border border-red-200 shadow-sm">
             <XCircle className="w-4 h-4" />
-            <span className="font-medium">Không đủ điều kiện hiến máu</span>
+            <span className="font-semibold">Không đủ điều kiện</span>
         </div>
     );
 };
@@ -95,17 +102,14 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                onClick={onClose}
-            ></div>
-
+        <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
             <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all">
+                <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
+                                <StethoscopeIcon className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
@@ -137,15 +141,17 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                     <BadgeCheck className="w-5 h-5 text-blue-500" />
                                 )}
                             </h4>
+                            <p className="text-sm text-gray-500">{staff?.degree || 'Nhân viên y tế'}</p>
                         </div>
 
                         <div className="space-y-3">
-                            <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                    <Hospital className="w-4 h-4 text-red-500" />
                                     Bệnh viện trực thuộc
                                 </h5>
                                 <div className="space-y-2">
-                                    <p className="font-medium text-gray-900">
+                                    <p className="font-semibold text-gray-900">
                                         {staff?.hospital?.name || 'Đang cập nhật'}
                                     </p>
                                     <p className="text-sm text-gray-600 flex items-start gap-1">
@@ -162,38 +168,38 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-gray-50 rounded-xl p-3">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Email</p>
-                                    <span className="text-sm font-medium text-gray-900 flex items-center gap-1 truncate">
+                                    <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
                                         <Mail className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.email || 'Chưa cập nhật'}
                                     </span>
                                 </div>
-                                <div className="bg-gray-50 rounded-xl p-3">
+                                <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
-                                    <span className="text-sm font-medium text-gray-900 flex items-center gap-1 truncate">
+                                    <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
                                         <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 rounded-xl p-4">
+                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-gray-600">Khoa</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.department || 'Khoa'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-gray-600">Chuyên môn</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.degree || 'Đa khoa'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">Kinh nghiệm</span>
-                                    <span className="text-sm font-medium text-gray-900">
+                                    <span className="text-sm font-semibold text-gray-900">
                                         {staff?.experience_years || 0} năm
                                     </span>
                                 </div>
@@ -209,14 +215,14 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 // Info Card Component
 const InfoCard = ({ icon: Icon, label, value, className = "" }) => {
     return (
-        <div className={`bg-gray-50 rounded-xl p-4 ${className}`}>
+        <div className={`bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all duration-300 ${className}`}>
             <div className="flex items-start gap-3">
-                <div className="p-2 bg-white rounded-lg">
-                    <Icon className="w-5 h-5 text-gray-600" />
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <Icon className="w-5 h-5 text-red-500" />
                 </div>
                 <div className="flex-1">
                     <p className="text-xs text-gray-500 mb-1">{label}</p>
-                    <p className="text-sm font-medium text-gray-900">{value || 'Chưa cập nhật'}</p>
+                    <p className="text-sm font-semibold text-gray-900">{value || 'Chưa cập nhật'}</p>
                 </div>
             </div>
         </div>
@@ -228,7 +234,7 @@ const BooleanStatus = ({ label, value, trueLabel = "Có", falseLabel = "Không" 
     return (
         <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
             <span className="text-sm text-gray-600">{label}</span>
-            <span className={`text-sm font-medium ${value ? 'text-red-600' : 'text-green-600'}`}>
+            <span className={`text-sm font-semibold ${value ? 'text-red-600' : 'text-green-600'}`}>
                 {value ? trueLabel : falseLabel}
             </span>
         </div>
@@ -240,13 +246,13 @@ const MedicalNote = ({ note, doctor }) => {
     if (!note && !doctor) return null;
 
     return (
-        <div className="bg-red-50 rounded-xl p-4 border border-red-200">
+        <div className="bg-gradient-to-r from-red-50 to-red-50/50 rounded-xl p-4 border border-red-100">
             <div className="flex items-start gap-3">
-                <div className="p-2 bg-white rounded-lg">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
                     <MessageSquare className="w-5 h-5 text-red-600" />
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-medium text-red-900 mb-2">Ghi chú khám sức khỏe</p>
+                    <p className="text-sm font-semibold text-red-900 mb-2">Ghi chú khám sức khỏe</p>
                     <p className="text-sm text-red-800 mb-2 italic">"{note || 'Không có ghi chú'}"</p>
                     {doctor && (
                         <p className="text-xs text-red-600 flex items-center gap-1">
@@ -263,7 +269,7 @@ const MedicalNote = ({ note, doctor }) => {
 // Info Section Component
 const InfoSection = ({ title, icon: Icon, children }) => {
     return (
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Icon className="w-5 h-5 text-red-500" />
                 {title}
@@ -300,7 +306,6 @@ const EventMedicalCheckUpDetail = () => {
             const response = await authApis().get(url);
             setCheckup(response.data);
             
-            // Kiểm tra xem đã có blood donation chưa
             await fetchBloodDonation(response.data.id);
         } catch (err) {
             console.error("Error fetching medical checkup:", err);
@@ -376,8 +381,8 @@ const EventMedicalCheckUpDetail = () => {
                             {error || 'Thông tin khám sức khỏe bạn đang tìm không tồn tại'}
                         </p>
                         <button
-                            onClick={() => navigate(`/event-registration/`)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-500/25"
+                            onClick={() => navigate(`/event-registration`)}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại danh sách đăng ký
@@ -392,19 +397,19 @@ const EventMedicalCheckUpDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
             {/* Message Toast */}
             {message.text && (
-                <div className="fixed top-24 right-4 z-[1000] animate-slideIn">
-                    <div className={`p-4 rounded-xl shadow-lg flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
-                        }`}>
+                <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
+                        message.type === 'success'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-red-500 text-white'
+                    }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
                         }
-                        <span>{message.text}</span>
+                        <span className="font-medium">{message.text}</span>
                     </div>
                 </div>
             )}
@@ -417,7 +422,7 @@ const EventMedicalCheckUpDetail = () => {
                 </div>
 
                 <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(12)].map((_, i) => (
                         <div
                             key={i}
                             className="absolute animate-float"
@@ -425,36 +430,48 @@ const EventMedicalCheckUpDetail = () => {
                                 left: `${Math.random() * 100}%`,
                                 top: `${Math.random() * 100}%`,
                                 animationDelay: `${i * 0.3}s`,
-                                animationDuration: '15s'
+                                animationDuration: `${15 + Math.random() * 10}s`
                             }}
                         >
-                            <Droplet className="w-8 h-8 text-white opacity-10" />
+                            <StethoscopeIcon className="w-6 h-6 text-white opacity-20" />
                         </div>
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
                     {/* Breadcrumb */}
-                    <nav className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <span>Sự kiện đã đăng ký</span>
+                    <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
+                        <button
+                            onClick={() => navigate("/event-registration")}
+                            className="hover:text-white transition-colors"
+                        >
+                            Sự kiện đã đăng ký
+                        </button>
                         <span>/</span>
-                        <span>Chi tiết đăng ký</span>
-                        <span>/</span>
-                        <span className="text-white">Kết quả khám sức khỏe</span>
-                    </nav>
-
-                    <div className="flex items-center justify-between">
                         <button
                             onClick={() => navigate(`/event-registration/${registration_id}`)}
-                            className="flex p-1 relative z-20 items-center mb-6 hover:bg-white/20 hover:text-white rounded-xl transition-all backdrop-blur-sm group"
+                            className="hover:text-white transition-colors"
                         >
-                            <div className="rotate-180 p-2 group-hover:-translate-x-1 transition-transform">
-                                <ChevronRight className="w-5 h-5" />
-                            </div>
-                            <span className='mr-1'>Chi tiết đăng ký</span>
+                            Chi tiết đăng ký
                         </button>
+                        <span>/</span>
+                        <span className="text-white font-medium">Kết quả khám sức khỏe</span>
                     </div>
-                    {/* Thêm Action Buttons */}
+
+                    <button
+                        onClick={() => navigate(`/event-registration/${registration_id}`)}
+                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                    >
+                        <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Quay lại chi tiết đăng ký</span>
+                    </button>
+
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
+                            <StethoscopeIcon className="w-8 h-8" />
+                            Kết quả khám sức khỏe
+                        </h1>
+                    </div>
                 </div>
 
                 {/* Wave Separator */}
@@ -471,33 +488,24 @@ const EventMedicalCheckUpDetail = () => {
                     {/* Left Column - Main Info */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Title Section */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6">
+                        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                                        Kết quả khám sức khỏe
-                                    </h1>
-                                    <div className="flex items-center gap-3 mb-2">
+                                    <div className="flex items-center gap-3 mb-4">
                                         <EligibilityBadge isEligible={checkup.is_eligible} />
                                     </div>
                                 </div>
-
                             </div>
+
                             <div className="flex flex-wrap gap-3 mt-2">
-                                {checkup.is_eligible && (
-                                    <>
-                                        {bloodDonation && (
-                                            <button
-                                                onClick={() => {
-                                                    navigate(`/event/${id}/registrations/${registration_id}/medical-checkup/${checkup.id}/blood-donation`)
-                                                }}
-                                                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                                            >
-                                                <FileHeart className="w-4 h-4" />
-                                                <span>Xem kết quả hiến máu</span>
-                                            </button>
-                                        )}
-                                    </>
+                                {checkup.is_eligible && bloodDonation && (
+                                    <button
+                                        onClick={() => navigate(`/event/${id}/registrations/${registration_id}/medical-checkup/${checkup.id}/blood-donation`)}
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                    >
+                                        <FileHeart className="w-4 h-4" />
+                                        Xem kết quả hiến máu
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -550,10 +558,10 @@ const EventMedicalCheckUpDetail = () => {
                             </div>
                         </InfoSection>
 
-                        <InfoSection title="Tiền sử bệnh lý" icon={Stethoscope}>
+                        <InfoSection title="Tiền sử bệnh lý" icon={StethoscopeIcon}>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <h4 className="font-medium text-gray-700 mb-3">Các yếu tố nguy cơ</h4>
+                                    <h4 className="font-semibold text-gray-700 mb-3">Các yếu tố nguy cơ</h4>
                                     <BooleanStatus
                                         label="Bệnh truyền nhiễm"
                                         value={checkup.has_infectious}
@@ -572,7 +580,7 @@ const EventMedicalCheckUpDetail = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <h4 className="font-medium text-gray-700 mb-3">Tình trạng hiện tại</h4>
+                                    <h4 className="font-semibold text-gray-700 mb-3">Tình trạng hiện tại</h4>
                                     <BooleanStatus
                                         label="Sử dụng chất kích thích"
                                         value={checkup.is_drug}
@@ -588,7 +596,7 @@ const EventMedicalCheckUpDetail = () => {
                                     {checkup.last_donation && (
                                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                                             <span className="text-sm text-gray-600">Lần hiến gần nhất</span>
-                                            <span className="text-sm font-medium text-gray-900">
+                                            <span className="text-sm font-semibold text-gray-900">
                                                 {formatDate(checkup.last_donation)}
                                             </span>
                                         </div>
@@ -598,14 +606,14 @@ const EventMedicalCheckUpDetail = () => {
                         </InfoSection>
 
                         {/* Medical Note */}
-                        {checkup.medical_note && (
+                        {(checkup.medical_note || checkup.doctor) && (
                             <MedicalNote note={checkup.medical_note} doctor={checkup.doctor} />
                         )}
                     </div>
 
                     {/* Right Column - Summary Card */}
                     <div className="space-y-6">
-                        <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-24">
+                        <div className="bg-white rounded-2xl shadow-md p-6 sticky top-24 border border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <FileText className="w-5 h-5 text-red-500" />
                                 Thông tin khám
@@ -619,13 +627,13 @@ const EventMedicalCheckUpDetail = () => {
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Bác sĩ khám</span>
-                                    <span className="font-medium text-gray-900">{checkup.doctor || 'Chưa cập nhật'}</span>
+                                    <span className="font-semibold text-gray-900">{checkup.doctor || 'Chưa cập nhật'}</span>
                                 </div>
 
                                 <div className="flex items-start justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Ngày khám</span>
                                     <div className="text-right">
-                                        <p className="font-medium text-gray-900">{formatDate(checkup.created_at)}</p>
+                                        <p className="font-semibold text-gray-900">{formatDate(checkup.created_at)}</p>
                                         <p className="text-sm text-gray-500">{formatTime(checkup.created_at)}</p>
                                     </div>
                                 </div>
@@ -634,17 +642,16 @@ const EventMedicalCheckUpDetail = () => {
                                     <div className="flex items-start justify-between pb-3 border-b border-gray-100">
                                         <span className="text-gray-600">Cập nhật</span>
                                         <div className="text-right">
-                                            <p className="font-medium text-gray-900">{formatDate(checkup.updated_at)}</p>
+                                            <p className="font-semibold text-gray-900">{formatDate(checkup.updated_at)}</p>
                                             <p className="text-sm text-gray-500">{formatTime(checkup.updated_at)}</p>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Thêm trạng thái hiến máu */}
                                 {bloodDonation && (
                                     <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                         <span className="text-gray-600">Trạng thái hiến máu</span>
-                                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-xs font-semibold">
                                             <CheckCircle2 className="w-3 h-3" />
                                             Đã hiến máu
                                         </span>
@@ -654,12 +661,13 @@ const EventMedicalCheckUpDetail = () => {
 
                             {/* Staff Info */}
                             {staff && (
-                                <div className="mt-6 pt-4">
+                                <div className="mt-6 pt-4 border-t border-gray-100">
                                     <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                        <StethoscopeIcon className="w-4 h-4 text-red-500" />
                                         Nhân viên y tế
                                     </h3>
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                                        <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 shadow-md">
                                             {staff?.account?.avatar ? (
                                                 <img
                                                     src={getImageUrl(staff.account.avatar)}
@@ -672,7 +680,7 @@ const EventMedicalCheckUpDetail = () => {
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-1 mb-1">
-                                                <span className="text-sm font-medium text-gray-900">
+                                                <span className="text-sm font-semibold text-gray-900">
                                                     {`${staff?.account?.last_name || ''} ${staff?.account?.first_name || ''}`}
                                                 </span>
                                                 {staff?.is_verified && (
@@ -685,7 +693,7 @@ const EventMedicalCheckUpDetail = () => {
                                         </div>
                                         <button
                                             onClick={() => setIsStaffDialogOpen(true)}
-                                            className="text-red-600 hover:text-red-700"
+                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </button>
@@ -693,15 +701,21 @@ const EventMedicalCheckUpDetail = () => {
                                 </div>
                             )}
 
-                            {/* Emergency Response */}
-                            {checkup.emergency_response && (
-                                <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
-                                    <p className="text-xs text-red-700 flex items-start gap-2">
-                                        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                                        <span>
-                                            <span className="font-semibold">Phản ứng khẩn cấp:</span> {checkup.emergency_response}
-                                        </span>
-                                    </p>
+                            {/* Health Tips */}
+                            {checkup.is_eligible && (
+                                <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
+                                    <div className="flex items-start gap-2">
+                                        <HeartPulse className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                        <div className="text-xs text-green-700">
+                                            <p className="font-semibold mb-1">Lưu ý trước khi hiến máu:</p>
+                                            <ul className="space-y-1 list-disc list-inside">
+                                                <li>Ăn nhẹ trước khi hiến 2-3 giờ</li>
+                                                <li>Uống nhiều nước</li>
+                                                <li>Ngủ đủ giấc trước ngày hiến</li>
+                                                <li>Không sử dụng chất kích thích</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -716,6 +730,46 @@ const EventMedicalCheckUpDetail = () => {
                 staff={staff}
             />
 
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) translateX(0px); }
+                    50% { transform: translateY(-20px) translateX(10px); }
+                }
+                
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                
+                .animate-float {
+                    animation: float 15s ease-in-out infinite;
+                }
+                
+                .animate-slideInRight {
+                    animation: slideInRight 0.3s ease-out;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.2s ease-out;
+                }
+            `}</style>
         </div>
     );
 };
