@@ -1994,7 +1994,7 @@ class MessageViewSet(viewsets.ViewSet):
         ai_response = "Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau."
 
         try:
-            callback = RAGMonitoringCallback()
+            callback = RAGMonitoringCallback(model=rag_system.OPENAI_MODEL)
             result = rag_system.qa_chain.invoke(
                 {
                     "question": request.data.get('text', ''),

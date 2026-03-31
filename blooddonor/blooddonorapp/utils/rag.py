@@ -119,7 +119,6 @@ class RAGSystem:
             combine_docs_chain_kwargs={"prompt": prompt},
             chain_type="stuff",
             verbose=False,
-            callbacks=[RAGMonitoringCallback()],
         )
 
     def query(self, question, chat_history=[]):
