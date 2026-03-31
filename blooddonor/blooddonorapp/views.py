@@ -15,18 +15,25 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 import random
 import json
+from rest_framework.parsers import MultiPartParser, FormParser
+import os
+from .utils.rag import RAGSystem
 
 from blooddonor import settings
 from .models import Account, Role, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, Friend, FriendStatus, \
     RewardCategory, Reward, RewardHistory, ResponseStatus, EmergencyResponse, EventRegistration, RegistrationStatus, \
-    MedicalCheckUp, BloodDonation
+    MedicalCheckUp, BloodDonation, ChatSession, Message, KnowledgeBase
 from .paginators import Pagination
-from .permissions import OwnerPermission, StaffPermission, OwnedStaffPermission, OwnedDonorPermission, DonorPermission
+from .permissions import OwnerPermission, StaffPermission, OwnedStaffPermission, OwnedDonorPermission, DonorPermission, \
+    AdminPermission
 from .serializers import AccountSerializer, ResetPasswordSerializer, \
     ChangePasswordSerializer, ProfileUpdateSerializer, DonorSerializer, StaffSerializer, DonationEventSerializer, \
     HospitalSerializer, EmergencyRequestSerializer, RewardCategorySerializer, RewardSerializer, \
     FriendSerializer, RecipientInformationSerializer, RewardHistorySerializer, EmergencyResponseSerializer, \
-    EventRegistrationSerializer, MedicalCheckUpSerializer, BloodDonationSerializer
+    EventRegistrationSerializer, MedicalCheckUpSerializer, BloodDonationSerializer, ChatSessionSerializer, \
+    MessageSerializer, KnowledgeBaseSerializer
+
+rag_system = RAGSystem()
 
 
 class CustomTokenView(TokenView):
@@ -1638,7 +1645,7 @@ class RewardCategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Ret
         serializer = RewardSerializer(rewards, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['get'], url_path='reward/(?P<reward_id>\d+)', detail=True)
+    @action(methods=['get'], url_path='reward/(?P<reward_id>[^/.]+)', detail=True)
     def get_reward_retrieve_by_category(self, request, pk=None, reward_id=None):
         category = self.get_object()
 
@@ -1854,3 +1861,200 @@ class EmergencyResponseViewSet(viewsets.ViewSet, generics.ListAPIView, generics.
             queryset = queryset.filter(created_at__lte=to_date)
 
         return queryset
+
+
+class ChatSessionViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, OwnerPermission]
+
+    def get_donor(self, request):
+        return Donor.objects.filter(account=request.user).first()
+
+    def get_object(self, pk, request):
+        return ChatSession.objects.filter(
+            session_code=pk,
+            donor__account=request.user
+        ).first()
+
+    def list(self, request):
+        queryset = ChatSession.objects.filter(donor__account=request.user)
+
+        paginator = Pagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request, view=self)
+
+        serializer = ChatSessionSerializer(paginated_queryset, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def create(self, request):
+        donor = self.get_donor(request)
+        if not donor:
+            return Response({"error": "Donor not found"}, status=400)
+
+        serializer = ChatSessionSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(donor=donor)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        chat_session = self.get_object(pk, request)
+
+        if not chat_session:
+            return Response({"error": "Not found"}, status=404)
+
+        serializer = ChatSessionSerializer(chat_session)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        chat_session = self.get_object(pk, request)
+
+        if not chat_session:
+            return Response({"error": "Not found"}, status=404)
+
+        serializer = ChatSessionSerializer(
+            chat_session,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=400)
+
+    def destroy(self, request, pk=None):
+        chat_session = self.get_object(pk, request)
+
+        if not chat_session:
+            return Response({"error": "Not found"}, status=404)
+
+        chat_session.delete()
+        return Response(status=204)
+
+
+class MessageViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, OwnerPermission]
+
+    def list(self, request, session_id=None):
+        try:
+            chat_session = ChatSession.objects.get(session_code=session_id, donor__account=request.user)
+        except ChatSession.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        messages = chat_session.chat_session_message.all().order_by('created_at')
+        serializer = MessageSerializer(messages, many=True)
+        return Response(serializer.data)
+
+    def create(self, request, session_id=None):
+        try:
+            chat_session = ChatSession.objects.get(session_code=session_id, donor__account=request.user)
+        except ChatSession.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        messages = chat_session.chat_session_message.all().order_by('created_at')
+        chat_history = []
+
+        human_messages = []
+        ai_messages = []
+
+        for msg in messages:
+            if msg.sender == 'human':
+                human_messages.append(msg.text)
+            elif msg.sender == 'ai':
+                ai_messages.append(msg.text)
+
+        for i in range(min(len(human_messages), len(ai_messages))):
+            chat_history.append((human_messages[i], ai_messages[i]))
+
+        # Lưu tin nhắn của người dùng
+        user_message = Message.objects.create(
+            sender='human',
+            text=request.data.get('text', ''),
+            chat_session=chat_session
+        )
+
+        # Nhận AI response từ RAG
+        ai_response = rag_system.query(
+            question=request.data.get('text', ''),
+            chat_history=chat_history
+        )
+
+        # Lưu AI response
+        ai_message = Message.objects.create(
+            sender='ai',
+            text=ai_response,
+            chat_session=chat_session
+        )
+
+        serializer = MessageSerializer([user_message, ai_message], many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class KnowledgeBaseViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, AdminPermission]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def list(self, request):
+        queryset = KnowledgeBase.objects.all()
+
+        paginator = Pagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request, view=self)
+
+        serializer = KnowledgeBaseSerializer(paginated_queryset, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        try:
+            knowledge = KnowledgeBase.objects.get(pk=pk)
+        except KnowledgeBase.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = KnowledgeBaseSerializer(knowledge)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request):
+        files = request.FILES.getlist('file')
+        if not files:
+            return Response({"error": "Không có file nào được upload."}, status=status.HTTP_400_BAD_REQUEST)
+
+        title = request.data.get('title', '').strip()
+        if not title:
+            return Response({"error": "Vui lòng nhập tiêu đề cho tài liệu."}, status=status.HTTP_400_BAD_REQUEST)
+
+        created_objects = []
+        for f in files:
+            knowledge = KnowledgeBase.objects.create(
+                title=request.data.get('title', ''),
+                description=request.data.get('description', ''),
+                file=f,
+                account=request.user
+            )
+            created_objects.append(knowledge)
+
+            file_path = os.path.join(settings.MEDIA_ROOT, knowledge.file.name)
+            rag_system.add_documents(file_path)
+
+        serializer = KnowledgeBaseSerializer(created_objects, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None):
+        try:
+            knowledge = KnowledgeBase.objects.get(pk=pk)
+        except KnowledgeBase.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        file_path = os.path.join(settings.MEDIA_ROOT, knowledge.file.name)
+
+        try:
+            rag_system.vectorstore.delete(where={"source": file_path})
+
+        except Exception as e:
+            print(f"Lỗi khi xóa khỏi vectorstore: {e}")
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        knowledge.delete()
+        return Response({"success": "File đã được xóa."}, status=status.HTTP_204_NO_CONTENT)

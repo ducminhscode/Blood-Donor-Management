@@ -17,7 +17,11 @@ router.register('reward', views.RewardViewSet, basename='reward')
 router.register('reward-history', views.RewardHistoryViewSet, basename='reward-history')
 router.register('event-registration', views.EventRegistrationViewSet, basename='event-registration')
 router.register('emergency-response', views.EmergencyResponseViewSet, basename='emergency-response')
+router.register('chat-sessions', views.ChatSessionViewSet, basename='chat-sessions')
+router.register('knowledge', views.KnowledgeBaseViewSet, basename='knowledge')
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('chat-sessions/<uuid:session_id>/messages/', views.MessageViewSet.as_view({'get': 'list', 'post': 'create'}),
+         name='session-messages'),
 ]

@@ -3,7 +3,8 @@ import os
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer, CharField, EmailField, ValidationError
 from .models import Account, Donor, Staff, DonationEvent, Hospital, EmergencyRequest, RewardCategory, Reward, \
-    RewardHistory, RecipientInformation, Friend, EmergencyResponse, EventRegistration, MedicalCheckUp, BloodDonation
+    RewardHistory, RecipientInformation, Friend, EmergencyResponse, EventRegistration, MedicalCheckUp, BloodDonation, \
+    ChatSession, Message, KnowledgeBase
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -205,3 +206,25 @@ class BloodDonationSerializer(ModelSerializer):
         model = BloodDonation
         fields = '__all__'
         read_only_fields = ['id', 'created_at', 'updated_at', 'staff', 'medical_check_up']
+
+
+class ChatSessionSerializer(ModelSerializer):
+    class Meta:
+        model = ChatSession
+        fields = ['id','session_code', 'session_name', 'created_at', 'updated_at', 'donor']
+        read_only_fields = ['session_code', 'created_at', 'donor']
+
+
+class MessageSerializer(ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['id', 'sender', 'text', 'created_at', 'chat_session', 'image_url']
+        read_only_fields = ['id', 'created_at']
+
+
+class KnowledgeBaseSerializer(ModelSerializer):
+    account=AccountSerializer(read_only=True)
+    class Meta:
+        model = KnowledgeBase
+        fields = ['id', 'title', 'description', 'file', 'account', 'created_at']
+        read_only_fields = ['id', 'account', 'created_at']
