@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from django_prometheus import exports
 
 from . import views
 
@@ -24,4 +25,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('chat-sessions/<uuid:session_id>/messages/', views.MessageViewSet.as_view({'get': 'list', 'post': 'create'}),
          name='session-messages'),
+    path("metrics/", exports.ExportToDjangoView, name="prometheus-django-metrics")
 ]

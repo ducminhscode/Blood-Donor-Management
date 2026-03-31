@@ -9,6 +9,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_fireworks import ChatFireworks
 from dotenv import load_dotenv
 
+from blooddonorapp.utils.rag_monitoring import RAGMonitoringCallback
+
 load_dotenv()
 
 
@@ -117,6 +119,7 @@ class RAGSystem:
             combine_docs_chain_kwargs={"prompt": prompt},
             chain_type="stuff",
             verbose=False,
+            callbacks=[RAGMonitoringCallback()],
         )
 
     def query(self, question, chat_history=[]):

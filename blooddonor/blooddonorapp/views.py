@@ -14,6 +14,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 import random
+from datetime import timedelta
 import json
 from rest_framework.parsers import MultiPartParser, FormParser
 import os
@@ -32,6 +33,11 @@ from .serializers import AccountSerializer, ResetPasswordSerializer, \
     FriendSerializer, RecipientInformationSerializer, RewardHistorySerializer, EmergencyResponseSerializer, \
     EventRegistrationSerializer, MedicalCheckUpSerializer, BloodDonationSerializer, ChatSessionSerializer, \
     MessageSerializer, KnowledgeBaseSerializer
+
+import logging
+from .utils.rag_monitoring import RAGMonitoringCallback
+
+logger = logging.getLogger(__name__)
 
 rag_system = RAGSystem()
 
@@ -1949,44 +1955,66 @@ class MessageViewSet(viewsets.ViewSet):
 
     def create(self, request, session_id=None):
         try:
-            chat_session = ChatSession.objects.get(session_code=session_id, donor__account=request.user)
+            chat_session = ChatSession.objects.get(
+                session_code=session_id,
+                donor__account=request.user
+            )
         except ChatSession.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        messages = chat_session.chat_session_message.all().order_by('created_at')
+        # Rate limiting
+        recent_messages = Message.objects.filter(
+            chat_session=chat_session,
+            created_at__gte=timezone.now() - timedelta(minutes=1)
+        ).count()
+
+        if recent_messages > 10:
+            return Response(
+                {"error": "Too many messages. Please wait."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+
+        # Lấy lịch sử chat
+        messages = chat_session.chat_session_message.all().order_by('-created_at')[:20]
         chat_history = []
 
-        human_messages = []
-        ai_messages = []
+        human_msgs = [m for m in messages if m.sender == 'human'][:5]
+        ai_msgs = [m for m in messages if m.sender == 'ai'][:5]
 
-        for msg in messages:
-            if msg.sender == 'human':
-                human_messages.append(msg.text)
-            elif msg.sender == 'ai':
-                ai_messages.append(msg.text)
+        for h, a in zip(reversed(human_msgs), reversed(ai_msgs)):
+            chat_history.append((h.text, a.text))
 
-        for i in range(min(len(human_messages), len(ai_messages))):
-            chat_history.append((human_messages[i], ai_messages[i]))
-
-        # Lưu tin nhắn của người dùng
+        # Tạo tin nhắn của người dùng
         user_message = Message.objects.create(
             sender='human',
             text=request.data.get('text', ''),
             chat_session=chat_session
         )
 
-        # Nhận AI response từ RAG
-        ai_response = rag_system.query(
-            question=request.data.get('text', ''),
-            chat_history=chat_history
-        )
+        ai_response = "Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau."
 
-        # Lưu AI response
+        try:
+            callback = RAGMonitoringCallback()
+            result = rag_system.qa_chain.invoke(
+                {
+                    "question": request.data.get('text', ''),
+                    "chat_history": chat_history
+                },
+                config={"callbacks": [callback]}
+            )
+            ai_response = result.get("answer", ai_response)
+
+        except Exception as e:
+            logger.error(f"RAG Error for question: {request.data.get('text', '')}", exc_info=True)
+
+        # Tạo tin nhắn trả lời từ AI
         ai_message = Message.objects.create(
             sender='ai',
             text=ai_response,
             chat_session=chat_session
         )
+
+        chat_session.save()
 
         serializer = MessageSerializer([user_message, ai_message], many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
