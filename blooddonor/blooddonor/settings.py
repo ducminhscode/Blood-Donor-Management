@@ -47,8 +47,17 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
     'debug_toolbar',
-    'django_prometheus'
+    'django_prometheus',
+    'channels',
 ]
+
+ASGI_APPLICATION = "blooddonor.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 MEDIA_URL = '/data/'
 
