@@ -362,3 +362,19 @@ class BloodDonation(BaseModel):
     staff = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='staff_blood_donation')
     medical_check_up = models.OneToOneField(MedicalCheckUp, on_delete=models.CASCADE)
+
+
+class RAGConfig(BaseModel):
+    name = models.CharField(max_length=255)
+    embedding_model = models.CharField(max_length=255)
+    llm_model = models.CharField(max_length=255)
+    chunk_size = models.IntegerField(default=1024)
+    chunk_overlap = models.IntegerField(default=128)
+    top_k = models.IntegerField(default=5)
+    version = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=False)
+    vectorstore_path = models.CharField(max_length=255)
+    notes = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - v{self.version}"

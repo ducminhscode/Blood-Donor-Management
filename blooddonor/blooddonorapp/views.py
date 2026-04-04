@@ -18,6 +18,8 @@ from datetime import timedelta
 import json
 from rest_framework.parsers import MultiPartParser, FormParser
 import os
+
+from .services.rag_config_service import get_active_rag_config
 from .utils.rag import RAGSystem
 
 from blooddonor import settings
@@ -38,9 +40,6 @@ import logging
 from .utils.rag_monitoring import RAGMonitoringCallback
 
 logger = logging.getLogger(__name__)
-
-rag_system = RAGSystem()
-
 
 class CustomTokenView(TokenView):
     def post(self, request, *args, **kwargs):
@@ -1954,6 +1953,9 @@ class MessageViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, session_id=None):
+        config = get_active_rag_config()
+        rag_system = RAGSystem(config)
+
         try:
             chat_session = ChatSession.objects.get(
                 session_code=session_id,
@@ -1994,7 +1996,7 @@ class MessageViewSet(viewsets.ViewSet):
         ai_response = "Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau."
 
         try:
-            callback = RAGMonitoringCallback(model=rag_system.OPENAI_MODEL)
+            callback = RAGMonitoringCallback(model=rag_system.OPENAI_MODEL, config=config)
             result = rag_system.qa_chain.invoke(
                 {
                     "question": request.data.get('text', ''),
@@ -2043,6 +2045,8 @@ class KnowledgeBaseViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
+        config = get_active_rag_config()
+        rag_system = RAGSystem(config)
         files = request.FILES.getlist('file')
         if not files:
             return Response({"error": "Không có file nào được upload."}, status=status.HTTP_400_BAD_REQUEST)
@@ -2072,6 +2076,9 @@ class KnowledgeBaseViewSet(viewsets.ViewSet):
             knowledge = KnowledgeBase.objects.get(pk=pk)
         except KnowledgeBase.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        config = get_active_rag_config()
+        rag_system = RAGSystem(config)
 
         file_path = os.path.join(settings.MEDIA_ROOT, knowledge.file.name)
 

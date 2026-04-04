@@ -15,12 +15,13 @@ load_dotenv()
 
 
 class RAGSystem:
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         # Khai báo biến
         self.OPENAI_API_KEY = os.getenv("TOGETHER_API_KEY")
         self.OPENAI_URL = "https://api.fireworks.ai/inference/v1/chat/completions"
         self.OPENAI_MODEL = "accounts/fireworks/models/gpt-oss-120b"
-        self.CHROMA_PATH = "vectorstore"
+        self.CHROMA_PATH = self.config.vectorstore_path
         self.DATA_PATH = "data"
 
         # Khởi tạo components
@@ -38,15 +39,15 @@ class RAGSystem:
 
     def _create_embeddings(self):
         return HuggingFaceEmbeddings(
-            model_name="BAAI/bge-small-en-v1.5",
+            model_name=self.config.embedding_model,
             model_kwargs={"device": "cpu"},
             encode_kwargs={"normalize_embeddings": True},
         )
 
     def _get_text_splitter(self):
         return RecursiveCharacterTextSplitter(
-            chunk_size=1024,
-            chunk_overlap=128,
+            chunk_size=self.config.chunk_size,
+            chunk_overlap=self.config.chunk_overlap,
             length_function=len,
             add_start_index=True,
         )
@@ -113,7 +114,7 @@ class RAGSystem:
         return ConversationalRetrievalChain.from_llm(
             llm=self.llm,
             retriever=self.vectorstore.as_retriever(
-                search_type="similarity", search_kwargs={"k": 5}
+                search_kwargs={"k": self.config.top_k}
             ),
             return_source_documents=True,
             combine_docs_chain_kwargs={"prompt": prompt},

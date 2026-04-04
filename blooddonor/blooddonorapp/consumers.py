@@ -3,11 +3,20 @@ import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 
-from blooddonorapp.models import Message, ChatSession
+from blooddonorapp.models import Message, ChatSession, RAGConfig
 from blooddonorapp.utils.rag import RAGSystem
 from blooddonorapp.utils.rag_monitoring import RAGMonitoringCallback
 
-rag_system = RAGSystem()
+def get_active_config():
+    return RAGConfig.objects.filter(is_active=True).first()
+
+RAG_CACHE = {}
+
+def get_rag_system(config):
+    key = config.version
+    if key not in RAG_CACHE:
+        RAG_CACHE[key] = RAGSystem(config)
+    return RAG_CACHE[key]
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -43,11 +52,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
             chat_session=chat_session
         )
 
+        config = await sync_to_async(get_active_config)()
+
+        if not config:
+            await self.send(json.dumps({
+                "type": "error",
+                "message": "No active RAG config"
+            }))
+            return
+
+        rag_system = await sync_to_async(get_rag_system)(config)
+
+        callback = RAGMonitoringCallback(
+            model=config.llm_model,
+            config=config
+        )
+
         full_answer = []
 
         async def send_token(token):
             full_answer.append(token)
-
             await self.send(json.dumps({
                 "type": "stream",
                 "token": token
@@ -55,8 +79,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         def stream_callback(token):
             asyncio.create_task(send_token(token))
-
-        callback = RAGMonitoringCallback(model=rag_system.OPENAI_MODEL)
 
         try:
             result = await sync_to_async(rag_system.qa_chain.invoke)(
@@ -70,7 +92,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             answer = result.get("answer", "")
 
         except Exception as e:
-            print("RAG ERROR:", e)
+            import traceback
+            traceback.print_exc()
             answer = "Xin lỗi, hệ thống đang gặp sự cố."
 
         await sync_to_async(Message.objects.create)(

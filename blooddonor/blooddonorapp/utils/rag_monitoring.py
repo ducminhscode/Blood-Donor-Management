@@ -1,7 +1,7 @@
 import time
 import logging
 from langchain_core.callbacks import BaseCallbackHandler
-from openai import models
+from blooddonorapp.utils.mlflow_logger import MLflowLogger
 
 from blooddonorapp.utils.metrics import (
     RAG_QUERY_TOTAL,
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class RAGMonitoringCallback(BaseCallbackHandler):
-    def __init__(self, model="unknown"):
+    def __init__(self, model="unknown", config=None):
         self.start_time = None
         self.retrieval_start_time = None
         self.llm_start_time = None
@@ -30,6 +30,9 @@ class RAGMonitoringCallback(BaseCallbackHandler):
 
         self.model = model
         self.phase = "unknown"
+        self.config = config
+        self.mlflow = MLflowLogger(config) if config else None
+        self.mlflow_run_started = False
 
     def on_chain_start(self, serialized, inputs, **kwargs):
         self.start_time = time.time()
@@ -40,6 +43,7 @@ class RAGMonitoringCallback(BaseCallbackHandler):
         if "context" in inputs:
             self.phase = "qa"
             context = inputs.get("context", "")
+            context_len = 0
             if isinstance(context, str):
                 context_len = len(context)
                 RAG_CONTEXT_LENGTH.observe(context_len)
@@ -47,6 +51,10 @@ class RAGMonitoringCallback(BaseCallbackHandler):
 
         else:
             self.phase = "condense"
+
+        if self.mlflow and not self.mlflow_run_started:
+            self.mlflow.start_run(self.current_query)
+            self.mlflow_run_started = True
 
     def on_retriever_start(self, serialized, query, **kwargs):
         self.retrieval_start_time = time.time()
@@ -56,10 +64,16 @@ class RAGMonitoringCallback(BaseCallbackHandler):
         self.retrieved_documents = documents
         doc_count = len(documents)
         RAG_RETRIEVAL_DOC_COUNT.observe(doc_count)
+
         if doc_count == 0:
             RAG_EMPTY_RETRIEVAL.inc()
+
         RAG_RETRIEVAL_HAS_DOC.labels(
             has_doc='Đã tìm thấy document' if doc_count > 0 else 'Không tìm thấy document').inc()
+
+        if self.mlflow:
+            self.mlflow.log_retrieval(doc_count, self.retrieval_duration)
+
         logger.info(f"[Retrieval] Documents: {doc_count} | "
                     f"Duration: {self.retrieval_duration:.3f}s | "
                     f"Status: {'FOUND' if doc_count > 0 else 'EMPTY'}")
@@ -70,8 +84,8 @@ class RAGMonitoringCallback(BaseCallbackHandler):
     def on_llm_end(self, response, **kwargs):
         llm_duration = time.time() - self.llm_start_time
         total_duration = time.time() - self.start_time
-
         input_tokens = output_tokens = 0
+
         try:
             if hasattr(response, 'usage_metadata') and response.usage_metadata:
                 usage = response.usage_metadata
@@ -103,6 +117,11 @@ class RAGMonitoringCallback(BaseCallbackHandler):
         RAG_TOKEN_USAGE.labels('output', self.phase).inc(output_tokens)
         RAG_REQUEST_IN_PROGRESS.dec()
 
+        if self.mlflow and self.mlflow_run_started:
+            self.mlflow.log_llm(input_tokens, output_tokens, llm_duration)
+            self.mlflow.end_run(total_duration, status="success")
+            self.mlflow_run_started = False
+
     def on_chain_error(self, error, **kwargs):
         total_duration = time.time() - (self.start_time or time.time())
         logger.error(f"[RAG] Query lỗi: {error}", exc_info=True)
@@ -113,6 +132,10 @@ class RAGMonitoringCallback(BaseCallbackHandler):
         ).inc()
         RAG_QUERY_LATENCY.labels(self.phase).observe(total_duration)
         RAG_REQUEST_IN_PROGRESS.dec()
+
+        if self.mlflow and self.mlflow_run_started:
+            self.mlflow.end_run(total_duration, status="failed")
+            self.mlflow_run_started = False
 
     def on_retriever_error(self, error, **kwargs):
         logger.error(f"[Retrieval] Lỗi: {error}")
