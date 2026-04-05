@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class RAGMonitoringCallback(BaseCallbackHandler):
-    def __init__(self, model="unknown", config=None):
+    def __init__(self, model="unknown", config=None, session_id=None, chat_history=None):
         self.start_time = None
         self.retrieval_start_time = None
         self.llm_start_time = None
@@ -33,6 +33,8 @@ class RAGMonitoringCallback(BaseCallbackHandler):
         self.config = config
         self.mlflow = MLflowLogger(config) if config else None
         self.mlflow_run_started = False
+        self.session_id = session_id
+        self.chat_history = chat_history or []
 
     def on_chain_start(self, serialized, inputs, **kwargs):
         self.start_time = time.time()
@@ -53,7 +55,7 @@ class RAGMonitoringCallback(BaseCallbackHandler):
             self.phase = "condense"
 
         if self.mlflow and not self.mlflow_run_started:
-            self.mlflow.start_run(self.current_query)
+            self.mlflow.start_run(self.current_query, session_id=self.session_id, chat_history=self.chat_history)
             self.mlflow_run_started = True
 
     def on_retriever_start(self, serialized, query, **kwargs):

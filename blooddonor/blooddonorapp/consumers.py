@@ -7,10 +7,13 @@ from blooddonorapp.models import Message, ChatSession, RAGConfig
 from blooddonorapp.utils.rag import RAGSystem
 from blooddonorapp.utils.rag_monitoring import RAGMonitoringCallback
 
+
 def get_active_config():
     return RAGConfig.objects.filter(is_active=True).first()
 
+
 RAG_CACHE = {}
+
 
 def get_rag_system(config):
     key = config.version
@@ -61,11 +64,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
             return
 
+        messages = await sync_to_async(list)(Message.objects.filter(chat_session=chat_session).order_by("-created_at"))
+        messages = messages[1:]
+        messages = messages[:10]
+        messages.reverse()
+
+        chat_history = []
+        for i in range(0, len(messages) - 1, 2):
+            if messages[i].sender == "human" and messages[i + 1].sender == "ai":
+                chat_history.append((messages[i].text, messages[i + 1].text))
+
         rag_system = await sync_to_async(get_rag_system)(config)
 
         callback = RAGMonitoringCallback(
             model=config.llm_model,
-            config=config
+            config=config,
+            session_id=self.session_id,
+            chat_history=chat_history
         )
 
         full_answer = []
@@ -84,7 +99,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             result = await sync_to_async(rag_system.qa_chain.invoke)(
                 {
                     "question": question,
-                    "chat_history": []
+                    "chat_history": chat_history
                 },
                 config={"callbacks": [callback]}
             )

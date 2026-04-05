@@ -11,10 +11,21 @@ class MLflowLogger:
         mlflow.set_experiment("RAG Experiments")
         mlflow.langchain.autolog()
 
-    def start_run(self, query):
+    def start_run(self, query, session_id=None, chat_history=None):
         if mlflow.active_run():
             mlflow.end_run()
         self.run = mlflow.start_run()
+
+        if session_id:
+            session_id = str(session_id)
+            mlflow.log_param("session_id", session_id)
+            mlflow.set_tag("session_id", session_id)
+
+        if chat_history:
+            mlflow.log_dict(
+                [{"human": h, "ai": a} for h, a in chat_history],
+                "chat_history.json"
+            )
 
         mlflow.log_param("embedding_model", self.config.embedding_model)
         mlflow.log_param("llm_model", self.config.llm_model)
