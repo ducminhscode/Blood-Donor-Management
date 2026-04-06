@@ -1,1 +1,154 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --app-bg: #fff7f7;
+  --app-surface: rgba(255, 255, 255, 0.92);
+  --app-surface-solid: #ffffff;
+  --app-border: rgba(226, 232, 240, 0.9);
+  --app-text: #111827;
+  --app-text-muted: #4b5563;
+  --app-shadow: 0 20px 45px rgba(148, 27, 46, 0.12);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top, rgba(239, 68, 68, 0.12), transparent 32%),
+    linear-gradient(180deg, #fff8f8 0%, #ffffff 55%, #fff3f3 100%);
+  color: var(--app-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg: #09111f;
+  --app-surface: rgba(15, 23, 42, 0.84);
+  --app-surface-solid: #0f172a;
+  --app-border: rgba(71, 85, 105, 0.55);
+  --app-text: #e5eefb;
+  --app-text-muted: #cbd5e1;
+  --app-shadow: 0 24px 60px rgba(2, 6, 23, 0.45);
+}
+
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at top, rgba(239, 68, 68, 0.18), transparent 24%),
+    linear-gradient(180deg, #08101d 0%, #0f172a 50%, #172033 100%);
+}
+
+.dark-theme-surface {
+  background: var(--app-surface);
+  color: var(--app-text);
+  border-color: var(--app-border);
+  box-shadow: var(--app-shadow);
+}
+
+[data-theme="dark"] .min-h-screen,
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-white\/95,
+[data-theme="dark"] .bg-white\/20,
+[data-theme="dark"] .bg-gray-50,
+[data-theme="dark"] .bg-gray-100,
+[data-theme="dark"] .from-white,
+[data-theme="dark"] .to-white,
+[data-theme="dark"] .from-gray-50,
+[data-theme="dark"] .to-gray-100,
+[data-theme="dark"] .to-white\/95 {
+  background-color: var(--app-surface-solid) !important;
+}
+
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-white\/95,
+[data-theme="dark"] .bg-gray-50,
+[data-theme="dark"] .bg-gray-100,
+[data-theme="dark"] .rounded-2xl,
+[data-theme="dark"] .rounded-3xl,
+[data-theme="dark"] .rounded-xl {
+  border-color: var(--app-border);
+}
+
+[data-theme="dark"] .shadow-lg,
+[data-theme="dark"] .shadow-xl,
+[data-theme="dark"] .shadow-2xl,
+[data-theme="dark"] .shadow-md,
+[data-theme="dark"] .shadow-sm {
+  box-shadow: var(--app-shadow) !important;
+}
+
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800,
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600,
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-black {
+  color: var(--app-text) !important;
+}
+
+[data-theme="dark"] .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .border-gray-50,
+[data-theme="dark"] .border-gray-100,
+[data-theme="dark"] .border-gray-200,
+[data-theme="dark"] .border-gray-300,
+[data-theme="dark"] .border-gray-700,
+[data-theme="dark"] .border-gray-800 {
+  border-color: var(--app-border) !important;
+}
+
+[data-theme="dark"] .hover\:bg-gray-50:hover,
+[data-theme="dark"] .hover\:bg-gray-100:hover,
+[data-theme="dark"] .hover\:bg-gray-200:hover,
+[data-theme="dark"] .hover\:bg-red-50:hover,
+[data-theme="dark"] .hover\:bg-red-100:hover {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] nav,
+[data-theme="dark"] footer,
+[data-theme="dark"] section,
+[data-theme="dark"] main,
+[data-theme="dark"] aside {
+  color: var(--app-text);
+}
+
+[data-theme="dark"] .bg-gradient-to-b.from-red-50,
+[data-theme="dark"] .bg-gradient-to-br.from-gray-50,
+[data-theme="dark"] .bg-gradient-to-r.from-gray-50,
+[data-theme="dark"] .bg-gradient-to-r.from-red-50,
+[data-theme="dark"] .bg-gradient-to-b.from-gray-50 {
+  background-image: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88)) !important;
+}

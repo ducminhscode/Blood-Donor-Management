@@ -1,7 +1,7 @@
 import axios from "axios";
 import cookie from 'react-cookies';
 
-const BASE_URL = 'http://127.0.0.1:8000/';
+export const BASE_URL = 'http://127.0.0.1:8000/';
 
 export const endpoints = {
     'login': '/o/token/',
@@ -57,6 +57,10 @@ export const endpoints = {
     'emergency_responses_detail': '/emergency-response/${id}/',
     'emergency_medical_checkup': '/emergency-request/${id}/responses/${response_id}/medical-checkup/',
     'emergency_blood_donation': '/emergency-request/${id}/responses/${response_id}/medical-checkup/${medical_check_up_id}/blood-donation/',
+    'chat_sessions': '/chat-sessions/',
+    'chat_session_detail': '/chat-sessions/${session_id}/',
+    'chat_session_messages': '/chat-sessions/${session_id}/messages/',
+    'chat_socket': '/ws/chat/${session_id}/',
 }
 
 export const authApis = () => {

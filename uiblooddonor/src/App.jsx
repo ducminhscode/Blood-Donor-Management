@@ -42,10 +42,29 @@ import StaffEventBloodDonationDetail from "./components/DonationEvent/StaffEvent
 import StaffEmergencyMedicalCheckUpDetail from "./components/DonationEvent/StaffEmergencyMedicalCheckUpDetail";
 import StaffEmergencyBloodDonationDetail from "./components/DonationEvent/StaffEmergencyBloodDonationDetail";
 import ChatBox from "./components/User/ChatBox/ChatBox";
+import { Moon, Sun } from "lucide-react";
+
+const THEME_STORAGE_KEY = "blood-donor-theme";
+
+const getInitialTheme = () => {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === "light" || savedTheme === "dark") {
+    return savedTheme;
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+};
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
   const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState(getInitialTheme);
 
   useEffect(() => {
     const token = cookie.load("access_token");
@@ -67,6 +86,16 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((currentTheme) => currentTheme === "dark" ? "light" : "dark");
+  };
+
   if (loading) {
     return <div></div>;
   }
@@ -75,6 +104,25 @@ function App() {
     <UserContexts.Provider value={user}>
       <UserDispatchContext.Provider value={dispatch}>
         <BrowserRouter>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="fixed bottom-6 left-6 z-[9999] inline-flex items-center gap-3 rounded-full border border-white/40 bg-white/85 px-4 py-3 text-sm font-semibold text-gray-800 shadow-xl backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark-theme-surface"
+            aria-label={theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
+            title={theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
+          >
+            {theme === "dark" ? (
+              <>
+                <Sun className="h-5 w-5 text-amber-400" />
+                <span>Sáng</span>
+              </>
+            ) : (
+              <>
+                <Moon className="h-5 w-5 text-slate-700" />
+                <span>Tối</span>
+              </>
+            )}
+          </button>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -133,3 +181,4 @@ function App() {
 }
 
 export default App;
+
