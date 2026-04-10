@@ -1,0 +1,22 @@
+[
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u O c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Ch\u00e0o b\u1ea1n, th\u00f4ng tin chi ti\u1ebft v\u1ec1 nh\u00f3m m\u00e1u O c\u00f3 th\u1ec3 hi\u1ebfn cho nh\u1eefng nh\u00f3m m\u00e1u n\u00e0o kh\u00f4ng c\u00f3 trong ng\u1eef c\u1ea3nh hi\u1ec7n t\u1ea1i. \u0110\u1ec3 \u0111\u1ea3m b\u1ea3o an to\u00e0n v\u00e0 ch\u00ednh x\u00e1c, b\u1ea1n n\u00ean tham kh\u1ea3o \u00fd ki\u1ebfn c\u1ee7a b\u00e1c s\u0129 ho\u1eb7c chuy\u00ean gia y t\u1ebf c\u00f3 chuy\u00ean m\u00f4n v\u1ec1 hi\u1ebfn m\u00e1u. H\u1ecd s\u1ebd cung c\u1ea5p h\u01b0\u1edbng d\u1eabn ph\u00f9 h\u1ee3p d\u1ef1a tr\u00ean t\u00ecnh tr\u1ea1ng s\u1ee9c kh\u1ecfe v\u00e0 c\u00e1c quy \u0111\u1ecbnh \u0111\u1ecba ph\u01b0\u01a1ng. N\u1ebfu c\u1ea7n, h\u00e3y li\u00ean h\u1ec7 v\u1edbi trung t\u00e2m hi\u1ebfn m\u00e1u g\u1ea7n nh\u1ea5t \u0111\u1ec3 nh\u1eadn t\u01b0 v\u1ea5n c\u1ee5 th\u1ec3."
+  },
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u O c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Nh\u00f3m m\u00e1u O (h\u1ed3ng c\u1ea7u) l\u00e0 donor to\u00e0n c\u1ea7u, c\u00f3 th\u1ec3 cho c\u00e1c nh\u00f3m m\u00e1u A, B, AB v\u00e0 O. Tuy nhi\u00ean, \u0111\u1ec3 ch\u1eafc ch\u1eafn v\u1ec1 t\u00ecnh tr\u1ea1ng s\u1ee9c kh\u1ecfe v\u00e0 c\u00e1c y\u1ebfu t\u1ed1 kh\u00e1c, b\u1ea1n n\u00ean tham kh\u1ea3o \u00fd ki\u1ebfn b\u00e1c s\u0129 ho\u1eb7c nh\u00e2n vi\u00ean y t\u1ebf tr\u01b0\u1edbc khi hi\u1ebfn."
+  },
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u AB c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Nh\u00f3m m\u00e1u AB khi cho m\u00e1u \u0111\u1ecf ch\u1ec9 c\u00f3 th\u1ec3 hi\u1ebfn cho ng\u01b0\u1eddi c\u00f9ng nh\u00f3m AB. Tuy nhi\u00ean, huy\u1ebft t\u01b0\u01a1ng (plasma) c\u1ee7a ng\u01b0\u1eddi nh\u00f3m AB \u0111\u01b0\u1ee3c coi l\u00e0 \u201c\u0111\u1ea1i t\u1ecbch\u201d v\u00e0 c\u00f3 th\u1ec3 d\u00f9ng cho t\u1ea5t c\u1ea3 c\u00e1c nh\u00f3m m\u00e1u (A, B, AB v\u00e0 O). Do v\u1eady, n\u1ebfu b\u1ea1n mu\u1ed1n hi\u1ebfn m\u00e1u to\u00e0n ph\u1ea7n, b\u1ea1n s\u1ebd ch\u1ec9 ph\u00f9 h\u1ee3p cho ng\u01b0\u1eddi nh\u1eadn c\u00f9ng nh\u00f3m AB. C\u0169ng n\u00ean tham kh\u1ea3o nh\u00e2n vi\u00ean y t\u1ebf \u0111\u1ec3 x\u00e1c nh\u1eadn \u0111\u1ee7 \u0111i\u1ec1u ki\u1ec7n tr\u01b0\u1edbc khi hi\u1ebfn."
+  },
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u B c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Nh\u00f3m m\u00e1u B (h\u1ed3ng c\u1ea7u) c\u00f3 th\u1ec3 hi\u1ebfn cho nh\u1eefng ng\u01b0\u1eddi c\u00f3 nh\u00f3m m\u00e1u B v\u00e0 AB. N\u1ebfu x\u00e9t \u0111\u1ebfn huy\u1ebft t\u01b0\u01a1ng, huy\u1ebft t\u01b0\u01a1ng t\u1eeb ng\u01b0\u1eddi nh\u00f3m B c\u00f3 th\u1ec3 d\u00f9ng cho ng\u01b0\u1eddi nh\u00f3m O v\u00e0 B. \u0110\u1ec3 \u0111\u1ea3m b\u1ea3o an to\u00e0n, b\u1ea1n n\u00ean tham kh\u1ea3o nh\u00e2n vi\u00ean y t\u1ebf tr\u01b0\u1edbc khi hi\u1ebfn."
+  },
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u B c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Nh\u00f3m m\u00e1u B (h\u1ed3ng c\u1ea7u) c\u00f3 th\u1ec3 cho ng\u01b0\u1eddi c\u00f3 nh\u00f3m m\u00e1u B v\u00e0 AB. N\u1ebfu x\u00e9t \u0111\u1ebfn huy\u1ebft t\u01b0\u01a1ng, huy\u1ebft t\u01b0\u01a1ng c\u1ee7a ng\u01b0\u1eddi nh\u00f3m B c\u00f3 th\u1ec3 d\u00f9ng cho ng\u01b0\u1eddi nh\u00f3m O v\u00e0 B. N\u1ebfu c\u00f3 b\u1ea5t k\u1ef3 th\u1eafc m\u1eafc n\u00e0o, b\u1ea1n n\u00ean tham kh\u1ea3o \u00fd ki\u1ebfn b\u00e1c s\u0129 ho\u1eb7c nh\u00e2n vi\u00ean y t\u1ebf."
+  }
+]

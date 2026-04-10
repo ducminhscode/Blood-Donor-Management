@@ -318,7 +318,30 @@ const FooterChatbot = () => {
       const response = await authApis().get(messagesUrl);
 
       if (activeSocketSessionRef.current === targetSessionCode) {
-        setMessages((response.data || []).map(mapMessage));
+        const nextMessages = (response.data || []).map(mapMessage);
+
+        setMessages((prev) => {
+          const pendingAiMessageId = pendingBySessionRef.current[targetSessionCode];
+          const pendingAiMessage = prev.find((item) => item.id === pendingAiMessageId);
+
+          if (!pendingAiMessageId || !pendingAiMessage) {
+            return nextMessages;
+          }
+
+          const alreadySyncedPending = nextMessages.some((item) => item.id === pendingAiMessageId);
+          if (alreadySyncedPending) {
+            return nextMessages.map((item) =>
+              item.id === pendingAiMessageId ? { ...item, isStreaming: true } : item
+            );
+          }
+
+          const lastSyncedMessage = nextMessages[nextMessages.length - 1];
+          if (lastSyncedMessage?.sender === "ai") {
+            return nextMessages;
+          }
+
+          return [...nextMessages, pendingAiMessage];
+        });
       }
 
       if (reconnect) {
@@ -818,6 +841,7 @@ const FooterChatbot = () => {
 };
 
 const Footer = () => {
+  const user = useContext(UserContexts);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -856,7 +880,7 @@ const Footer = () => {
         ></div>
       </div>
 
-      <FooterChatbot />
+      {user?.role === 1 && <FooterChatbot />}
 
       <button
         onClick={scrollToTop}
