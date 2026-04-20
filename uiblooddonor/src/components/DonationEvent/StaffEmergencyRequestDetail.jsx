@@ -1,20 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from "react-router-dom";
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Search, Filter,
-    AlertCircle, ChevronRight, X, Sparkles, Users, Activity,
-    Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle,
-    Clock as ClockIcon, UserCheck, UserX, Loader2,
-    CalendarCheck, User, Mail, Phone, IdCard, Briefcase,
-    Building, Calendar as CalendarIcon, UserPlus, Eye,
-    ChevronLeft, RefreshCw, Info, FileText,
-    NotepadText, InfoIcon, VenusAndMars, Edit, Trash2,
-    Save, Upload, Image as ImageIcon, Ambulance, Hospital,
-    Syringe, AlertOctagon, HeartHandshake, Timer,
-    CheckCircle2, AlertTriangle, ExternalLink, Send,
-    Grid, List, Filter as FilterIcon, TrendingUp,
-    Stethoscope, BadgeCheck, Shield
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, User, Mail, Phone, IdCard, Briefcase, Building, Calendar as CalendarIcon, UserPlus, Eye, ChevronLeft, RefreshCw, Info, FileText, NotepadText, InfoIcon, VenusAndMars, Edit, Trash2, Save, Upload, Image as ImageIcon, Ambulance, Hospital, Syringe, AlertOctagon, HeartHandshake, Timer, CheckCircle2, AlertTriangle, ExternalLink, Send, Grid, List, Filter as FilterIcon, TrendingUp, Stethoscope, BadgeCheck, Shield } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -943,22 +929,20 @@ const StaffEmergencyRequestDetail = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'grid'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng lưới"
                                 >
                                     <Grid className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'list'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng danh sách"
                                 >
                                     <List className="w-5 h-5" />
@@ -1038,11 +1022,10 @@ const StaffEmergencyRequestDetail = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'grid'
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             <Grid className="w-4 h-4" />
                                             <span>Dạng lưới</span>
@@ -1052,11 +1035,10 @@ const StaffEmergencyRequestDetail = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'list'
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             <List className="w-4 h-4" />
                                             <span>Dạng danh sách</span>
@@ -1232,13 +1214,12 @@ const StaffEmergencyRequestDetail = () => {
 
                                                 {/* Status Badge */}
                                                 <div className="absolute top-4 left-4">
-                                                    <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold shadow-md ${
-                                                        donorInfo.statusResponse === 1
+                                                    <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold shadow-md ${donorInfo.statusResponse === 1
                                                             ? 'bg-green-500 text-white'
                                                             : donorInfo.statusResponse === 2
                                                                 ? 'bg-red-500 text-white'
                                                                 : 'bg-gray-500 text-white'
-                                                    }`}>
+                                                        }`}>
                                                         {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
                                                             donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
                                                     </span>
@@ -1326,13 +1307,12 @@ const StaffEmergencyRequestDetail = () => {
                                                             <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
                                                                 {donorInfo.fullName}
                                                             </h3>
-                                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                                donorInfo.statusResponse === 1
+                                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${donorInfo.statusResponse === 1
                                                                     ? 'bg-green-100 text-green-700'
                                                                     : donorInfo.statusResponse === 2
                                                                         ? 'bg-red-100 text-red-700'
                                                                         : 'bg-gray-100 text-gray-700'
-                                                            }`}>
+                                                                }`}>
                                                                 {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
                                                                     donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
                                                             </span>

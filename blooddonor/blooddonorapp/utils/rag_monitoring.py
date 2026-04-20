@@ -2,6 +2,7 @@ import time
 import logging
 from langchain_core.callbacks import BaseCallbackHandler
 from blooddonorapp.utils.mlflow_logger import MLflowLogger
+from blooddonorapp.utils.ragas_metrics import RAGASMetrics
 
 from blooddonorapp.utils.metrics import (
     RAG_QUERY_TOTAL,
@@ -27,6 +28,7 @@ class RAGMonitoringCallback(BaseCallbackHandler):
         self.retrieved_documents = []
         self.current_query = ""
         self.retrieval_duration = 0.0
+        self.generated_answer = ""
 
         self.model = model
         self.phase = "unknown"
@@ -35,6 +37,8 @@ class RAGMonitoringCallback(BaseCallbackHandler):
         self.mlflow_run_started = False
         self.session_id = session_id
         self.chat_history = chat_history or []
+
+        self.ragas_metrics = RAGASMetrics()
 
     def on_chain_start(self, serialized, inputs, **kwargs):
         self.start_time = time.time()
@@ -85,8 +89,20 @@ class RAGMonitoringCallback(BaseCallbackHandler):
 
     def on_llm_end(self, response, **kwargs):
         llm_duration = time.time() - self.llm_start_time
-        total_duration = time.time() - self.start_time
         input_tokens = output_tokens = 0
+
+        try:
+            if hasattr(response, 'content'):
+                self.generated_answer = response.content
+                logger.debug(f"[LLM] Answer from content: {self.generated_answer[:100]}...")
+            elif hasattr(response, 'text'):
+                self.generated_answer = response.text
+                logger.debug(f"[LLM] Answer from text: {self.generated_answer[:100]}...")
+            elif isinstance(response, str):
+                self.generated_answer = response
+                logger.debug(f"[LLM] Answer from string: {self.generated_answer[:100]}...")
+        except Exception as e:
+            logger.warning(f"Could not extract answer from LLM response: {e}")
 
         try:
             if hasattr(response, 'usage_metadata') and response.usage_metadata:
@@ -102,8 +118,29 @@ class RAGMonitoringCallback(BaseCallbackHandler):
             logger.warning(f"Không lấy được token usage: {e}")
 
         logger.info(
-            f"[RAG] Hoàn thành | Total process query: {total_duration:.2f}s | Retrieval time: {self.retrieval_duration:.3f}s | "
-            f"Call LLM: {llm_duration:.2f}s | Tokens Usage: {input_tokens} in / {output_tokens} out")
+            f"[RAG] Hoàn thành | Retrieval time: {self.retrieval_duration:.3f}s | "f"Call LLM: {llm_duration:.2f}s | Tokens Usage: {input_tokens} in / {output_tokens} out")
+
+        RAG_QUERY_LATENCY.labels(self.phase).observe(llm_duration)
+        RAG_LLM_LATENCY.labels(self.phase).observe(llm_duration)
+
+        RAG_TOKEN_USAGE.labels('input', self.phase).inc(input_tokens)
+        RAG_TOKEN_USAGE.labels('output', self.phase).inc(output_tokens)
+
+        if self.mlflow and self.mlflow_run_started:
+            self.mlflow.log_llm(input_tokens, output_tokens, llm_duration)
+
+    def on_chain_end(self, outputs, **kwargs):
+        total_duration = time.time() - self.start_time
+
+        try:
+            if isinstance(outputs, dict):
+                answer = outputs.get('output') or outputs.get('text') or outputs.get('answer') or outputs.get('result')
+                if answer:
+                    self.generated_answer = str(answer)
+            elif isinstance(outputs, str):
+                self.generated_answer = outputs
+        except Exception as e:
+            logger.warning(f"Could not extract answer from chain output: {e}")
 
         RAG_QUERY_TOTAL.labels(
             status='success',
@@ -111,16 +148,29 @@ class RAGMonitoringCallback(BaseCallbackHandler):
             model=self.model
         ).inc()
 
-        RAG_QUERY_LATENCY.labels(self.phase).observe(total_duration)
         RAG_RETRIEVAL_LATENCY.observe(self.retrieval_duration)
-        RAG_LLM_LATENCY.labels(self.phase).observe(llm_duration)
-
-        RAG_TOKEN_USAGE.labels('input', self.phase).inc(input_tokens)
-        RAG_TOKEN_USAGE.labels('output', self.phase).inc(output_tokens)
         RAG_REQUEST_IN_PROGRESS.dec()
 
+        try:
+            if self.generated_answer and self.retrieved_documents:
+                logger.info("[RAGAS] Calculating metrics...")
+                metrics = self.ragas_metrics.get_all_metrics(
+                    query=self.current_query,
+                    answer=self.generated_answer,
+                    retrieved_docs=self.retrieved_documents
+                )
+
+                if self.mlflow and self.mlflow_run_started:
+                    self.mlflow.log_evaluation_metrics(metrics)
+                    logger.info("[RAGAS] Metrics logged successfully")
+            else:
+                logger.warning(
+                    f"[RAGAS] Cannot calculate metrics - Answer: {bool(self.generated_answer)}, Docs: {len(self.retrieved_documents)}")
+        except Exception as e:
+            logger.error(f"Error calculating RAGAS metrics: {e}", exc_info=True)
+
+        # End MLflow run
         if self.mlflow and self.mlflow_run_started:
-            self.mlflow.log_llm(input_tokens, output_tokens, llm_duration)
             self.mlflow.end_run(total_duration, status="success")
             self.mlflow_run_started = False
 

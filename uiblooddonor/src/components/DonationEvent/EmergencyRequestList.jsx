@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Search, Filter,
-    AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell,
-    HeartPlus, HeartPulse, Ambulance, Phone, AlertTriangle, Hospital, Syringe,
-    Grid, List, Send, Eye, CheckCircle2, Loader2, RefreshCw
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPlus, HeartPulse, Ambulance, Phone, AlertTriangle, Hospital, Syringe, Grid, List, Send, Eye, CheckCircle2, Loader2, RefreshCw } from 'lucide-react';
 import APIs, { endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -263,8 +258,8 @@ const EmergencyRequestList = () => {
                                         <p className="text-white/80 text-sm">Xem các yêu cầu cấp cứu đã tạo</p>
                                     )}
                                 </div>
-                                <button 
-                                    onClick={handleFeatureCard} 
+                                <button
+                                    onClick={handleFeatureCard}
                                     className="w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
                                 >
                                     {!user ? 'Đăng nhập để đăng ký' : (user.role === 2 ? 'Quản lý yêu cầu' : 'Yêu cầu đã phản hồi')}
@@ -318,22 +313,20 @@ const EmergencyRequestList = () => {
                             <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'grid'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng lưới"
                                 >
                                     <Grid className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'list'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng danh sách"
                                 >
                                     <List className="w-5 h-5" />
@@ -542,11 +535,10 @@ const EmergencyRequestList = () => {
 
                                             <Link
                                                 to={`/emergency-request/${request.id}`}
-                                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 ${
-                                                    request.is_expire
+                                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 ${request.is_expire
                                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                         : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg'
-                                                }`}
+                                                    }`}
                                                 onClick={(e) => request.is_expire && e.preventDefault()}
                                             >
                                                 <span className="font-medium">
@@ -627,11 +619,10 @@ const EmergencyRequestList = () => {
 
                                                 <Link
                                                     to={`/emergency-request/${request.id}`}
-                                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
-                                                        request.is_expire
+                                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${request.is_expire
                                                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                             : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md'
-                                                    }`}
+                                                        }`}
                                                     onClick={(e) => request.is_expire && e.preventDefault()}
                                                 >
                                                     <span className="font-medium">

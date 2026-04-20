@@ -1,12 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Search, Filter,
-    AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell,
-    HeartPlus, HeartPulse, Plus, Save, Loader2, Upload, Image as ImageIcon,
-    UserCog, Settings, Edit, Trash2, ChevronDown, Send, Grid, List,
-    TrendingUp, Award as AwardIcon, Shield, CheckCircle2, Eye, EyeOff
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPlus, HeartPulse, Plus, Save, Loader2, Upload, Image as ImageIcon, UserCog, Settings, Edit, Trash2, ChevronDown, Send, Grid, List, TrendingUp, Award as AwardIcon, Shield, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import APIs, { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -720,8 +714,8 @@ const StaffEventList = () => {
                                     <h3 className="text-lg font-bold mb-1">Tạo sự kiện mới</h3>
                                     <p className="text-white/80 text-sm">Tạo sự kiện hiến máu để kêu gọi cộng đồng</p>
                                 </div>
-                                <button 
-                                    onClick={handleCreateEvent} 
+                                <button
+                                    onClick={handleCreateEvent}
                                     className="w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
                                 >
                                     Tạo sự kiện hiến máu
@@ -788,7 +782,7 @@ const StaffEventList = () => {
                                     <span className="text-gray-700 font-medium">{getStatusLabel()}</span>
                                     <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
                                 </button>
-                                
+
                                 {showStatusDropdown && (
                                     <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
                                         {[
@@ -819,7 +813,7 @@ const StaffEventList = () => {
                                     <span className="text-gray-700 font-medium truncate">{getProvinceLabel()}</span>
                                     <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform flex-shrink-0 ${showProvinceDropdown ? 'rotate-180' : ''}`} />
                                 </button>
-                                
+
                                 {showProvinceDropdown && (
                                     <div className="absolute top-full left-0 mt-2 w-[280px] max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
                                         <button
@@ -854,7 +848,7 @@ const StaffEventList = () => {
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng lưới"
                                 >
                                     <Grid className="w-5 h-5" />
@@ -864,7 +858,7 @@ const StaffEventList = () => {
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng danh sách"
                                 >
                                     <List className="w-5 h-5" />
@@ -898,11 +892,10 @@ const StaffEventList = () => {
                                                     handleFilterTypeChange(option.value);
                                                     setShowFilters(false);
                                                 }}
-                                                className={`px-4 py-2 rounded-lg border transition-all ${
-                                                    filterType === option.value
+                                                className={`px-4 py-2 rounded-lg border transition-all ${filterType === option.value
                                                         ? 'border-red-500 bg-red-50 text-red-600'
                                                         : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
+                                                    }`}
                                             >
                                                 {option.label}
                                             </button>
@@ -911,12 +904,12 @@ const StaffEventList = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Tỉnh/Thành phố</label>
-                                    <select 
-                                        value={selectedProvince} 
-                                        onChange={(e) => { 
-                                            handleProvinceChange(e.target.value); 
-                                            setShowFilters(false); 
-                                        }} 
+                                    <select
+                                        value={selectedProvince}
+                                        onChange={(e) => {
+                                            handleProvinceChange(e.target.value);
+                                            setShowFilters(false);
+                                        }}
                                         className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                         disabled={loadingProvinces}
                                     >
@@ -975,8 +968,8 @@ const StaffEventList = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Mobile Create Button */}
                 <div className="lg:hidden mb-6">
-                    <button 
-                        onClick={handleCreateEvent} 
+                    <button
+                        onClick={handleCreateEvent}
                         className="w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg"
                     >
                         <Plus className="w-5 h-5" />
@@ -1016,8 +1009,8 @@ const StaffEventList = () => {
                                     <h3 className="font-semibold text-red-800 mb-1">Đã xảy ra lỗi</h3>
                                     <p className="text-red-600">{error}</p>
                                 </div>
-                                <button 
-                                    onClick={handleRefresh} 
+                                <button
+                                    onClick={handleRefresh}
                                     className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
@@ -1044,14 +1037,14 @@ const StaffEventList = () => {
                         </h3>
 
                         <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                            {searchTerm || selectedProvince || filterType !== 'all' 
+                            {searchTerm || selectedProvince || filterType !== 'all'
                                 ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác"
                                 : "Hãy tạo sự kiện hiến máu đầu tiên của bạn để kêu gọi cộng đồng"}
                         </p>
 
                         {!searchTerm && !selectedProvince && filterType === 'all' && (
-                            <button 
-                                onClick={handleCreateEvent} 
+                            <button
+                                onClick={handleCreateEvent}
                                 className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <Plus className="w-5 h-5" />
@@ -1072,8 +1065,8 @@ const StaffEventList = () => {
                                 <span className="text-gray-600">sự kiện {filterType !== 'all' && "phù hợp"}</span>
                             </div>
 
-                            <button 
-                                onClick={handleRefresh} 
+                            <button
+                                onClick={handleRefresh}
                                 disabled={loading}
                                 className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
@@ -1090,9 +1083,9 @@ const StaffEventList = () => {
                                     <div key={event.id} className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200">
                                         <div className="relative h-48 overflow-hidden">
                                             {event.image_url ? (
-                                                <img 
-                                                    src={getImageUrl(event.image_url)} 
-                                                    alt={event.title} 
+                                                <img
+                                                    src={getImageUrl(event.image_url)}
+                                                    alt={event.title}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />
                                             ) : (
@@ -1127,8 +1120,8 @@ const StaffEventList = () => {
                                                     <span>{formatTime(event.time_start)}</span>
                                                 </div>
                                             </div>
-                                            <Link 
-                                                to={`/staff-donation-event/${event.id}/registrations`} 
+                                            <Link
+                                                to={`/staff-donation-event/${event.id}/registrations`}
                                                 className="w-full flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md hover:shadow-lg"
                                             >
                                                 <span>Quản lý sự kiện</span>
@@ -1145,9 +1138,9 @@ const StaffEventList = () => {
                                         <div className="flex flex-col md:flex-row">
                                             <div className="md:w-64 h-48 md:h-auto relative overflow-hidden bg-gradient-to-br from-red-400 to-red-600">
                                                 {event.image_url ? (
-                                                    <img 
-                                                        src={getImageUrl(event.image_url)} 
-                                                        alt={event.title} 
+                                                    <img
+                                                        src={getImageUrl(event.image_url)}
+                                                        alt={event.title}
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                     />
                                                 ) : (
@@ -1182,8 +1175,8 @@ const StaffEventList = () => {
                                                         <span>{formatTime(event.time_start)}</span>
                                                     </div>
                                                 </div>
-                                                <Link 
-                                                    to={`/staff-donation-event/${event.id}/registrations`} 
+                                                <Link
+                                                    to={`/staff-donation-event/${event.id}/registrations`}
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md"
                                                 >
                                                     <span>Quản lý sự kiện</span>

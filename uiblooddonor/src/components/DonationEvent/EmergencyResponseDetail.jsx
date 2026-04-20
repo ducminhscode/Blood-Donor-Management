@@ -1,29 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Share2,
-    ArrowLeft, Users, Award, CheckCircle, AlertCircle,
-    XCircle, Phone, Mail, Globe, Navigation, Copy,
-    ChevronRight, Sparkles, Target, Shield, ThumbsUp,
-    Bookmark, Bell, CalendarDays, MapPinned, Building2,
-    User, UserCheck, MessageCircle, Share, ExternalLink,
-    ClipboardClock, AlarmClock, CalendarCog, BadgeCheck,
-    X, FileText, UserCircle, IdCard, Briefcase, Home,
-    CalendarClock, Clock3, Clock12, Ban, CheckCircle2,
-    Timer, Hourglass, UserPlus, UserMinus, Edit,
-    Printer, Download, Send, MessageSquare,
-    CalendarCheck,
-    ClipboardCheck,
-    Mars,
-    Venus,
-    Stethoscope,
-    Ambulance,
-    AlertTriangle,
-    Syringe,
-    Hospital,
-    HeartPulse, Loader2, Eye, TrendingUp, RefreshCw,
-    Activity
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, CalendarCheck, ClipboardCheck, Mars, Venus, Stethoscope, Ambulance, AlertTriangle, Syringe, Hospital, HeartPulse, Loader2, Eye, TrendingUp, RefreshCw, Activity } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -32,7 +9,6 @@ import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { UserContexts } from '../../configs/UserContexts';
 
-// Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -40,7 +16,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// OpenStreetMap Component
 const OpenStreetMap = ({ location, province, subDistrict }) => {
     const [position, setPosition] = useState([10.8231, 106.6297]);
     const [mapError, setMapError] = useState(false);
@@ -533,11 +508,10 @@ const EmergencyResponseDetail = () => {
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -621,9 +595,9 @@ const EmergencyResponseDetail = () => {
                                         Bệnh nhân: {emergency?.patient_name}
                                     </h1>
                                     <div className="flex items-center gap-3 mt-4 mb-4 flex-wrap">
-                                        <StatusBadge 
-                                            statusResponse={response.status_response} 
-                                            statusRegistration={response.status_registration} 
+                                        <StatusBadge
+                                            statusResponse={response.status_response}
+                                            statusRegistration={response.status_registration}
                                         />
                                         {emergency?.critical && !emergency?.is_expire && (
                                             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white animate-pulse shadow-md">
@@ -664,11 +638,10 @@ const EmergencyResponseDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${
-                                                activeTab === tab.id
+                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
                                                     ? 'text-red-600'
                                                     : 'text-gray-500 hover:text-gray-700'
-                                            }`}
+                                                }`}
                                         >
                                             <tab.icon className="w-4 h-4" />
                                             {tab.label}
@@ -704,8 +677,8 @@ const EmergencyResponseDetail = () => {
                                                     label="Trạng thái đăng ký"
                                                     value={
                                                         response.status_registration === 4 ? 'Đã hoàn thành' :
-                                                        response.status_registration === 3 ? 'Đã Check-in' :
-                                                        response.status_registration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
+                                                            response.status_registration === 3 ? 'Đã Check-in' :
+                                                                response.status_registration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
                                                     }
                                                 />
                                             </div>
@@ -923,9 +896,9 @@ const EmergencyResponseDetail = () => {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Trạng thái</span>
-                                    <StatusBadge 
-                                        statusResponse={response.status_response} 
-                                        statusRegistration={response.status_registration} 
+                                    <StatusBadge
+                                        statusResponse={response.status_response}
+                                        statusRegistration={response.status_registration}
                                     />
                                 </div>
 

@@ -1,22 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Share2,
-    ArrowLeft, Users, Award, CheckCircle, AlertCircle,
-    XCircle, Phone, Mail, Globe, Navigation, Copy,
-    ChevronRight, Sparkles, Target, Shield, ThumbsUp,
-    Bookmark, Bell, CalendarDays, MapPinned, Building2,
-    User, UserCheck, MessageCircle, Share, ExternalLink,
-    ClipboardClock,
-    AlarmClock,
-    CalendarCog,
-    BadgeCheck,
-    X,
-    FileText, Stethoscope, Hospital, TrendingUp, Loader2,
-    Eye, Send, CheckCircle2, RefreshCw,
-    Home,
-    UserPlus
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, Stethoscope, Hospital, TrendingUp, Loader2, Eye, Send, CheckCircle2, RefreshCw, Home, UserPlus } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -1321,11 +1305,10 @@ const EventDetail = () => {
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -1466,11 +1449,10 @@ const EventDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${
-                                                activeTab === tab.id
+                                            className={`py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${activeTab === tab.id
                                                     ? 'text-red-600'
                                                     : 'text-gray-500 hover:text-gray-700'
-                                            }`}
+                                                }`}
                                         >
                                             <tab.icon className="w-4 h-4" />
                                             {tab.label}

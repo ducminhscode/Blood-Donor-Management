@@ -1,0 +1,14 @@
+{
+  "retrieval_count": 5,
+  "retrieval_precision": 1.0,
+  "retrieval_recall": 0.5,
+  "retrieval_f1": 0.6666666666666666,
+  "answer_relevance": 1.0,
+  "answer_length": 1755,
+  "query_coverage": 0.7272727272727273,
+  "faithfulness": 0.2777777777777778,
+  "grounded_sentences": 5,
+  "total_sentences": 18,
+  "grounding_ratio": 0.2777777777777778,
+  "ragas_score": 0.648148148148148
+}

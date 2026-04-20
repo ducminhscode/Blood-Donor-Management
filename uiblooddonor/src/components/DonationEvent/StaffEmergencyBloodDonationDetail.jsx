@@ -1,23 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Share2,
-    ArrowLeft, Users, Award, CheckCircle, AlertCircle,
-    XCircle, Phone, Mail, Globe, Navigation, Copy,
-    ChevronRight, Sparkles, Target, Shield, ThumbsUp,
-    Bookmark, Bell, CalendarDays, MapPinned, Building2,
-    User, UserCheck, MessageCircle, Share, ExternalLink,
-    ClipboardClock, AlarmClock, CalendarCog, BadgeCheck,
-    X, FileText, UserCircle, IdCard, Briefcase, Home,
-    CalendarClock, Clock3, Clock12, Ban, CheckCircle2,
-    Timer, Hourglass, UserPlus, UserMinus, Edit,
-    Printer, Download, Send, MessageSquare,
-    HeartPulse, Activity, FileHeart, Award as AwardIcon,
-    Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon,
-    Syringe, FlaskConical, Loader2, Save,
-    Ambulance, Hospital, AlertTriangle, Stethoscope,
-    TrendingUp, Eye, Trash2
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, HeartPulse, Activity, FileHeart, Award as AwardIcon, Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon, Syringe, FlaskConical, Loader2, Save, Ambulance, Hospital, AlertTriangle, Stethoscope, TrendingUp, Eye, Trash2 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
@@ -516,7 +499,7 @@ const StaffEmergencyBloodDonationDetail = () => {
                 .replace('${id}', id)
                 .replace('${response_id}', response_id)
                 .replace('${medical_check_up_id}', medical_check_up_id);
-            
+
             await authApis().patch(url, formData);
             showMessage('Cập nhật kết quả hiến máu thành công!', 'success');
             setShowEditDialog(false);
@@ -536,11 +519,11 @@ const StaffEmergencyBloodDonationDetail = () => {
                 .replace('${id}', id)
                 .replace('${response_id}', response_id)
                 .replace('${medical_check_up_id}', medical_check_up_id);
-            
+
             await authApis().delete(url);
             showMessage('Xóa kết quả hiến máu thành công!', 'success');
             setConfirmDeleteDialog({ isOpen: false, title: '', message: '' });
-            
+
             setTimeout(() => {
                 navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`);
             }, 1500);
@@ -635,11 +618,10 @@ const StaffEmergencyBloodDonationDetail = () => {
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -886,11 +868,10 @@ const StaffEmergencyBloodDonationDetail = () => {
                                 {/* Status Badge */}
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <span className="text-gray-600">Trạng thái phản hồi</span>
-                                    <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${
-                                        isCompleted 
-                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' 
+                                    <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${isCompleted
+                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
                                             : 'bg-gradient-to-r from-blue-100 to-blue-100 text-blue-700'
-                                    }`}>
+                                        }`}>
                                         {isCompleted ? 'Đã hoàn thành' : 'Đang tiến hành'}
                                     </span>
                                 </div>

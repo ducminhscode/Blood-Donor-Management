@@ -727,7 +727,26 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
 
     def destroy(self, request, pk=None):
         donation_event = get_object_or_404(DonationEvent, pk=pk, is_active=True)
-        donation_event.delete()
+
+        with transaction.atomic():
+            registrations = EventRegistration.objects.filter(
+                donation_event=donation_event
+            )
+
+            medical_checkups = MedicalCheckUp.objects.filter(
+                event_registration__in=registrations
+            )
+
+            BloodDonation.objects.filter(
+                medical_check_up__in=medical_checkups
+            ).delete()
+
+            medical_checkups.delete()
+
+            registrations.delete()
+
+            donation_event.delete()
+
         return Response({"message": "Xoá thành công"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], url_path='staff', detail=True)
@@ -1268,7 +1287,26 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
 
     def destroy(self, request, pk=None):
         emergency_request = get_object_or_404(EmergencyRequest, pk=pk, is_active=True)
-        emergency_request.delete()
+
+        with transaction.atomic():
+            responses = EmergencyResponse.objects.filter(
+                emergency_request=emergency_request
+            )
+
+            medical_checkups = MedicalCheckUp.objects.filter(
+                emergency_response__in=responses
+            )
+
+            BloodDonation.objects.filter(
+                medical_check_up__in=medical_checkups
+            ).delete()
+
+            medical_checkups.delete()
+
+            responses.delete()
+
+            emergency_request.delete()
+
         return Response({"message": "Xoá thành công"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], url_path='staff', detail=True)

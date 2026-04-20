@@ -1,18 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from "react-router-dom";
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Search, Filter,
-    AlertCircle, ChevronRight, X, Sparkles, Users, Activity,
-    Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle,
-    Clock as ClockIcon, UserCheck, UserX, Loader2,
-    CalendarCheck, User, Mail, Phone, IdCard, Briefcase,
-    Building, Calendar as CalendarIcon, UserPlus, Eye,
-    ChevronLeft, RefreshCw, Info, FileText,
-    NotepadText, InfoIcon, VenusAndMars, Edit, Trash2,
-    Save, Upload, Image as ImageIcon, TrendingUp,
-    Award as AwardIcon, Shield, CheckCircle2, Send,
-    Grid, List, Filter as FilterIcon, XCircle as XCircleIcon
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, User, Mail, Phone, IdCard, Briefcase, Building, Calendar as CalendarIcon, UserPlus, Eye, ChevronLeft, RefreshCw, Info, FileText, NotepadText, InfoIcon, VenusAndMars, Edit, Trash2, Save, Upload, Image as ImageIcon, TrendingUp, Award as AwardIcon, Shield, CheckCircle2, Send, Grid, List, Filter as FilterIcon, XCircle as XCircleIcon, AlertTriangle } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -933,8 +921,8 @@ const StaffEventListDetail = () => {
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng lưới"
                                 >
@@ -943,8 +931,8 @@ const StaffEventListDetail = () => {
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng danh sách"
                                 >
@@ -1025,10 +1013,10 @@ const StaffEventListDetail = () => {
                                                         setShowFilters(false);
                                                     }}
                                                     className={`px-3 py-2 rounded-lg border transition-all ${isSelected
-                                                            ? option.value === 'all'
-                                                                ? 'border-red-500 bg-red-50 text-red-600'
-                                                                : `${status.bgColor} ${status.textColor} border-${status.color.split('-')[1]}-200`
-                                                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                        ? option.value === 'all'
+                                                            ? 'border-red-500 bg-red-50 text-red-600'
+                                                            : `${status.bgColor} ${status.textColor} border-${status.color.split('-')[1]}-200`
+                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
                                                         }`}
                                                 >
                                                     <span className="text-sm">{option.label}</span>
@@ -1067,8 +1055,8 @@ const StaffEventListDetail = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             <Grid className="w-4 h-4" />
@@ -1080,8 +1068,8 @@ const StaffEventListDetail = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             <List className="w-4 h-4" />

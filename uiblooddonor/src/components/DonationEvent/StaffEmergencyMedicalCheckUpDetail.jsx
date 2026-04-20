@@ -1,32 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Calendar, MapPin, Clock, NotebookPen, Droplet, Heart, Share2,
-    ArrowLeft, Users, Award, CheckCircle, AlertCircle,
-    XCircle, Phone, Mail, Globe, Navigation, Copy,
-    ChevronRight, Sparkles, Target, Shield, ThumbsUp,
-    Bookmark, Bell, CalendarDays, MapPinned, Building2,
-    User, UserCheck, MessageCircle, Share, ExternalLink,
-    ClipboardClock, AlarmClock, CalendarCog, BadgeCheck,
-    X, FileText, UserCircle, IdCard, Briefcase, Home,
-    CalendarClock, Clock3, Clock12, Ban, CheckCircle2,
-    Timer, Hourglass, UserPlus, UserMinus, Edit,
-    Printer, Download, Send, MessageSquare, Scale,
-    Ruler, Activity, Thermometer, Droplets, AlertTriangle,
-    Stethoscope, Syringe, Pill, Baby, HeartPulse,
-    Brain, Bone, Wind, Shield as ShieldIcon,
-    ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle,
-    User as UserIcon, Calendar as CalendarIcon,
-    Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon,
-    FileHeart, Loader2, PlusCircle, Save,
-    ClipboardCheck, Ambulance, Hospital, Stethoscope as StethoscopeIcon,
-    TrendingUp, Award as AwardIcon, Shield as ShieldIcon2
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, NotebookPen, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, ScaleRuler, Activity, Thermometer, Droplets, AlertTriangle, Stethoscope, Syringe, Pill, Baby, HeartPulse, Brain, Bone, Wind, Shield as ShieldIcon, ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle, User as UserIcon, Calendar as CalendarIcon, Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon, FileHeart, Loader2, PlusCircle, Save, ClipboardCheck, Ambulance, Hospital, Stethoscope as StethoscopeIcon, TrendingUp, Award as AwardIcon, Shield as ShieldIcon2 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 
-// Vital Sign Card Component
 const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue" }) => {
     const getColorClasses = () => {
         const baseClasses = {
@@ -1020,7 +998,7 @@ const StaffEmergencyMedicalCheckUpDetail = () => {
             const url = endpoints.emergency_medical_checkup
                 .replace('${id}', id)
                 .replace('${response_id}', response_id);
-            
+
             await authApis().patch(url, formData);
             showMessage('Cập nhật phiếu khám sức khỏe thành công!', 'success');
             setShowEditDialog(false);
@@ -1039,11 +1017,11 @@ const StaffEmergencyMedicalCheckUpDetail = () => {
             const url = endpoints.emergency_medical_checkup
                 .replace('${id}', id)
                 .replace('${response_id}', response_id);
-            
+
             await authApis().delete(url);
             showMessage('Xóa phiếu khám sức khỏe thành công!', 'success');
             setConfirmDeleteDialog({ isOpen: false, title: '', message: '' });
-            
+
             setTimeout(() => {
                 navigate(`/staff-emergency-request/${id}/responses/${response_id}`);
             }, 1500);
@@ -1147,11 +1125,10 @@ const StaffEmergencyMedicalCheckUpDetail = () => {
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -1468,11 +1445,10 @@ const StaffEmergencyMedicalCheckUpDetail = () => {
 
                                 <div className="flex items-center justify-between pt-3">
                                     <span className="text-gray-600">Trạng thái phản hồi</span>
-                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
-                                        isCompleted 
-                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' 
+                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${isCompleted
+                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
                                             : 'bg-gradient-to-r from-blue-100 to-blue-100 text-blue-700'
-                                    }`}>
+                                        }`}>
                                         {isCompleted ? 'Đã hoàn thành' : 'Đang tiến hành'}
                                     </span>
                                 </div>

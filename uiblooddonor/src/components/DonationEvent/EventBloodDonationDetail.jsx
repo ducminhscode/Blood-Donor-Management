@@ -1,28 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Share2,
-    ArrowLeft, Users, Award, CheckCircle, AlertCircle,
-    XCircle, Phone, Mail, Globe, Navigation, Copy,
-    ChevronRight, Sparkles, Target, Shield, ThumbsUp,
-    Bookmark, Bell, CalendarDays, MapPinned, Building2,
-    User, UserCheck, MessageCircle, Share, ExternalLink,
-    ClipboardClock, AlarmClock, CalendarCog, BadgeCheck,
-    X, FileText, UserCircle, IdCard, Briefcase, Home,
-    CalendarClock, Clock3, Clock12, Ban, CheckCircle2,
-    Timer, Hourglass, UserPlus, UserMinus, Edit,
-    Printer, Download, Send, MessageSquare,
-    HeartPulse, Activity, FileHeart, Award as AwardIcon,
-    Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon,
-    Syringe,
-    FlaskConical, Stethoscope, Hospital, Loader2,
-    TrendingUp, Eye, CheckCircle2 as CheckCircleIcon
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, HeartPulse, Activity, FileHeart, Award as AwardIcon, Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon, Syringe, FlaskConical, Stethoscope, Hospital, Loader2, TrendingUp, Eye, CheckCircle2 as CheckCircleIcon } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 
-// Staff Detail Dialog
 const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
     if (!isOpen) return null;
 
@@ -164,7 +146,7 @@ const BloodTypeBadge = ({ bloodType, rhFactor }) => {
     };
 
     const bloodTypeDisplay = getBloodTypeDisplay();
-    
+
     return (
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-700 rounded-full border border-red-200 shadow-sm">
             <Droplet className="w-5 h-5 fill-current" />
@@ -308,11 +290,10 @@ const EventBloodDonationDetail = () => {
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -407,9 +388,9 @@ const EventBloodDonationDetail = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <div className="flex items-center gap-3 mb-4 flex-wrap">
-                                        <BloodTypeBadge 
-                                            bloodType={donation.blood_type} 
-                                            rhFactor={donation.rh_factor} 
+                                        <BloodTypeBadge
+                                            bloodType={donation.blood_type}
+                                            rhFactor={donation.rh_factor}
                                         />
                                         <DonationTypeBadge type={donation.donation_type} />
                                     </div>

@@ -1,0 +1,22 @@
+[
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u B c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Nh\u00f3m m\u00e1u B c\u00f3 th\u1ec3 cho ng\u01b0\u1eddi c\u00f3 nh\u00f3m m\u00e1u B v\u00e0 AB. Ng\u01b0\u1eddi mang nh\u00f3m m\u00e1u B ch\u1ec9 nh\u1eadn \u0111\u01b0\u1ee3c m\u00e1u t\u1eeb B ho\u1eb7c O. N\u1ebfu c\u00f3 nhu c\u1ea7u hi\u1ebfn ho\u1eb7c ti\u00eam m\u00e1u, n\u00ean tham kh\u1ea3o \u00fd ki\u1ebfn b\u00e1c s\u0129 ho\u1eb7c trung t\u00e2m m\u00e1u."
+  },
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u A c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Nh\u00f3m m\u00e1u A c\u00f3 th\u1ec3 cho ng\u01b0\u1eddi nh\u1eadn c\u00f3 nh\u00f3m m\u00e1u A v\u00e0 AB. Ng\u01b0\u1eddi mang nh\u00f3m m\u00e1u A ch\u1ec9 nh\u1eadn \u0111\u01b0\u1ee3c m\u00e1u t\u1eeb A ho\u1eb7c O. N\u1ebfu c\u00f3 nhu c\u1ea7u hi\u1ebfn ho\u1eb7c truy\u1ec1n m\u00e1u, n\u00ean tham kh\u1ea3o \u00fd ki\u1ebfn b\u00e1c s\u0129 ho\u1eb7c trung t\u00e2m m\u00e1u \u0111\u1ec3 \u0111\u1ea3m b\u1ea3o an to\u00e0n."
+  },
+  {
+    "human": "Ch\u00e0o b\u1ea1n, t\u00f4i mu\u1ed1n bi\u1ebft nh\u00f3m m\u00e1u O+ c\u00f3 th\u1ec3 cho nh\u00f3m m\u00e1u n\u00e0o?",
+    "ai": "Nh\u00f3m m\u00e1u O+ c\u00f3 th\u1ec3 cho m\u00e1u cho c\u00e1c nh\u00f3m m\u00e1u: O+, A+, B+ v\u00e0 AB+. Ng\u01b0\u1eddi c\u00f3 nh\u00f3m m\u00e1u O+ ch\u1ec9 nh\u1eadn m\u00e1u t\u1eeb O+ v\u00e0 O\u2011. N\u1ebfu c\u1ea7n hi\u1ebfn ho\u1eb7c truy\u1ec1n m\u00e1u, h\u00e3y tham kh\u1ea3o \u00fd ki\u1ebfn b\u00e1c s\u0129 ho\u1eb7c trung t\u00e2m m\u00e1u \u0111\u1ec3 \u0111\u1ea3m b\u1ea3o an to\u00e0n."
+  },
+  {
+    "human": "B\u1ecb huy\u1ebft \u00e1p th\u1ea5p c\u00f3 hi\u1ebfn m\u00e1u \u0111\u01b0\u1ee3c kh\u00f4ng?",
+    "ai": "Ng\u01b0\u1eddi c\u00f3 huy\u1ebft \u00e1p th\u1ea5p th\u01b0\u1eddng s\u1ebd \u0111\u01b0\u1ee3c ki\u1ec3m tra \u00e1p l\u1ef1c m\u00e1u \u1edf ch\u1ed7 hi\u1ebfn; n\u1ebfu ch\u1ec9 s\u1ed1 n\u1eb1m trong m\u1ee9c cho ph\u00e9p c\u1ee7a trung t\u00e2m m\u00e1u (th\u01b0\u1eddng tr\u00ean\u202f90/60\u202fmmHg), h\u1ecd c\u00f3 th\u1ec3 hi\u1ebfn. Tuy nhi\u00ean, n\u1ebfu huy\u1ebft \u00e1p qu\u00e1 th\u1ea5p ho\u1eb7c c\u00f3 tri\u1ec7u ch\u1ee9ng ng\u1ea5t x\u1ec9u, th\u01b0\u1eddng s\u1ebd b\u1ecb t\u1eeb ch\u1ed1i \u0111\u1ec3 tr\u00e1nh r\u1ee7i ro. B\u1ea1n n\u00ean \u0111\u1ebfn c\u01a1 s\u1edf hi\u1ebfn m\u00e1u \u0111\u1ec3 \u0111o huy\u1ebft \u00e1p v\u00e0 h\u1ecfi nh\u00e2n vi\u00ean y t\u1ebf. N\u1ebfu v\u1eabn c\u00f2n lo l\u1eafng, h\u00e3y tham kh\u1ea3o \u00fd ki\u1ebfn b\u00e1c s\u0129."
+  },
+  {
+    "human": "Ng\u01b0\u1eddi c\u00f3 m\u1ee1 nhi\u1ec1u trong m\u00e1u hi\u1ebfn m\u00e1u \u0111\u01b0\u1ee3c kh\u00f4ng?",
+    "ai": "Ng\u01b0\u1eddi c\u00f3 m\u1ee9c m\u1ee1 trong m\u00e1u cao (t\u0103ng cholesterol) th\u01b0\u1eddng v\u1eabn c\u00f3 th\u1ec3 hi\u1ebfn m\u00e1u n\u1ebfu t\u1ed5ng cholesterol v\u00e0 triglyceride kh\u00f4ng v\u01b0\u1ee3t qu\u00e1 m\u1ee9c gi\u1edbi h\u1ea1n do c\u01a1 s\u1edf hi\u1ebfn m\u00e1u quy \u0111\u1ecbnh (th\u01b0\u1eddng \u2264\u202f300\u202fmg/dL cho cholesterol v\u00e0 \u2264\u202f250\u202fmg/dL cho triglyceride). N\u1ebfu m\u1ee9c m\u1ee1 r\u1ea5t cao ho\u1eb7c \u0111ang d\u00f9ng thu\u1ed1c h\u1ea1 lipid, nh\u00e2n vi\u00ean y t\u1ebf c\u00f3 th\u1ec3 y\u00eau c\u1ea7u ki\u1ec3m tra l\u1ea1i ho\u1eb7c t\u1ea1m ho\u00e3n vi\u1ec7c hi\u1ebfn \u0111\u1ec3 \u0111\u1ea3m b\u1ea3o an to\u00e0n. B\u1ea1n n\u00ean \u0111\u1ebfn trung t\u00e2m hi\u1ebfn m\u00e1u \u0111\u1ec3 \u0111o ch\u1ec9 s\u1ed1 lipid v\u00e0 h\u1ecfi tr\u1ef1c ti\u1ebfp nh\u00e2n vi\u00ean. N\u1ebfu c\u00f2n lo l\u1eafng, h\u00e3y tham kh\u1ea3o \u00fd ki\u1ebfn b\u00e1c s\u0129."
+  }
+]

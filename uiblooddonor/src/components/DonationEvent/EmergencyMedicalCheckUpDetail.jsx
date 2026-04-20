@@ -1,25 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Share2,
-    ArrowLeft, Users, Award, CheckCircle, AlertCircle,
-    XCircle, Phone, Mail, Globe, Navigation, Copy,
-    ChevronRight, Sparkles, Target, Shield, ThumbsUp,
-    Bookmark, Bell, CalendarDays, MapPinned, Building2,
-    User, UserCheck, MessageCircle, Share, ExternalLink,
-    ClipboardClock, AlarmClock, CalendarCog, BadgeCheck,
-    X, FileText, UserCircle, IdCard, Briefcase, Home,
-    CalendarClock, Clock3, Clock12, Ban, CheckCircle2,
-    Timer, Hourglass, UserPlus, UserMinus, Edit,
-    Printer, Download, Send, MessageSquare, Scale,
-    Ruler, Activity, Thermometer, Droplets, AlertTriangle,
-    Stethoscope, Syringe, Pill, Baby, HeartPulse,
-    Brain, Bone, Wind, Shield as ShieldIcon,
-    ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle,
-    User as UserIcon, Calendar as CalendarIcon,
-    Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon,
-    FileHeart, NotebookPen, Ambulance, Hospital, Loader2
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, Scale, Ruler, Activity, Thermometer, Droplets, AlertTriangle, Stethoscope, Syringe, Pill, Baby, HeartPulse, Brain, Bone, Wind, Shield as ShieldIcon, ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle, User as UserIcon, Calendar as CalendarIcon, Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon, FileHeart, NotebookPen, Ambulance, Hospital, Loader2 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
@@ -328,7 +309,7 @@ const EmergencyMedicalCheckUpDetail = () => {
                 .replace('${response_id}', response_id);
             const response = await authApis().get(url);
             setCheckup(response.data);
-            
+
             await fetchBloodDonation(response.data.id);
         } catch (err) {
             console.error("Error fetching medical checkup:", err);
@@ -424,11 +405,10 @@ const EmergencyMedicalCheckUpDetail = () => {
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />

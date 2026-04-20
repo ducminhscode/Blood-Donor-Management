@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Search, Filter,
-    AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell,
-    HeartPlus,
-    HeartPulse, Grid, List, Filter as FilterIcon, Send,
-    TrendingUp, CheckCircle2, Loader2, Eye,
-    RefreshCw
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPlus, HeartPulse, Grid, List, Filter as FilterIcon, Send, TrendingUp, CheckCircle2, Loader2, Eye, RefreshCw } from 'lucide-react';
 import APIs, { endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -330,8 +323,8 @@ const EventList = () => {
                                         <p className="text-white/80 text-sm">Xem những sự kiện hiến máu mà bạn đã tạo</p>
                                     )}
                                 </div>
-                                <button 
-                                    onClick={handleFeatureCard} 
+                                <button
+                                    onClick={handleFeatureCard}
                                     className="w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
                                 >
                                     {!user ? 'Đăng nhập để đăng ký' : (user.role === 2 ? 'Quản lý sự kiện' : 'Sự kiện đã đăng ký')}
@@ -393,31 +386,28 @@ const EventList = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setFilterType('all')}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                                        filterType === 'all'
+                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'all'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                 >
                                     Tất cả
                                 </button>
                                 <button
                                     onClick={() => setFilterType('ongoing')}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                                        filterType === 'ongoing'
+                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'ongoing'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                 >
                                     Đang diễn ra
                                 </button>
                                 <button
                                     onClick={() => setFilterType('upcoming')}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                                        filterType === 'upcoming'
+                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'upcoming'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                 >
                                     Sắp diễn ra
                                 </button>
@@ -446,22 +436,20 @@ const EventList = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'grid'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng lưới"
                                 >
                                     <Grid className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'list'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng danh sách"
                                 >
                                     <List className="w-5 h-5" />
@@ -490,11 +478,10 @@ const EventList = () => {
                                                 setShowFilters(false);
                                                 setPage(1);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${
-                                                filterType === 'all'
+                                            className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'all'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             Tất cả
                                         </button>
@@ -504,11 +491,10 @@ const EventList = () => {
                                                 setShowFilters(false);
                                                 setPage(1);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${
-                                                filterType === 'ongoing'
+                                            className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'ongoing'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             Đang diễn ra
                                         </button>
@@ -518,11 +504,10 @@ const EventList = () => {
                                                 setShowFilters(false);
                                                 setPage(1);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${
-                                                filterType === 'upcoming'
+                                            className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'upcoming'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             Sắp diễn ra
                                         </button>
@@ -562,11 +547,10 @@ const EventList = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'grid'
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             <Grid className="w-4 h-4" />
                                             <span>Dạng lưới</span>
@@ -576,11 +560,10 @@ const EventList = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'list'
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             <List className="w-4 h-4" />
                                             <span>Dạng danh sách</span>
@@ -795,11 +778,10 @@ const EventList = () => {
 
                                             <Link
                                                 to={`/event/${event.id}`}
-                                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 ${
-                                                    event.is_expire
+                                                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 ${event.is_expire
                                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                         : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg'
-                                                }`}
+                                                    }`}
                                                 onClick={(e) => event.is_expire && e.preventDefault()}
                                             >
                                                 <span className="font-medium">
@@ -869,11 +851,10 @@ const EventList = () => {
 
                                                 <Link
                                                     to={`/event/${event.id}`}
-                                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
-                                                        event.is_expire
+                                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${event.is_expire
                                                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                             : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md'
-                                                    }`}
+                                                        }`}
                                                     onClick={(e) => event.is_expire && e.preventDefault()}
                                                 >
                                                     <span className="font-medium">Xem chi tiết</span>

@@ -1,14 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Link } from "react-router-dom";
-import {
-    Calendar, MapPin, Clock, Droplet, Heart, Search, Filter,
-    AlertCircle, ChevronRight, X, Sparkles, Users, Activity,
-    Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle,
-    Clock as ClockIcon, UserCheck, UserX, Loader2,
-    CalendarCheck, Grid, List, Filter as FilterIcon,
-    Send, Eye, TrendingUp, CheckCircle2,
-    RefreshCw
-} from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, Grid, List, Filter as FilterIcon, Send, Eye, TrendingUp, CheckCircle2, RefreshCw } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -348,7 +340,7 @@ const EventRegistration = () => {
                                     <span className="text-gray-700 font-medium">{getStatusLabel()}</span>
                                     <ChevronRight className={`h-4 w-4 text-gray-500 transition-transform ${showStatusDropdown ? 'rotate-90' : ''}`} />
                                 </button>
-                                
+
                                 {showStatusDropdown && (
                                     <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
                                         {statusOptions.map((option) => (
@@ -377,22 +369,20 @@ const EventRegistration = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'grid'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng lưới"
                                 >
                                     <Grid className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'list'
+                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng danh sách"
                                 >
                                     <List className="w-5 h-5" />
@@ -454,11 +444,10 @@ const EventRegistration = () => {
                                                     handleStatusChange(option.value);
                                                     setShowFilters(false);
                                                 }}
-                                                className={`px-3 py-2 rounded-lg border transition-all ${
-                                                    selectedStatus === option.value
+                                                className={`px-3 py-2 rounded-lg border transition-all ${selectedStatus === option.value
                                                         ? 'border-red-500 bg-red-50 text-red-600'
                                                         : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                }`}
+                                                    }`}
                                             >
                                                 <span className="text-sm">{option.label}</span>
                                             </button>
@@ -494,11 +483,10 @@ const EventRegistration = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'grid'
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             <Grid className="w-4 h-4" />
                                             <span>Dạng lưới</span>
@@ -508,11 +496,10 @@ const EventRegistration = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'list'
+                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
-                                            }`}
+                                                }`}
                                         >
                                             <List className="w-4 h-4" />
                                             <span>Dạng danh sách</span>

@@ -1,27 +1,8 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import {
-  ArrowUp,
-  Bot,
-  Check,
-  ChevronUp,
-  CircleAlert,
-  Droplet,
-  Edit3,
-  Facebook,
-  Instagram,
-  Loader2,
-  Mail,
-  MapPinned,
-  MessageCircle,
-  Phone,
-  Plus,
-  SendHorizontal,
-  Trash2,
-  Twitter,
-  X,
-  Youtube
-} from "lucide-react";
+import { useContext, useEffect, useRef, useState, useCallback, useMemo, memo } from "react";
+import { ArrowUp, Bot, Check, ChevronUp, CircleAlert, Droplet, Edit3, Facebook, Instagram, Loader2, Mail, MapPinned, MessageCircle, Phone, Plus, SendHorizontal, Trash2, Twitter, X, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { UserContexts } from "../../../configs/UserContexts";
 import { authApis, BASE_URL, endpoints } from "../../../configs/APIs";
 
@@ -739,8 +720,34 @@ const FooterChatbot = () => {
                                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
                                 </div>
-                              ) : (
+                              ) : isHuman ? (
                                 item.text
+                              ) : (
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                                    ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2" {...props} />,
+                                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2" {...props} />,
+                                    li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                                    code: ({ node, inline, ...props }) =>
+                                      inline ? (
+                                        <code className="bg-slate-700/30 rounded px-1.5 py-0.5 font-mono text-xs" {...props} />
+                                      ) : (
+                                        <code className="block bg-slate-700/30 rounded px-3 py-2 my-2 font-mono text-xs overflow-x-auto" {...props} />
+                                      ),
+                                    pre: ({ node, ...props }) => <pre className="bg-slate-700/30 rounded px-3 py-2 my-2 overflow-x-auto" {...props} />,
+                                    blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-slate-400 pl-3 italic my-2" {...props} />,
+                                    strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
+                                    em: ({ node, ...props }) => <em className="italic" {...props} />,
+                                    a: ({ node, ...props }) => <a className="text-red-600 underline hover:text-red-700" {...props} />,
+                                    h1: ({ node, ...props }) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                                    h2: ({ node, ...props }) => <h2 className="text-base font-bold mb-2" {...props} />,
+                                    h3: ({ node, ...props }) => <h3 className="text-sm font-bold mb-1" {...props} />,
+                                  }}
+                                >
+                                  {item.text}
+                                </ReactMarkdown>
                               )}
                             </div>
                             <span className="mt-1 px-1 text-[11px] text-slate-400">{formatTime(item.createdAt)}</span>
@@ -1109,6 +1116,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
-
-
