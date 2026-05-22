@@ -9,12 +9,13 @@ import {
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
+import { Helmet } from "react-helmet-async";
 
 const Reward = () => {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const categoryName = location.state?.categoryName || 'Danh mục quà tặng';
+    const [categoryName, setCategoryName] = useState(location.state?.categoryName || 'Danh mục quà tặng');
 
     const [rewards, setRewards] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -30,12 +31,47 @@ const Reward = () => {
         fetchRewards();
     }, [id]);
 
+    useEffect(() => {
+        setCategoryName(location.state?.categoryName || 'Danh mục quà tặng');
+    }, [location.state]);
+
+    useEffect(() => {
+        const fetchCategoryName = async () => {
+            if (location.state?.categoryName || !id) return;
+
+            try {
+                const response = await authApis().get(`${endpoints.reward_category}${id}/`);
+                if (response.data?.name) {
+                    setCategoryName(response.data.name);
+                }
+            } catch (error) {
+                console.error("Error fetching category name:", error);
+            }
+        };
+
+        fetchCategoryName();
+    }, [id, location.state]);
+
+    useEffect(() => {
+        document.title = `${categoryName} | Dòng Máu Lạc Hồng`;
+    }, [categoryName]);
+
     const fetchRewards = async () => {
         setLoading(true);
         try {
             const url = endpoints.reward_by_category.replace('${id}', id);
             const response = await authApis().get(url);
             setRewards(response.data);
+
+            const firstReward = response.data?.[0];
+            const resolvedCategoryName =
+                firstReward?.reward_category?.name ||
+                firstReward?.category?.name ||
+                firstReward?.reward_category_name;
+
+            if (resolvedCategoryName) {
+                setCategoryName(resolvedCategoryName);
+            }
         } catch (error) {
             console.error("Error fetching rewards:", error);
         } finally {
@@ -95,6 +131,9 @@ const Reward = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>{categoryName} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">

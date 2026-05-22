@@ -25,6 +25,7 @@ import { authApis, endpoints } from '../../configs/APIs';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { Helmet } from "react-helmet-async";
 
 // Info Card Component
 const InfoCard = ({ icon: Icon, label, value, className = "" }) => {
@@ -673,10 +674,15 @@ const StaffResponseDetail = () => {
         title: '',
         message: ''
     });
+    const donorName = `${donor?.account?.last_name || ''} ${donor?.account?.first_name || ''}`.trim() || 'Đang tải người hiến';
 
     useEffect(() => {
         fetchResponseDetail();
     }, [id, response_id]);
+
+    useEffect(() => {
+        document.title = `${donorName} | Dòng Máu Lạc Hồng`;
+    }, [donorName]);
 
     const fetchResponseDetail = async () => {
         setLoading(true);
@@ -797,6 +803,9 @@ const StaffResponseDetail = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+                <Helmet>
+                    <title>{donorName} | Dòng Máu Lạc Hồng</title>
+                </Helmet>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="bg-white rounded-3xl shadow-xl p-8">
                         <div className="animate-pulse">
@@ -824,6 +833,9 @@ const StaffResponseDetail = () => {
     if (error || !response) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+                <Helmet>
+                    <title>{donorName} | Dòng Máu Lạc Hồng</title>
+                </Helmet>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
                         <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -854,14 +866,16 @@ const StaffResponseDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>{donorName} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -950,8 +964,8 @@ const StaffResponseDetail = () => {
                         {/* Status Section */}
                         <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                             <div className="flex flex-wrap items-center gap-3 mb-4">
-                                <ResponseStatusBadge 
-                                    statusResponse={statusResponse} 
+                                <ResponseStatusBadge
+                                    statusResponse={statusResponse}
                                     statusRegistration={statusRegistration}
                                 />
                                 {emergency?.critical && !emergency?.is_expire && (
@@ -996,11 +1010,10 @@ const StaffResponseDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${
-                                                activeTab === tab.id
+                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
                                                     ? 'text-red-600'
                                                     : 'text-gray-500 hover:text-gray-700'
-                                            }`}
+                                                }`}
                                         >
                                             <tab.icon className="w-4 h-4" />
                                             {tab.label}
@@ -1036,8 +1049,8 @@ const StaffResponseDetail = () => {
                                                     label="Trạng thái đăng ký"
                                                     value={
                                                         statusRegistration === 4 ? 'Đã hoàn thành' :
-                                                        statusRegistration === 3 ? 'Đã Check-in' :
-                                                        statusRegistration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
+                                                            statusRegistration === 3 ? 'Đã Check-in' :
+                                                                statusRegistration === 1 ? 'Đã xác nhận' : 'Chưa xác nhận'
                                                     }
                                                 />
                                             </div>
@@ -1207,8 +1220,8 @@ const StaffResponseDetail = () => {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Trạng thái</span>
-                                    <ResponseStatusBadge 
-                                        statusResponse={statusResponse} 
+                                    <ResponseStatusBadge
+                                        statusResponse={statusResponse}
                                         statusRegistration={statusRegistration}
                                     />
                                 </div>

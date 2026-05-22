@@ -969,11 +969,11 @@ const Profile = () => {
                                                 <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4">
                                                     <div className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl">
                                                         <p className="text-2xl font-bold text-red-600">{donorInfo.donation_count || 0}</p>
-                                                        <p className="text-sm text-gray-600">Lần hiến máu</p>
+                                                        <p className="profile-stat-label text-sm text-gray-600">Lần hiến máu</p>
                                                     </div>
                                                     <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl">
                                                         <p className="text-2xl font-bold text-yellow-600">{donorInfo.points || 0}</p>
-                                                        <p className="text-sm text-gray-600">Điểm tích lũy</p>
+                                                        <p className="profile-stat-label text-sm text-gray-600">Điểm tích lũy</p>
                                                     </div>
                                                     <div className={`text-center p-4 rounded-xl ${donorInfo.can_donation ? 'bg-gradient-to-br from-green-50 to-green-100' : 'bg-gradient-to-br from-gray-100 to-gray-200'}`}>
                                                         <p className={`text-sm font-semibold ${donorInfo.can_donation ? 'text-green-600' : 'text-gray-600'}`}>

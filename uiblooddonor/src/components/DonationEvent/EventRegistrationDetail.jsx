@@ -6,6 +6,7 @@ import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 // Map Component
 const OpenStreetMap = ({ location, province, subDistrict }) => {
@@ -299,6 +300,11 @@ const EventRegistrationDetail = () => {
 
     const [hasMedicalCheckup, setHasMedicalCheckup] = useState(false);
     const [checkingMedical, setCheckingMedical] = useState(false);
+    const eventTitle =
+        registration?.donation_event?.title ||
+        registration?.donation_event?.name ||
+        registration?.donation_event?.event_name ||
+        'Chi tiết đăng ký sự kiện';
 
     const checkMedicalCheckup = async () => {
         if (!registration?.donation_event?.id || !id) return;
@@ -327,6 +333,10 @@ const EventRegistrationDetail = () => {
         fetchRegistrationDetail();
     }, [id]);
 
+    useEffect(() => {
+        document.title = `${eventTitle} | Dòng Máu Lạc Hồng`;
+    }, [eventTitle]);
+
     const fetchRegistrationDetail = async () => {
         setLoading(true);
         setError('');
@@ -354,6 +364,9 @@ const EventRegistrationDetail = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+                <Helmet>
+                    <title>{eventTitle} | Dòng Máu Lạc Hồng</title>
+                </Helmet>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="bg-white rounded-3xl shadow-xl p-8">
                         <div className="animate-pulse">
@@ -381,6 +394,9 @@ const EventRegistrationDetail = () => {
     if (error || !registration) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+                <Helmet>
+                    <title>{eventTitle} | Dòng Máu Lạc Hồng</title>
+                </Helmet>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
                         <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -410,12 +426,15 @@ const EventRegistrationDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>{eventTitle} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
                     <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
-                            ? 'bg-green-500 text-white'
-                            : 'bg-red-500 text-white'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-red-500 text-white'
                         }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
@@ -460,7 +479,7 @@ const EventRegistrationDetail = () => {
                             Sự kiện đã đăng ký
                         </button>
                         <span>/</span>
-                        <span className="text-white font-medium">Chi tiết đăng ký</span>
+                        <span className="text-white font-medium">{event?.title}</span>
                     </div>
 
                     <button
@@ -539,8 +558,8 @@ const EventRegistrationDetail = () => {
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
                                             className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
-                                                    ? 'text-red-600'
-                                                    : 'text-gray-500 hover:text-gray-700'
+                                                ? 'text-red-600'
+                                                : 'text-gray-500 hover:text-gray-700'
                                                 }`}
                                         >
                                             <tab.icon className="w-4 h-4" />

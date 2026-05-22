@@ -6,6 +6,7 @@ import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import debounce from 'lodash.debounce';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 // Create Event Dialog Component
 const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
@@ -648,6 +649,9 @@ const StaffEventList = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Quản lý sự kiện | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">
@@ -893,8 +897,8 @@ const StaffEventList = () => {
                                                     setShowFilters(false);
                                                 }}
                                                 className={`px-4 py-2 rounded-lg border transition-all ${filterType === option.value
-                                                        ? 'border-red-500 bg-red-50 text-red-600'
-                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                    ? 'border-red-500 bg-red-50 text-red-600'
+                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
                                                     }`}
                                             >
                                                 {option.label}

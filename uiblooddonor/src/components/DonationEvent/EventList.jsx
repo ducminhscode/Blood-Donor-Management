@@ -8,6 +8,7 @@ import debounce from 'lodash.debounce';
 import Header from '../Home/layouts/Header';
 import Footer from '../Home/layouts/Footer';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 const EventList = () => {
     const [events, setEvents] = useState([]);
@@ -251,6 +252,9 @@ const EventList = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Hoạt động hiến máu | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             <Header />
 
             {/* Hero Section */}
@@ -387,8 +391,8 @@ const EventList = () => {
                                 <button
                                     onClick={() => setFilterType('all')}
                                     className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'all'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                 >
                                     Tất cả
@@ -396,8 +400,8 @@ const EventList = () => {
                                 <button
                                     onClick={() => setFilterType('ongoing')}
                                     className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'ongoing'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                 >
                                     Đang diễn ra
@@ -405,8 +409,8 @@ const EventList = () => {
                                 <button
                                     onClick={() => setFilterType('upcoming')}
                                     className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'upcoming'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                 >
                                     Sắp diễn ra
@@ -437,8 +441,8 @@ const EventList = () => {
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng lưới"
                                 >
@@ -447,8 +451,8 @@ const EventList = () => {
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng danh sách"
                                 >
@@ -479,8 +483,8 @@ const EventList = () => {
                                                 setPage(1);
                                             }}
                                             className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'all'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             Tất cả
@@ -492,8 +496,8 @@ const EventList = () => {
                                                 setPage(1);
                                             }}
                                             className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'ongoing'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             Đang diễn ra
@@ -505,8 +509,8 @@ const EventList = () => {
                                                 setPage(1);
                                             }}
                                             className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'upcoming'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             Sắp diễn ra
@@ -548,8 +552,8 @@ const EventList = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             <Grid className="w-4 h-4" />
@@ -561,8 +565,8 @@ const EventList = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             <List className="w-4 h-4" />
@@ -779,8 +783,8 @@ const EventList = () => {
                                             <Link
                                                 to={`/event/${event.id}`}
                                                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 ${event.is_expire
-                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                        : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg'
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg'
                                                     }`}
                                                 onClick={(e) => event.is_expire && e.preventDefault()}
                                             >
@@ -852,8 +856,8 @@ const EventList = () => {
                                                 <Link
                                                     to={`/event/${event.id}`}
                                                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${event.is_expire
-                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md'
+                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                        : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md'
                                                         }`}
                                                     onClick={(e) => event.is_expire && e.preventDefault()}
                                                 >

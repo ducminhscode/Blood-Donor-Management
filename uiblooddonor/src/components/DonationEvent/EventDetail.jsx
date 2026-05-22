@@ -10,6 +10,7 @@ import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import Header from '../Home/layouts/Header';
 import Footer from '../Home/layouts/Footer';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -608,7 +609,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                     </div>
 
                     <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                        <div className="event-proxy-notice bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                             <label className="flex items-center gap-3 cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -617,10 +618,10 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                     className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
                                 />
                                 <div>
-                                    <span className="text-base font-semibold text-gray-900">
+                                    <span className="event-proxy-notice__title text-base font-semibold text-gray-900">
                                         Đăng ký thay cho người khác
                                     </span>
-                                    <p className="text-sm text-gray-600 mt-1">
+                                    <p className="event-proxy-notice__description text-sm text-gray-600 mt-1">
                                         Chọn nếu bạn đang đăng ký tham gia cho người thân, bạn bè
                                     </p>
                                 </div>
@@ -786,12 +787,12 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                 </div>
                             </>
                         ) : (
-                            <div className="bg-gradient-to-r from-blue-50 to-blue-50/50 rounded-xl p-4 border border-blue-100">
-                                <h4 className="font-semibold text-blue-700 mb-3 flex items-center gap-2">
+                            <div className="event-proxy-form bg-gradient-to-r from-blue-50 to-blue-50/50 rounded-xl p-4 border border-blue-100">
+                                <h4 className="event-proxy-form__title font-semibold text-blue-700 mb-3 flex items-center gap-2">
                                     <UserPlus className="w-4 h-4" />
                                     Thông tin người được đăng ký thay
                                 </h4>
-                                <p className="text-sm text-blue-600 mb-4">
+                                <p className="event-proxy-form__description text-sm text-blue-600 mb-4">
                                     Vui lòng nhập đầy đủ thông tin của người mà bạn đang đăng ký thay
                                 </p>
 
@@ -1035,6 +1036,7 @@ const EventDetail = () => {
     const navigate = useNavigate();
 
     const [event, setEvent] = useState(null);
+    const [eventTitle, setEventTitle] = useState('Chi tiết sự kiện');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('info');
@@ -1073,6 +1075,18 @@ const EventDetail = () => {
     useEffect(() => {
         fetchEventDetail();
     }, [id]);
+
+    useEffect(() => {
+        const nextTitle =
+            event?.title ||
+            event?.name ||
+            event?.event_name ||
+            event?.eventTitle ||
+            'Chi tiết sự kiện';
+
+        setEventTitle(nextTitle);
+        document.title = `${nextTitle} | Dòng Máu Lạc Hồng`;
+    }, [event]);
 
     useEffect(() => {
         if (event?.province && !isNaN(event.province)) {
@@ -1118,6 +1132,15 @@ const EventDetail = () => {
             const url = endpoints.donation_event_detail.replace('${id}', id);
             const response = await authApis().get(url);
             setEvent(response.data);
+            const responseTitle =
+                response.data?.title ||
+                response.data?.name ||
+                response.data?.event_name ||
+                response.data?.eventTitle;
+            if (responseTitle) {
+                setEventTitle(responseTitle);
+                document.title = `${responseTitle} | Dòng Máu Lạc Hồng`;
+            }
         } catch (err) {
             console.error("Error fetching event detail:", err);
             setError("Không thể tải thông tin sự kiện. Vui lòng thử lại sau.");
@@ -1301,13 +1324,15 @@ const EventDetail = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Header />
-
+            <Helmet>
+                <title>{eventTitle} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
                     <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
-                            ? 'bg-green-500 text-white'
-                            : 'bg-red-500 text-white'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-red-500 text-white'
                         }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
@@ -1352,7 +1377,7 @@ const EventDetail = () => {
                             Sự kiện
                         </button>
                         <span>/</span>
-                        <span className="text-white font-medium">{event.title || 'Chi tiết'}</span>
+                        <span className="text-white font-medium">{eventTitle || 'Chi tiết'}</span>
                     </div>
 
                     <button
@@ -1366,7 +1391,7 @@ const EventDetail = () => {
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
                             <Calendar className="w-8 h-8" />
-                            {event.title}
+                            {eventTitle}
                         </h1>
                         <div className="flex items-center gap-3 mt-2">
                             <span className={`${getStatusColor(event)} text-white px-3 py-1.5 rounded-full text-sm font-semibold shadow-md`}>
@@ -1426,7 +1451,7 @@ const EventDetail = () => {
                                 {event.image_url ? (
                                     <img
                                         src={getImageUrl(event.image_url)}
-                                        alt={event.title}
+                                        alt={eventTitle}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
@@ -1450,8 +1475,8 @@ const EventDetail = () => {
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
                                             className={`py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${activeTab === tab.id
-                                                    ? 'text-red-600'
-                                                    : 'text-gray-500 hover:text-gray-700'
+                                                ? 'text-red-600'
+                                                : 'text-gray-500 hover:text-gray-700'
                                                 }`}
                                         >
                                             <tab.icon className="w-4 h-4" />
@@ -1615,16 +1640,6 @@ const EventDetail = () => {
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Giờ bắt đầu</span>
                                     <span className="font-semibold text-gray-900">{formatTime(event.time_start)}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Số người đăng ký</span>
-                                    <span className="font-semibold text-red-600">{event.registered_count || 0}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Chỉ tiêu dự kiến</span>
-                                    <span className="font-semibold text-gray-900">{event.target || 200}</span>
                                 </div>
 
                                 <div className="flex items-center justify-between">

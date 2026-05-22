@@ -1,5 +1,6 @@
 from django.contrib import admin
-from blooddonorapp.models import Account, RewardCategory, Reward, RecipientInformation, Staff, Hospital, RAGConfig
+from blooddonorapp.models import Account, RewardCategory, Reward, RecipientInformation, Staff, Hospital, RAGConfig, \
+    RewardHistory
 
 
 # Register your models here.
@@ -16,6 +17,24 @@ my_admin_site = MyAdminSite(name='myadmin')
 class RewardInline(admin.TabularInline):
     model = Reward
     extra = 1
+
+
+class RewardHistoryInline(admin.TabularInline):
+    model = RewardHistory
+    extra = 0
+    can_delete = False
+    readonly_fields = ("get_username", "get_reward_name", "quantity", "points_used", "created_at",)
+    fields = ("get_username", "get_reward_name", "quantity", "points_used", "created_at",)
+
+    def get_username(self, obj):
+        return obj.donor.account.username
+
+    get_username.short_description = "Donor"
+
+    def get_reward_name(self, obj):
+        return obj.reward.name
+
+    get_reward_name.short_description = "Reward"
 
 
 class AccountAdmin(admin.ModelAdmin):
@@ -53,9 +72,11 @@ class RewardAdmin(admin.ModelAdmin):
 class RecipientInformationAdmin(admin.ModelAdmin):
     list_display = ("last_name", "first_name", "email", "phone", "province", "sub_district", "recipient_address",
                     "recipient_note", "is_active", "created_at", "updated_at")
-    list_filter = ("is_active", "province", "sub_district",)
-    search_fields = ("last_name", "first_name", "email", "phone",)
+    list_filter = ("is_active", "province", "sub_district")
+    search_fields = ("last_name", "first_name", "email", "phone")
     ordering = ("-created_at",)
+
+    inlines = (RewardHistoryInline,)
 
 
 class HospitalAdmin(admin.ModelAdmin):

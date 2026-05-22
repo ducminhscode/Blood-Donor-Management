@@ -5,6 +5,7 @@ import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue" }) => {
     const getColorClasses = () => {
@@ -377,12 +378,15 @@ const EventMedicalCheckUpDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Kết quả khám sức khỏe | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
                     <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
-                            ? 'bg-green-500 text-white'
-                            : 'bg-red-500 text-white'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-red-500 text-white'
                         }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />

@@ -548,7 +548,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="auth-page min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <Helmet>
         <title>Quên mật khẩu | Dòng Máu Lạc Hồng</title>
       </Helmet>
@@ -571,15 +571,15 @@ const ForgotPassword = () => {
       <div className="max-w-md w-full relative z-10">
         <Link
           to="/login"
-          className="inline-flex items-center text-gray-600 hover:text-red-600 transition-all duration-300 group mb-4"
+          className="forgot-password-back-link inline-flex items-center text-gray-600 hover:text-red-600 transition-all duration-300 group mb-4"
         >
           <ChevronLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Đăng nhập</span>
         </Link>
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+        <div className="auth-card bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
           <div className="p-8">
             <div className="flex items-center justify-center mb-8">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= 1
+              <div className={`forgot-password-step w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= 1
                 ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg'
                 : 'bg-gray-200 text-gray-600'
                 }`}>
@@ -587,7 +587,7 @@ const ForgotPassword = () => {
               </div>
               <div className={`w-12 h-0.5 transition-all duration-300 ${step >= 2 ? 'bg-gradient-to-r from-red-600 to-red-500' : 'bg-gray-200'
                 }`}></div>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= 2
+              <div className={`forgot-password-step w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= 2
                 ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg'
                 : 'bg-gray-200 text-gray-600'
                 }`}>
@@ -595,7 +595,7 @@ const ForgotPassword = () => {
               </div>
               <div className={`w-12 h-0.5 transition-all duration-300 ${step >= 3 ? 'bg-gradient-to-r from-red-600 to-red-500' : 'bg-gray-200'
                 }`}></div>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= 3
+              <div className={`forgot-password-step w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= 3
                 ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg'
                 : 'bg-gray-200 text-gray-600'
                 }`}>
@@ -609,14 +609,14 @@ const ForgotPassword = () => {
 
         {step === 1 && (
           <div className="mt-4 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="forgot-password-help text-xs text-gray-500">
               Nhập thông tin tài khoản để nhận mã xác thực qua email
             </p>
           </div>
         )}
         {step === 2 && (
           <div className="mt-4 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="forgot-password-help text-xs text-gray-500">
               Mã OTP có hiệu lực trong 5 phút. Kiểm tra cả mục Spam nếu không thấy email.
             </p>
           </div>

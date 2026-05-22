@@ -5,6 +5,7 @@ import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import debounce from 'lodash.debounce';
+import { Helmet } from "react-helmet-async";
 
 // Confirm Delete Dialog
 const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loading }) => {
@@ -472,6 +473,7 @@ const StaffEmergencyRequestDetail = () => {
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const patientName = emergency?.patient_name || 'Đang tải tên bệnh nhân';
 
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
         if (bloodType === undefined || rhFactor === undefined) return 'Chưa cập nhật';
@@ -595,6 +597,10 @@ const StaffEmergencyRequestDetail = () => {
         }
     }, [page]);
 
+    useEffect(() => {
+        document.title = `${patientName} | Dòng Máu Lạc Hồng`;
+    }, [patientName]);
+
     const handleEditEmergency = () => {
         setShowEditDialog(true);
     };
@@ -682,6 +688,9 @@ const StaffEmergencyRequestDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>{patientName} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">

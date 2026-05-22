@@ -26,6 +26,7 @@ import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 // Vital Sign Card Component
 const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue" }) => {
@@ -1023,7 +1024,7 @@ const StaffEventMedicalCheckUpDetail = () => {
             const url = endpoints.donation_medical_checkup
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id);
-            
+
             await authApis().patch(url, formData);
             showMessage('Cập nhật phiếu khám sức khỏe thành công!', 'success');
             setShowEditDialog(false);
@@ -1042,11 +1043,11 @@ const StaffEventMedicalCheckUpDetail = () => {
             const url = endpoints.donation_medical_checkup
                 .replace('${id}', id)
                 .replace('${registration_id}', registration_id);
-            
+
             await authApis().delete(url);
             showMessage('Xóa phiếu khám sức khỏe thành công!', 'success');
             setConfirmDeleteDialog({ isOpen: false, title: '', message: '' });
-            
+
             setTimeout(() => {
                 navigate(`/staff-donation-event/${id}/registrations/${registration_id}`);
             }, 1500);
@@ -1147,14 +1148,16 @@ const StaffEventMedicalCheckUpDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Kết quả khám sức khỏe | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -1471,11 +1474,10 @@ const StaffEventMedicalCheckUpDetail = () => {
 
                                 <div className="flex items-center justify-between pt-3">
                                     <span className="text-gray-600">Trạng thái đăng ký</span>
-                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${
-                                        isCompleted 
-                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700' 
+                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${isCompleted
+                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
                                             : 'bg-gradient-to-r from-blue-100 to-blue-100 text-blue-700'
-                                    }`}>
+                                        }`}>
                                         {isCompleted ? 'Đã hoàn thành' : 'Đang tiến hành'}
                                     </span>
                                 </div>

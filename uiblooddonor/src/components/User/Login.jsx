@@ -91,7 +91,7 @@ const Login = () => {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="auth-page min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <Helmet>
         <title>Đăng nhập | Dòng Máu Lạc Hồng</title>
       </Helmet>
@@ -114,13 +114,13 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8 relative z-10">
         <Link
           to="/"
-          className="inline-flex items-center text-gray-600 hover:text-red-600 transition-all duration-300 group mb-4"
+          className="login-home-link inline-flex items-center text-gray-600 hover:text-red-600 transition-all duration-300 group mb-4"
         >
           <ChevronLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Trang chủ</span>
         </Link>
 
-        <div className="bg-white/95 backdrop-blur-sm p-8 sm:p-10 rounded-2xl shadow-2xl border border-gray-100">
+        <div className="auth-card bg-white/95 backdrop-blur-sm p-8 sm:p-10 rounded-2xl shadow-2xl border border-gray-100">
           <div className="text-center">
             <div className="flex justify-center mb-6">
               <div className="relative">
@@ -130,7 +130,7 @@ const Login = () => {
                 </div>
               </div>
             </div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            <h2 className="login-title text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
               Chào mừng trở lại
             </h2>
             <p className="mt-2 text-sm text-gray-500">

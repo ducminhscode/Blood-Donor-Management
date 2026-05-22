@@ -5,8 +5,8 @@ import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import debounce from 'lodash.debounce';
+import { Helmet } from "react-helmet-async";
 
-// Edit Event Dialog Component
 const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
     const [formData, setFormData] = useState({
         title: '',
@@ -524,6 +524,11 @@ const StaffEventListDetail = () => {
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const eventTitle =
+        eventInfo?.title ||
+        eventInfo?.name ||
+        eventInfo?.event_name ||
+        'Chi tiết sự kiện';
 
     const statusConfig = {
         0: { label: 'Đã đăng ký', color: 'bg-gradient-to-r from-blue-500 to-blue-600', textColor: 'text-white', bgColor: 'bg-blue-50' },
@@ -674,6 +679,10 @@ const StaffEventListDetail = () => {
         }
     }, [id]);
 
+    useEffect(() => {
+        document.title = `${eventTitle} | Dòng Máu Lạc Hồng`;
+    }, [eventTitle]);
+
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
@@ -731,6 +740,9 @@ const StaffEventListDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>{eventTitle} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">

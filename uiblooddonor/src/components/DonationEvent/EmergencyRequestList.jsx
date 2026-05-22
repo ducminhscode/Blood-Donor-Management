@@ -8,6 +8,7 @@ import debounce from 'lodash.debounce';
 import Header from '../Home/layouts/Header';
 import Footer from '../Home/layouts/Footer';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 const EmergencyRequestList = () => {
     const [requests, setRequests] = useState([]);
@@ -186,6 +187,9 @@ const EmergencyRequestList = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Hiến máu khẩn cấp | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             <Header />
 
             {/* Hero Section */}
@@ -314,8 +318,8 @@ const EmergencyRequestList = () => {
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng lưới"
                                 >
@@ -324,8 +328,8 @@ const EmergencyRequestList = () => {
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng danh sách"
                                 >
@@ -536,8 +540,8 @@ const EmergencyRequestList = () => {
                                             <Link
                                                 to={`/emergency-request/${request.id}`}
                                                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 ${request.is_expire
-                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                        : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg'
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg'
                                                     }`}
                                                 onClick={(e) => request.is_expire && e.preventDefault()}
                                             >
@@ -620,8 +624,8 @@ const EmergencyRequestList = () => {
                                                 <Link
                                                     to={`/emergency-request/${request.id}`}
                                                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${request.is_expire
-                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md'
+                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                        : 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md'
                                                         }`}
                                                     onClick={(e) => request.is_expire && e.preventDefault()}
                                                 >

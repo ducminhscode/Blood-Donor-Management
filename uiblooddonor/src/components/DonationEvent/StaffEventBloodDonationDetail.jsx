@@ -4,6 +4,7 @@ import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Awar
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
+import { Helmet } from "react-helmet-async";
 
 // Staff Detail Dialog
 const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
@@ -615,12 +616,15 @@ const StaffEventBloodDonationDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Kết quả hiến máu | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
                     <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
-                            ? 'bg-green-500 text-white'
-                            : 'bg-red-500 text-white'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-red-500 text-white'
                         }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
@@ -869,8 +873,8 @@ const StaffEventBloodDonationDetail = () => {
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <span className="text-gray-600">Trạng thái đăng ký</span>
                                     <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold ${isCompleted
-                                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
-                                            : 'bg-gradient-to-r from-blue-100 to-blue-100 text-blue-700'
+                                        ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
+                                        : 'bg-gradient-to-r from-blue-100 to-blue-100 text-blue-700'
                                         }`}>
                                         {isCompleted ? 'Đã hoàn thành' : 'Đang tiến hành'}
                                     </span>

@@ -6,6 +6,7 @@ import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import debounce from 'lodash.debounce';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 // Create Emergency Request Dialog Component
 const CreateEmergencyDialog = ({ isOpen, onClose, onSuccess }) => {
@@ -582,6 +583,9 @@ const StaffEmergencyRequest = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Hiến máu khẩn cấp | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">

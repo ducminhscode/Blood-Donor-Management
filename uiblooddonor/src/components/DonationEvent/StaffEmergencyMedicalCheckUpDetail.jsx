@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, NotebookPen, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, ScaleRuler, Activity, Thermometer, Droplets, AlertTriangle, Stethoscope, Syringe, Pill, Baby, HeartPulse, Brain, Bone, Wind, Shield as ShieldIcon, ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle, User as UserIcon, Calendar as CalendarIcon, Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon, FileHeart, Loader2, PlusCircle, Save, ClipboardCheck, Ambulance, Hospital, Stethoscope as StethoscopeIcon, TrendingUp, Award as AwardIcon, Shield as ShieldIcon2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, NotebookPen, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, Activity, Thermometer, Droplets, AlertTriangle, Stethoscope, Syringe, Pill, Baby, HeartPulse, Brain, Bone, Wind, Shield as ShieldIcon, ThumbsDown, ThumbsUp as ThumbsUpIcon, HelpCircle, User as UserIcon, Calendar as CalendarIcon, Weight, Gauge, Heart as HeartIcon, Thermometer as ThermometerIcon, FileHeart, Loader2, PlusCircle, Save, ClipboardCheck, Ambulance, Hospital, Stethoscope as StethoscopeIcon, TrendingUp, Award as AwardIcon, Shield as ShieldIcon2, Ruler } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
+import { Helmet } from "react-helmet-async";
 
 const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue" }) => {
     const getColorClasses = () => {
@@ -1122,6 +1123,9 @@ const StaffEmergencyMedicalCheckUpDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                    <title>Kết quả khám sức khỏe | Dòng Máu Lạc Hồng</title>
+                </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">

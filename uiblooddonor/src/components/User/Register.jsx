@@ -424,7 +424,7 @@ const Register = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="auth-page min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
             <Helmet>
                 <title>Đăng ký | Dòng Máu Lạc Hồng</title>
             </Helmet>
@@ -445,12 +445,12 @@ const Register = () => {
             <div className="max-w-5xl mx-auto relative z-10">
                 <Link
                     to="/"
-                    className="inline-flex items-center text-gray-600 hover:text-red-600 transition-all duration-300 group mb-4"
+                    className="register-home-link inline-flex items-center text-gray-600 hover:text-red-600 transition-all duration-300 group mb-4"
                 >
                     <ChevronLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                     <span className="text-sm font-medium">Trang chủ</span>
                 </Link>
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+                <div className="auth-card bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
                     <div className="bg-gradient-to-r from-red-600 to-red-500 p-6 text-white">
                         <div className="text-center">
                             <div className="flex justify-center mb-4">

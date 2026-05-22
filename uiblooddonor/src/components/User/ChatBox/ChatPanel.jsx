@@ -17,6 +17,9 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef(null);
   const isInitialLoad = useRef(true);
+  const [isDarkTheme, setIsDarkTheme] = useState(
+    typeof document !== "undefined" && document.documentElement.dataset.theme === "dark"
+  );
 
   if (!user || !selectedUser) return null;
 
@@ -184,6 +187,19 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showEmojiPicker]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+
+    const root = document.documentElement;
+    const syncTheme = () => setIsDarkTheme(root.dataset.theme === "dark");
+    syncTheme();
+
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+    return () => observer.disconnect();
+  }, []);
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
@@ -308,8 +324,8 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white">
-      <div className="px-6 py-5 bg-white border-b border-gray-100 flex items-center justify-between">
+    <div className="chat-panel flex-1 flex flex-col bg-white">
+      <div className="chat-panel-header px-6 py-5 bg-white border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="relative">
             <img
@@ -335,10 +351,10 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-3 bg-gray-50" ref={chatHistoryRef}>
+      <div className="chat-panel-body flex-1 overflow-y-auto p-6 flex flex-col gap-3 bg-gray-50" ref={chatHistoryRef}>
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mb-2">
+            <div className="chat-panel-empty-avatar w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mb-2">
               <img
                 src={getAvatar()}
                 alt={getDisplayName()}
@@ -371,7 +387,7 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
                 )}
                 <div className={`max-w-full px-4 py-3 rounded-2xl ${isOwn
                   ? 'bg-gradient-to-br from-red-500 to-red-600 text-white rounded-br-md shadow-md'
-                  : 'bg-white border border-gray-200 text-gray-700 rounded-bl-md shadow-sm'
+                  : 'chat-panel-message-other bg-white border border-gray-200 text-gray-700 rounded-bl-md shadow-sm'
                   }`}>
                   {isFile ? (
                     <div className="flex items-center gap-2">
@@ -417,12 +433,12 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
         )}
       </div>
 
-      <form className="px-6 py-5 bg-white border-t border-gray-100 flex items-center gap-3" onSubmit={sendMessage}>
+      <form className="chat-panel-form px-6 py-5 bg-white border-t border-gray-100 flex items-center gap-3" onSubmit={sendMessage}>
         <div className="relative emoji-picker-container">
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
+            className="chat-panel-icon-button w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
           >
             <IoHappy size={24} />
           </button>
@@ -432,7 +448,7 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
                 onEmojiClick={handleEmojiClick}
                 width={300}
                 height={400}
-                theme="light"
+                theme={isDarkTheme ? "dark" : "light"}
                 searchPlaceholder="Tìm kiếm emoji..."
               />
             </div>
@@ -442,7 +458,7 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
+          className="chat-panel-icon-button w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
         >
           <IoAttach size={22} />
         </button>
@@ -461,7 +477,7 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
           onChange={e => setText(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Nhập tin nhắn"
-          className="flex-1 px-5 py-3 border-2 border-gray-200 rounded-full text-sm outline-none transition-all duration-200 bg-gray-50 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-100"
+          className="chat-panel-input flex-1 px-5 py-3 border-2 border-gray-200 rounded-full text-sm outline-none transition-all duration-200 bg-gray-50 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-100"
         />
 
         <button

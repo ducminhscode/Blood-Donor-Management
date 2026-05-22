@@ -111,7 +111,7 @@ const Header = () => {
                                 <div className="hidden sm:flex items-center space-x-2">
                                     <Link
                                         to="/login"
-                                        className="group relative px-5 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-all duration-300 rounded-xl overflow-hidden"
+                                        className="home-login-link group relative px-5 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-all duration-300 rounded-xl overflow-hidden"
                                     >
                                         <span className="relative z-10">Đăng nhập</span>
                                         <div className="absolute inset-0 bg-red-50 scale-0 group-hover:scale-100 transition-transform duration-300 rounded-xl"></div>

@@ -25,6 +25,7 @@ import { authApis, endpoints } from '../../configs/APIs';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { Helmet } from "react-helmet-async";
 
 // Map Component
 const OpenStreetMap = ({ location, province, subDistrict }) => {
@@ -804,10 +805,15 @@ const StaffRegistrationDetail = () => {
         title: '',
         message: ''
     });
+    const registrantName = `${registration?.last_name || ''} ${registration?.first_name || ''}`.trim() || 'Đang tải người đăng ký';
 
     useEffect(() => {
         fetchRegistrationDetail();
     }, [id, registration_id]);
+
+    useEffect(() => {
+        document.title = `${registrantName} | Dòng Máu Lạc Hồng`;
+    }, [registrantName]);
 
     const fetchRegistrationDetail = async () => {
         setLoading(true);
@@ -941,6 +947,9 @@ const StaffRegistrationDetail = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+                <Helmet>
+                    <title>{registrantName} | Dòng Máu Lạc Hồng</title>
+                </Helmet>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="bg-white rounded-3xl shadow-xl p-8">
                         <div className="animate-pulse">
@@ -968,6 +977,9 @@ const StaffRegistrationDetail = () => {
     if (error || !registration) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+                <Helmet>
+                    <title>{registrantName} | Dòng Máu Lạc Hồng</title>
+                </Helmet>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
                         <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -998,14 +1010,16 @@ const StaffRegistrationDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>{registrantName} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Message Toast */}
             {message.text && (
                 <div className="fixed top-24 right-4 z-[1000] animate-slideInRight">
-                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${
-                        message.type === 'success'
+                    <div className={`p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-sm ${message.type === 'success'
                             ? 'bg-green-500 text-white'
                             : 'bg-red-500 text-white'
-                    }`}>
+                        }`}>
                         {message.type === 'success'
                             ? <CheckCircle className="w-5 h-5" />
                             : <AlertCircle className="w-5 h-5" />
@@ -1143,11 +1157,10 @@ const StaffRegistrationDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${
-                                                activeTab === tab.id
+                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
                                                     ? 'text-red-600'
                                                     : 'text-gray-500 hover:text-gray-700'
-                                            }`}
+                                                }`}
                                         >
                                             <tab.icon className="w-4 h-4" />
                                             {tab.label}

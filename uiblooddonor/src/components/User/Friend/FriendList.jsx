@@ -15,6 +15,7 @@ import { authApis, endpoints } from '../../../configs/APIs';
 import { getImageUrl } from '../../../utils/Image';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from "react-helmet-async";
 
 const FriendList = () => {
     const [friends, setFriends] = useState([]);
@@ -251,6 +252,9 @@ const FriendList = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Danh sách bạn bè | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">

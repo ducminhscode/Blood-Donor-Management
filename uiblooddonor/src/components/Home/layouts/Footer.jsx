@@ -541,7 +541,7 @@ const FooterChatbot = () => {
   return (
     <div ref={containerRef} className="fixed bottom-8 right-8 z-50 flex flex-col items-end space-y-4">
       {open && (
-        <div className="w-[64rem] h-[34rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_28px_90px_rgba(15,23,42,0.24)] backdrop-blur-2xl animate-slideUp">
+        <div className="chatbot-shell w-[64rem] h-[34rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_28px_90px_rgba(15,23,42,0.24)] backdrop-blur-2xl animate-slideUp">
           <div className="relative overflow-hidden border-b border-white/20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.22),_transparent_36%),linear-gradient(135deg,_#7f1d1d,_#dc2626_58%,_#fb7185)] px-5 py-4 text-white">
             <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 42%, rgba(255,255,255,0.08) 100%)" }}></div>
             <div className="relative flex items-center justify-between gap-4">
@@ -569,9 +569,9 @@ const FooterChatbot = () => {
             </div>
           </div>
 
-          <div className="grid min-h-[30rem] grid-cols-[19rem_minmax(0,1fr)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.96))] max-md:grid-cols-1">
-            <aside className="border-r border-slate-200/80 bg-[linear-gradient(180deg,#fff7f7_0%,#fff_100%)]">
-              <div className="border-b border-slate-200/80 bg-white/80 px-4 py-4 backdrop-blur-sm">
+          <div className="chatbot-panel grid min-h-[30rem] grid-cols-[19rem_minmax(0,1fr)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.96))] max-md:grid-cols-1">
+            <aside className="chatbot-sidebar border-r border-slate-200/80 bg-[linear-gradient(180deg,#fff7f7_0%,#fff_100%)]">
+              <div className="chatbot-sidebar-header border-b border-slate-200/80 bg-white/80 px-4 py-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900">Các đoạn chat của bạn</h4>
@@ -605,7 +605,7 @@ const FooterChatbot = () => {
                     return (
                       <div
                         key={session.session_code}
-                        className={`rounded-2xl border p-3 transition-all duration-300 ${isActive ? "border-red-200 bg-gradient-to-br from-red-50 via-white to-rose-50 shadow-[0_12px_30px_rgba(239,68,68,0.12)]" : "border-slate-200/80 bg-white/90 hover:-translate-y-0.5 hover:border-red-100 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)]"
+                        className={`chatbot-session-card rounded-2xl border p-3 transition-all duration-300 ${isActive ? "chatbot-session-card-active border-red-200 bg-gradient-to-br from-red-50 via-white to-rose-50 shadow-[0_12px_30px_rgba(239,68,68,0.12)]" : "border-slate-200/80 bg-white/90 hover:-translate-y-0.5 hover:border-red-100 hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)]"
                           }`}
                       >
                         {isEditing ? (
@@ -676,10 +676,10 @@ const FooterChatbot = () => {
               </div>
             </aside>
 
-            <section className="flex min-w-0 flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.96))]">
+            <section className="chatbot-main flex min-w-0 flex-col bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(248,250,252,0.96))]">
               <div
                 ref={chatBodyRef}
-                className="h-[21rem] overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(254,242,242,0.85),_rgba(255,255,255,0)_32%),linear-gradient(180deg,#fff7f7_0%,#ffffff_28%,#f8fafc_100%)] px-5 py-5"
+                className="chatbot-body h-[21rem] overflow-y-auto bg-[radial-gradient(circle_at_top,_rgba(254,242,242,0.85),_rgba(255,255,255,0)_32%),linear-gradient(180deg,#fff7f7_0%,#ffffff_28%,#f8fafc_100%)] px-5 py-5"
               >
                 {loading ? (
                   <div className="flex h-full flex-col items-center justify-center gap-3 text-slate-500">
@@ -692,7 +692,7 @@ const FooterChatbot = () => {
                       <div className="w-9 h-9 bg-gradient-to-br from-red-500 to-red-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md">
                         <Bot className="w-4 h-4 text-white" />
                       </div>
-                      <div className="bg-white rounded-2xl rounded-tl-md p-3 shadow-sm max-w-[320px] border border-red-100">
+                      <div className="chatbot-welcome-bubble bg-white rounded-2xl rounded-tl-md p-3 shadow-sm max-w-[320px] border border-red-100">
                         <p className="text-sm text-gray-700">
                           Xin chào. Tôi có thể hỗ trợ thông tin về hiến máu và tư vấn y tế cơ bản cho bạn.
                         </p>
@@ -711,7 +711,7 @@ const FooterChatbot = () => {
                             <div
                               className={`whitespace-pre-wrap break-words rounded-[22px] px-4 py-3 text-sm leading-6 shadow-sm ${isHuman
                                 ? "rounded-br-md bg-[linear-gradient(135deg,#dc2626,#fb7185)] text-white shadow-[0_14px_30px_rgba(239,68,68,0.28)]"
-                                : "rounded-bl-md border border-white/80 bg-white/92 text-slate-800 shadow-[0_12px_28px_rgba(15,23,42,0.08)] backdrop-blur-sm"
+                                : "chatbot-ai-bubble rounded-bl-md border border-white/80 bg-white/92 text-slate-800 shadow-[0_12px_28px_rgba(15,23,42,0.08)] backdrop-blur-sm"
                                 }`}
                             >
                               {item.isStreaming && !item.text ? (
@@ -757,13 +757,13 @@ const FooterChatbot = () => {
                     })}
 
                     {!loading && !messages.length && (
-                      <div className="mt-8 rounded-[24px] border border-dashed border-slate-200 bg-white/70 px-5 py-8 text-center text-sm text-slate-400">
+                      <div className="chatbot-empty-state mt-8 rounded-[24px] border border-dashed border-slate-200 bg-white/70 px-5 py-8 text-center text-sm text-slate-400">
                         Hãy bắt đầu bằng một câu hỏi ngắn để chatbot tư vấn y tế.
                       </div>
                     )}
 
                     {error && (
-                      <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50/95 px-3 py-2.5 text-sm text-amber-800 shadow-sm">
+                      <div className="chatbot-error-banner mt-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50/95 px-3 py-2.5 text-sm text-amber-800 shadow-sm">
                         <CircleAlert className="w-4 h-4 mt-0.5 flex-shrink-0" />
                         <span>{error}</span>
                       </div>
@@ -772,10 +772,10 @@ const FooterChatbot = () => {
                 )}
               </div>
 
-              <form onSubmit={handleSubmit} className="border-t border-slate-200/80 bg-white/85 px-5 py-4 backdrop-blur-sm">
-                <div className="rounded-[28px] border border-slate-200/80 bg-white/95 p-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+              <form onSubmit={handleSubmit} className="chatbot-form border-t border-slate-200/80 bg-white/85 px-5 py-4 backdrop-blur-sm">
+                <div className="chatbot-form-shell rounded-[28px] border border-slate-200/80 bg-white/95 p-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
                   <div className="flex items-end gap-2">
-                    <div className="flex min-h-[52px] flex-1 items-end rounded-[22px] bg-slate-50/80 px-2">
+                    <div className="chatbot-input-wrap flex min-h-[52px] flex-1 items-end rounded-[22px] bg-slate-50/80 px-2">
                       <textarea
                         value={input}
                         onChange={(event) => setInput(event.target.value)}
@@ -830,7 +830,7 @@ const FooterChatbot = () => {
         </div>
 
         <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
-          <div className="whitespace-nowrap rounded-xl border border-slate-700/80 bg-slate-900/95 px-3 py-1.5 text-sm text-white shadow-xl backdrop-blur-sm">
+          <div className="chatbot-launcher-tooltip whitespace-nowrap rounded-xl border border-slate-700/80 bg-slate-900/95 px-3 py-1.5 text-sm text-white shadow-xl backdrop-blur-sm">
             {open ? "Đóng chat" : "Chatbot tư vấn y tế"}
             <span className="absolute top-1/2 -right-1 -translate-y-1/2 border-4 border-transparent border-l-gray-800"></span>
           </div>

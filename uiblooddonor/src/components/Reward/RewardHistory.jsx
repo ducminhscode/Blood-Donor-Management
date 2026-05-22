@@ -19,6 +19,7 @@ import { getImageUrl } from '../../utils/Image';
 import { UserContexts } from '../../configs/UserContexts';
 import debounce from 'lodash.debounce';
 import { formatDateTime } from '../../utils/Format';
+import { Helmet } from "react-helmet-async";
 
 const RewardHistory = () => {
     const [histories, setHistories] = useState([]);
@@ -96,7 +97,7 @@ const RewardHistory = () => {
 
         } catch (error) {
             console.error("Error fetching reward history:", error);
-            setError("Không thể tải lịch sử đổi quà. Vui lòng thử lại sau");
+            setError("Không thể tải lịch sử đổi thưởng. Vui lòng thử lại sau");
         } finally {
             if (isLoadMore) {
                 setLoadingMore(false);
@@ -247,6 +248,9 @@ const RewardHistory = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Lịch sử đổi thưởng | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">
@@ -276,18 +280,18 @@ const RewardHistory = () => {
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                                 <Sparkles className="w-4 h-4" />
-                                <span className="text-sm font-medium">Lịch sử lượt đổi quà của bạn</span>
+                                <span className="text-sm font-medium">Lịch sử lượt đổi thưởng của bạn</span>
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
                                 <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
                                     <History className="w-10 h-10" />
                                 </div>
-                                <h1 className="text-4xl md:text-5xl font-bold">Lịch sử đổi quà</h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Lịch sử đổi thưởng</h1>
                             </div>
 
                             <p className="text-lg text-red-100 max-w-2xl">
-                                Theo dõi chi tiết các lượt đổi quà của bạn
+                                Theo dõi chi tiết các lượt đổi thưởng của bạn
                             </p>
 
                             <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
@@ -297,7 +301,7 @@ const RewardHistory = () => {
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold">{stats.total}</div>
-                                        <div className="text-sm text-white/80">Lượt đổi quà</div>
+                                        <div className="text-sm text-white/80">Lượt đổi thưởng</div>
                                     </div>
                                 </div>
                             </div>
@@ -669,18 +673,18 @@ const RewardHistory = () => {
 
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
                             {selectedDate
-                                ? `Không có lượt đổi quà ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')}`
+                                ? `Không có lượt đổi thưởng ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')}`
                                 : searchTerm
-                                    ? "Không tìm thấy lượt đổi quà phù hợp"
-                                    : "Chưa có lượt đổi quà nào"}
+                                    ? "Không tìm thấy lượt đổi thưởng phù hợp"
+                                    : "Chưa có lượt đổi thưởng nào"}
                         </h3>
 
                         <p className="text-gray-600 mb-6 max-w-md mx-auto">
                             {selectedDate
-                                ? "Hãy chọn ngày khác để xem lịch sử đổi quà"
+                                ? "Hãy chọn ngày khác để xem lịch sử đổi thưởng"
                                 : searchTerm
                                     ? "Thử tìm kiếm với từ khóa khác"
-                                    : "Bạn chưa thực hiện lượt đổi quà nào. Hãy khám phá các quà tặng hấp dẫn!"}
+                                    : "Bạn chưa thực hiện lượt đổi thưởng nào. Hãy khám phá các quà tặng hấp dẫn!"}
                         </p>
 
                         {(selectedDate || searchTerm) && (
@@ -708,7 +712,7 @@ const RewardHistory = () => {
                                     <span className="font-bold text-lg">{filteredHistories.length}</span>
                                 </div>
                                 <span className="text-gray-600">
-                                    lượt đổi quà
+                                    lượt đổi thưởng
                                     {selectedDate && ` ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')}`}
                                     {searchTerm && " phù hợp với tìm kiếm"}
                                 </span>
@@ -838,16 +842,6 @@ const RewardHistory = () => {
                                                             </div>
 
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
-                                                                    history.status === 'completed'
-                                                                        ? 'bg-green-50 text-green-600'
-                                                                        : history.status === 'pending'
-                                                                        ? 'bg-yellow-50 text-yellow-600'
-                                                                        : 'bg-red-50 text-red-600'
-                                                                }`}>
-                                                                    {history.status === 'completed' ? 'Đã giao' : 
-                                                                     history.status === 'pending' ? 'Đang xử lý' : 'Đã hủy'}
-                                                                </span>
                                                                 <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
                                                                     {expandedId === history.id ? (
                                                                         <ChevronUp className="w-5 h-5" />
@@ -910,7 +904,7 @@ const RewardHistory = () => {
                                                                     <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
                                                                         <h5 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                                                             <ShoppingBag className="w-4 h-4 text-red-500" />
-                                                                            Chi tiết đổi quà
+                                                                            Chi tiết đổi thưởng
                                                                         </h5>
                                                                         <div className="space-y-2">
                                                                             <div className="flex justify-between">
@@ -974,7 +968,7 @@ const RewardHistory = () => {
                             <div className="text-center mt-8">
                                 <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
                                     <CheckCircle className="w-5 h-5 text-green-500" />
-                                    <span>Đã hiển thị tất cả {totalItems} lượt đổi quà</span>
+                                    <span>Đã hiển thị tất cả {totalItems} lượt đổi thưởng</span>
                                 </div>
                             </div>
                         )}
@@ -997,7 +991,7 @@ const RewardHistory = () => {
                                 </button>
                                 <div className="flex items-center gap-3">
                                     <Gift className="w-6 h-6" />
-                                    <h3 className="text-xl font-bold">Chi tiết đổi quà</h3>
+                                    <h3 className="text-xl font-bold">Chi tiết đổi thưởng</h3>
                                 </div>
                             </div>
 
@@ -1084,7 +1078,7 @@ const RewardHistory = () => {
                                         <div className="bg-gray-50 rounded-xl p-4">
                                             <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                                 <ShoppingBag className="w-4 h-4 text-red-500" />
-                                                Chi tiết đổi quà
+                                                Chi tiết đổi thưởng
                                             </h4>
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">

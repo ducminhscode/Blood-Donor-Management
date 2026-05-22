@@ -15,6 +15,7 @@ import {
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 const RewardDetail = () => {
     const { id, reward_id } = useParams();
@@ -22,6 +23,7 @@ const RewardDetail = () => {
     const location = useLocation();
 
     const [reward, setReward] = useState(null);
+    const [rewardTitle, setRewardTitle] = useState('Chi tiết phần thưởng');
     const [loading, setLoading] = useState(false);
     const [redeeming, setRedeeming] = useState(false);
     const [quantity, setQuantity] = useState(1);
@@ -60,6 +62,18 @@ const RewardDetail = () => {
     }, [id, reward_id]);
 
     useEffect(() => {
+        const nextTitle =
+            location.state?.rewardName ||
+            reward?.name ||
+            reward?.reward_name ||
+            reward?.title ||
+            'Chi tiết phần thưởng';
+
+        setRewardTitle(nextTitle);
+        document.title = `${nextTitle} | Dòng Máu Lạc Hồng`;
+    }, [location.state, reward]);
+
+    useEffect(() => {
         setRedeemForm(prev => ({ ...prev, quantity }));
     }, [quantity]);
 
@@ -95,6 +109,10 @@ const RewardDetail = () => {
                 .replace('${reward_id}', reward_id);
             const response = await authApis().get(url);
             setReward(response.data);
+            const responseName = response.data?.name || response.data?.reward_name || response.data?.title;
+            if (responseName) {
+                setRewardTitle(responseName);
+            }
         } catch (error) {
             console.error("Error fetching reward detail:", error);
         } finally {
@@ -309,6 +327,9 @@ const RewardDetail = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>{rewardTitle} | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
                 <div className="absolute inset-0 opacity-10">
@@ -350,7 +371,7 @@ const RewardDetail = () => {
                             {reward?.reward_category?.name || 'Quà tặng'}
                         </button>
                         <span>/</span>
-                        <span className="text-white font-medium">Chi tiết</span>
+                        <span className="text-white font-medium">{rewardTitle}</span>
                     </div>
 
                     <button

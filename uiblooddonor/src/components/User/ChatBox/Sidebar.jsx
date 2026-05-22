@@ -118,8 +118,8 @@ export default function Sidebar({
     };
 
     return (
-        <div className="w-[380px] bg-white border-r border-gray-100 flex flex-col">
-            <div className="p-6 border-b border-gray-100">
+        <div className="chat-sidebar w-[380px] bg-white border-r border-gray-100 flex flex-col">
+            <div className="chat-sidebar-header p-6 border-b border-gray-100">
                 <div className="flex items-center gap-2.5 mb-5">
                     <MessageSquare className="text-red-500" size={20} />
                     <h3 className="text-xl font-bold text-gray-900 m-0">Tin nhắn</h3>
@@ -137,12 +137,12 @@ export default function Sidebar({
                         placeholder="Tìm kiếm bạn bè..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full py-3 pl-10 pr-3 border border-gray-200 rounded-full text-sm bg-gray-50 transition-all duration-200 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-100"
+                        className="chat-sidebar-search w-full py-3 pl-10 pr-3 border border-gray-200 rounded-full text-sm bg-gray-50 transition-all duration-200 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-100"
                     />
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-2" onScroll={handleScroll}>
+            <div className="chat-sidebar-list flex-1 overflow-y-auto p-2" onScroll={handleScroll}>
                 {loading && users.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 px-6 text-gray-400">
                         <Loader2 className="animate-spin mb-3" size={32} />
@@ -170,8 +170,8 @@ export default function Sidebar({
                         return (
                             <div
                                 key={email || u.id}
-                                className={`flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-200 mb-1 ${isActive
-                                    ? 'bg-red-50 border-l-3 border-l-red-500'
+                                className={`chat-sidebar-item flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-200 mb-1 ${isActive
+                                    ? 'chat-sidebar-item-active bg-red-50 border-l-3 border-l-red-500'
                                     : 'hover:bg-gray-50'
                                     }`}
                                 onClick={() => onSelect(u)}

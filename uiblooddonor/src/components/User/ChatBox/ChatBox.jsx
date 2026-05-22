@@ -182,11 +182,11 @@ export default function ChatBox() {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 p-4">
+        <div className="chat-page min-h-screen bg-gradient-to-br from-red-50 to-orange-50 p-4">
             <Helmet>
                 <title>Trò chuyện | Dòng Máu Lạc Hồng</title>
                 </Helmet>
-            <div className="max-w-[1400px] mx-auto h-[calc(87vh-2rem)] bg-white rounded-2xl shadow-2xl overflow-hidden flex">
+            <div className="chat-shell max-w-[1400px] mx-auto h-[calc(87vh-2rem)] bg-white rounded-2xl shadow-2xl overflow-hidden flex">
                 <Sidebar
                     users={users}
                     currentEmail={user.email}
@@ -204,7 +204,7 @@ export default function ChatBox() {
                         onMessagesRead={markMessagesAsRead}
                     />
                 ) : (
-                    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-red-50/30 to-orange-50/30">
+                    <div className="chat-empty-state flex-1 flex items-center justify-center bg-gradient-to-br from-red-50/30 to-orange-50/30">
                         <div className="text-center px-8">
                             <div className="relative mb-8 inline-block">
                                 <MessageCircle
@@ -219,7 +219,7 @@ export default function ChatBox() {
                             <p className="text-gray-500 mb-6 leading-relaxed">
                                 Chọn một người bạn từ danh sách bên trái để bắt đầu trò chuyện
                             </p>
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200">
+                            <div className="chat-empty-pill inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200">
                                 <Users size={18} className="text-red-400" />
                                 <span className="text-sm text-gray-600 font-medium">
                                     {users.length} người bạn

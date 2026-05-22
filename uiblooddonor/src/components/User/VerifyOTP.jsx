@@ -290,7 +290,7 @@ const VerifyOTP = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="auth-page min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
             <Helmet>
                 <title>Xác thực OTP | Dòng Máu Lạc Hồng</title>
             </Helmet>
@@ -318,7 +318,7 @@ const VerifyOTP = () => {
                     <ChevronLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                     <span className="text-sm font-medium">Đăng ký</span>
                 </Link>
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+                <div className="auth-card bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
 
                     <div className="p-8">
                         <div className="text-center mb-8">
@@ -330,7 +330,7 @@ const VerifyOTP = () => {
                                     </div>
                                 </div>
                             </div>
-                            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                            <h2 className="verify-otp-title text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                                 Xác thực tài khoản
                             </h2>
                             <div className="mt-3">

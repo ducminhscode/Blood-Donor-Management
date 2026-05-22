@@ -6,6 +6,7 @@ import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
 import debounce from 'lodash.debounce';
 import { UserContexts } from '../../configs/UserContexts';
+import { Helmet } from "react-helmet-async";
 
 const EmergencyResponse = () => {
     const [responses, setResponses] = useState([]);
@@ -229,6 +230,9 @@ const EmergencyResponse = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <Helmet>
+                <title>Khẩn cấp đã ứng cứu | Dòng Máu Lạc Hồng</title>
+            </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white">
                 <div className="absolute inset-0 opacity-10">
@@ -405,8 +409,8 @@ const EmergencyResponse = () => {
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng lưới"
                                 >
@@ -415,8 +419,8 @@ const EmergencyResponse = () => {
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
-                                            ? 'bg-white text-red-600 shadow-md'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-red-600 shadow-md'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     title="Xem dạng danh sách"
                                 >
@@ -478,8 +482,8 @@ const EmergencyResponse = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`px-3 py-2 rounded-lg border transition-all ${selectedStatus === 'all'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             Tất cả
@@ -490,8 +494,8 @@ const EmergencyResponse = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`px-3 py-2 rounded-lg border transition-all ${selectedStatus === '1'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             Đã chấp nhận
@@ -502,8 +506,8 @@ const EmergencyResponse = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`px-3 py-2 rounded-lg border transition-all ${selectedStatus === '2'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             Đã từ chối
@@ -540,8 +544,8 @@ const EmergencyResponse = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             <Grid className="w-4 h-4" />
@@ -553,8 +557,8 @@ const EmergencyResponse = () => {
                                                 setShowFilters(false);
                                             }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
-                                                    ? 'border-red-500 bg-red-50 text-red-600'
-                                                    : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-red-500 bg-red-50 text-red-600'
+                                                : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
                                         >
                                             <List className="w-4 h-4" />
