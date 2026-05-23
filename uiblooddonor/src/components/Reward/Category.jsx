@@ -272,7 +272,7 @@ const Category = () => {
             <Helmet>
                 <title>Đổi thưởng | Dòng Máu Lạc Hồng</title>
             </Helmet>
-            <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
+            <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-yellow-300 rounded-full blur-3xl"></div>

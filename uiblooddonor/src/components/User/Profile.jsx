@@ -432,7 +432,7 @@ const Profile = () => {
             <Helmet>
                 <title>Thông tin cá nhân | Dòng Máu Lạc Hồng</title>
             </Helmet>
-            <div className="relative h-64 lg:h-80 bg-gradient-to-r from-red-600 via-red-500 to-orange-500 overflow-hidden">
+            <div className="relative h-64 lg:h-80 bg-gradient-to-r from-red-700 via-red-600 to-red-500 overflow-hidden">
                 <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute inset-0" style={{
@@ -476,7 +476,7 @@ const Profile = () => {
                             </div>
 
                             <div className="flex-1">
-                                <div className="flex flex-wrap items-center gap-3 mb-2">
+                                <div className="flex flex-wrap items-center gap-3 mb-4">
                                     <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                                         {editForm.last_name} {editForm.first_name}
                                     </h1>
@@ -488,11 +488,11 @@ const Profile = () => {
                                     )}
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium flex items-center gap-1">
+                                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium flex items-center gap-1">
                                         <User className="w-3 h-3" />
                                         {user?.username}
                                     </span>
-                                    <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${user?.role === 1 ? "bg-green-100 text-green-700" :
+                                    <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${user?.role === 1 ? "bg-red-100 text-red-700" :
                                         user?.role === 2 ? "bg-blue-100 text-blue-700" :
                                             "bg-purple-100 text-purple-700"
                                         }`}>
@@ -569,7 +569,6 @@ const Profile = () => {
                                             onClick={() => setIsEditing(true)}
                                             className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
                                         >
-                                            <Edit2 className="w-4 h-4" />
                                             Chỉnh sửa
                                         </button>
                                     ) : (
@@ -579,19 +578,16 @@ const Profile = () => {
                                                 disabled={loading}
                                                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-300 disabled:opacity-50"
                                             >
-                                                {loading ? (
+                                                {loading && (
                                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                ) : (
-                                                    <Save className="w-4 h-4" />
                                                 )}
                                                 Lưu
                                             </button>
                                             <button
                                                 onClick={handleCancelEdit}
                                                 disabled={loading}
-                                                className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 disabled:opacity-50"
+                                                className="profile-cancel-button flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 disabled:opacity-50"
                                             >
-                                                <X className="w-4 h-4" />
                                                 Hủy
                                             </button>
                                         </div>
@@ -748,7 +744,6 @@ const Profile = () => {
                                                 onClick={() => setIsEditingDonor(true)}
                                                 className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
                                             >
-                                                <Edit2 className="w-4 h-4" />
                                                 Chỉnh sửa
                                             </button>
                                         ) : (
@@ -758,19 +753,16 @@ const Profile = () => {
                                                     disabled={loading}
                                                     className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-300 disabled:opacity-50"
                                                 >
-                                                    {loading ? (
+                                                    {loading && (
                                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                    ) : (
-                                                        <Save className="w-4 h-4" />
                                                     )}
                                                     Lưu
                                                 </button>
                                                 <button
                                                     onClick={handleCancelDonorEdit}
                                                     disabled={loading}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 disabled:opacity-50"
+                                                    className="profile-cancel-button flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 disabled:opacity-50"
                                                 >
-                                                    <X className="w-4 h-4" />
                                                     Hủy
                                                 </button>
                                             </div>
@@ -991,7 +983,6 @@ const Profile = () => {
                                 <div className="bg-white rounded-2xl shadow-lg overflow-visible">
                                     <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                            <Stethoscope className="w-5 h-5 text-red-600" />
                                             Thông tin nhân viên y tế
                                         </h2>
                                         {!isEditingStaff ? (
@@ -999,7 +990,6 @@ const Profile = () => {
                                                 onClick={() => setIsEditingStaff(true)}
                                                 className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300"
                                             >
-                                                <Edit2 className="w-4 h-4" />
                                                 Chỉnh sửa
                                             </button>
                                         ) : (
@@ -1009,19 +999,16 @@ const Profile = () => {
                                                     disabled={loading}
                                                     className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-300 disabled:opacity-50"
                                                 >
-                                                    {loading ? (
+                                                    {loading && (
                                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                    ) : (
-                                                        <Save className="w-4 h-4" />
                                                     )}
                                                     Lưu
                                                 </button>
                                                 <button
                                                     onClick={handleCancelStaffEdit}
                                                     disabled={loading}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300 disabled:opacity-50"
+                                                    className="profile-cancel-button flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 disabled:opacity-50"
                                                 >
-                                                    <X className="w-4 h-4" />
                                                     Hủy
                                                 </button>
                                             </div>
@@ -1185,9 +1172,8 @@ const Profile = () => {
                                         </h2>
                                         <button
                                             onClick={handleCancelPasswordChange}
-                                            className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-300"
+                                            className="profile-cancel-button flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300"
                                         >
-                                            <X className="w-4 h-4" />
                                             Hủy
                                         </button>
                                     </div>
@@ -1291,7 +1277,6 @@ const Profile = () => {
                             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                                 <div className="p-6 border-b border-gray-100">
                                     <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                        <Settings className="w-5 h-5 text-red-600" />
                                         Cài đặt tài khoản
                                     </h2>
                                 </div>

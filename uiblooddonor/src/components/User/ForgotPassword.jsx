@@ -270,7 +270,7 @@ const ForgotPassword = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300"
-                  placeholder="Email của bạn"
+                  placeholder="Email của tài khoản"
                 />
               </div>
             </div>
