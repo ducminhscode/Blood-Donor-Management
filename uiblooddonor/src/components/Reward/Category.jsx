@@ -295,7 +295,7 @@ const Category = () => {
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 pb-20">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 pb-20 min-h-[22rem] flex flex-col justify-center">
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
@@ -304,9 +304,6 @@ const Category = () => {
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Package className="w-10 h-10" />
-                                </div>
                                 <h1 className="text-4xl md:text-5xl font-bold">Kho đổi thưởng</h1>
                             </div>
 
@@ -376,7 +373,7 @@ const Category = () => {
                                     <button
                                         type="button"
                                         onClick={handleClearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -387,7 +384,7 @@ const Category = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <Filter className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
@@ -405,7 +402,7 @@ const Category = () => {
                                 }}
                             >
                                 <button
-                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[100px] justify-between"
+                                    className="cursor-pointer flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[100px] justify-between"
                                 >
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-700 font-medium">{getNameSortLabel()}</span>
@@ -430,7 +427,7 @@ const Category = () => {
                                                 <button
                                                     key={option.value}
                                                     onClick={() => handleNameSortSelect(option)}
-                                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                    className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                                 >
                                                     <span>{option.label}</span>
                                                 </button>
@@ -452,7 +449,7 @@ const Category = () => {
                                 }}
                             >
                                 <button
-                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[120px] justify-between"
+                                    className="cursor-pointer flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[120px] justify-between"
                                 >
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-700 font-medium">{getRewardsSortLabel()}</span>
@@ -477,7 +474,7 @@ const Category = () => {
                                                 <button
                                                     key={option.value}
                                                     onClick={() => handleRewardsSortSelect(option)}
-                                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                    className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                                 >
                                                     <span>{option.label}</span>
                                                 </button>
@@ -490,7 +487,7 @@ const Category = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -500,7 +497,7 @@ const Category = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -518,7 +515,7 @@ const Category = () => {
                                 <h3 className="font-semibold text-gray-900">Bộ lọc & Sắp xếp</h3>
                                 <button
                                     onClick={() => setShowFilters(false)}
-                                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                                    className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition-colors"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -536,7 +533,7 @@ const Category = () => {
                                                         handleNameSortSelect(option);
                                                         setShowFilters(false);
                                                     }}
-                                                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isSelected
+                                                    className={`cursor-pointer w-full flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isSelected
                                                         ? 'border-red-500 bg-red-50 text-red-600'
                                                         : 'border-gray-200 hover:border-gray-300'
                                                         }`}
@@ -559,7 +556,7 @@ const Category = () => {
                                                         handleRewardsSortSelect(option);
                                                         setShowFilters(false);
                                                     }}
-                                                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isSelected
+                                                    className={`cursor-pointer w-full flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${isSelected
                                                         ? 'border-red-500 bg-red-50 text-red-600'
                                                         : 'border-gray-200 hover:border-gray-300'
                                                         }`}
@@ -578,7 +575,7 @@ const Category = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300'
                                                 }`}
@@ -591,7 +588,7 @@ const Category = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300'
                                                 }`}
@@ -612,7 +609,7 @@ const Category = () => {
                                 <span>Tìm kiếm: "{searchTerm}"</span>
                                 <button
                                     onClick={handleClearSearch}
-                                    className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                    className="cursor-pointer p-1 hover:bg-white/20 rounded-lg transition-colors"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
@@ -638,7 +635,7 @@ const Category = () => {
                         <button
                             onClick={handleRefresh}
                             disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                            className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                         >
                             <svg
                                 className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`}
@@ -686,7 +683,7 @@ const Category = () => {
                                 </div>
                                 <button
                                     onClick={handleRefresh}
-                                    className="ml-auto px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer ml-auto px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
                                 </button>
@@ -719,7 +716,7 @@ const Category = () => {
                         {searchTerm && (
                             <button
                                 onClick={handleClearSearch}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <X className="w-5 h-5" />
                                 Xóa tìm kiếm
@@ -812,7 +809,7 @@ const Category = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -822,7 +819,6 @@ const Category = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm danh mục</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>

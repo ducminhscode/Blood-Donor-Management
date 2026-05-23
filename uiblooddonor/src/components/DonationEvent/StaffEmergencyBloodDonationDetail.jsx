@@ -659,7 +659,7 @@ const StaffEmergencyBloodDonationDetail = () => {
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20 min-h-[22rem] flex flex-col justify-center">
                     {/* Breadcrumb */}
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button

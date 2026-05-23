@@ -275,18 +275,15 @@ const RewardHistory = () => {
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20 min-h-[22rem] flex flex-col justify-center">
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                                <Sparkles className="w-4 h-4" />
+                                <History className="w-4 h-4" />
                                 <span className="text-sm font-medium">Lịch sử lượt đổi thưởng của bạn</span>
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <History className="w-10 h-10" />
-                                </div>
                                 <h1 className="text-4xl md:text-5xl font-bold">Lịch sử đổi thưởng</h1>
                             </div>
 
@@ -333,7 +330,7 @@ const RewardHistory = () => {
             </div>
 
             {/* Search & Filter Section */}
-            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+            <div className="sticky top-20 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                         <form onSubmit={handleSearchSubmit} className="w-full lg:w-[500px]">
@@ -350,7 +347,7 @@ const RewardHistory = () => {
                                     <button
                                         type="button"
                                         onClick={handleClearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -361,7 +358,7 @@ const RewardHistory = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <FilterIcon className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
@@ -375,13 +372,11 @@ const RewardHistory = () => {
                                         setSortOrder('desc');
                                         setPage(1);
                                     }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                                        sortBy === 'date' && sortOrder === 'desc'
+                                    className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${sortBy === 'date' && sortOrder === 'desc'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                 >
-                                    <TrendingUpIcon className="w-4 h-4" />
                                     <span>Mới nhất</span>
                                 </button>
                                 <button
@@ -390,13 +385,11 @@ const RewardHistory = () => {
                                         setSortOrder('asc');
                                         setPage(1);
                                     }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                                        sortBy === 'date' && sortOrder === 'asc'
+                                    className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${sortBy === 'date' && sortOrder === 'asc'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                 >
-                                    <TrendingDownIcon className="w-4 h-4" />
                                     <span>Cũ nhất</span>
                                 </button>
                             </div>
@@ -405,22 +398,20 @@ const RewardHistory = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng lưới"
                                 >
                                     <Grid className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${
-                                        viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                     title="Xem dạng danh sách"
                                 >
                                     <List className="w-5 h-5" />
@@ -436,7 +427,7 @@ const RewardHistory = () => {
                                 <h3 className="font-semibold text-gray-900">Bộ lọc & Sắp xếp</h3>
                                 <button
                                     onClick={() => setShowFilters(false)}
-                                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                                    className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition-colors"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -453,13 +444,11 @@ const RewardHistory = () => {
                                                 setPage(1);
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                                sortBy === 'date' && sortOrder === 'desc'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${sortBy === 'date' && sortOrder === 'desc'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
-                                            <TrendingUpIcon className="w-4 h-4" />
                                             <span>Mới nhất</span>
                                         </button>
                                         <button
@@ -469,13 +458,11 @@ const RewardHistory = () => {
                                                 setPage(1);
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                                sortBy === 'date' && sortOrder === 'asc'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${sortBy === 'date' && sortOrder === 'asc'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
-                                            <TrendingDownIcon className="w-4 h-4" />
                                             <span>Cũ nhất</span>
                                         </button>
                                     </div>
@@ -489,11 +476,10 @@ const RewardHistory = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'grid'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             <Grid className="w-4 h-4" />
                                             <span>Dạng lưới</span>
@@ -503,11 +489,10 @@ const RewardHistory = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${
-                                                viewMode === 'list'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             <List className="w-4 h-4" />
                                             <span>Dạng danh sách</span>
@@ -541,45 +526,13 @@ const RewardHistory = () => {
                                             setSelectedDate('');
                                             setPage(1);
                                         }}
-                                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                        className="cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                         title="Xóa bộ lọc ngày"
                                     >
                                         <X className="h-4 w-4 text-gray-500" />
                                     </button>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => {
-                                    const today = new Date().toISOString().split('T')[0];
-                                    setSelectedDate(today);
-                                    setPage(1);
-                                }}
-                                className={`px-3 py-2 text-sm rounded-lg border transition-all ${
-                                    selectedDate === new Date().toISOString().split('T')[0]
-                                        ? 'bg-red-500 text-white border-red-500'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                                }`}
-                            >
-                                Hôm nay
-                            </button>
-                            <button
-                                onClick={() => {
-                                    const yesterday = new Date();
-                                    yesterday.setDate(yesterday.getDate() - 1);
-                                    setSelectedDate(yesterday.toISOString().split('T')[0]);
-                                    setPage(1);
-                                }}
-                                className={`px-3 py-2 text-sm rounded-lg border transition-all ${
-                                    selectedDate === new Date(Date.now() - 86400000).toISOString().split('T')[0]
-                                        ? 'bg-red-500 text-white border-red-500'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                                }`}
-                            >
-                                Hôm qua
-                            </button>
                         </div>
                     </div>
 
@@ -592,7 +545,7 @@ const RewardHistory = () => {
                                     <span>Tìm kiếm: "{searchTerm}"</span>
                                     <button
                                         onClick={handleClearSearch}
-                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                        className="cursor-pointer p-1 hover:bg-white/20 rounded-lg transition-colors"
                                     >
                                         <X className="h-3 w-3" />
                                     </button>
@@ -608,7 +561,7 @@ const RewardHistory = () => {
                                             setSelectedDate('');
                                             setPage(1);
                                         }}
-                                        className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                        className="cursor-pointer p-1 hover:bg-white/20 rounded-lg transition-colors"
                                     >
                                         <X className="h-3 w-3" />
                                     </button>
@@ -634,7 +587,7 @@ const RewardHistory = () => {
                             </div>
                             <button
                                 onClick={handleRefresh}
-                                className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                             >
                                 Thử lại
                             </button>
@@ -694,7 +647,7 @@ const RewardHistory = () => {
                                     setSearchTerm('');
                                     setPage(1);
                                 }}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <X className="w-5 h-5" />
                                 Xóa tất cả bộ lọc
@@ -721,7 +674,7 @@ const RewardHistory = () => {
                             <button
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                                 <span>Làm mới</span>
@@ -774,7 +727,6 @@ const RewardHistory = () => {
 
                                             <div className="flex items-center justify-end pt-2 border-t border-gray-100">
                                                 <div className="flex items-center gap-1 text-red-600 font-medium text-sm">
-                                                    <EyeIcon className="w-4 h-4" />
                                                     <span>Chi tiết</span>
                                                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                 </div>
@@ -827,7 +779,7 @@ const RewardHistory = () => {
                                                                 </h4>
                                                                 <div className="flex flex-wrap items-center gap-4 text-sm">
                                                                     <span className="text-gray-500 flex items-center gap-1">
-                                                                        <Award className="w-4 h-4 text-red-400" />
+                                                                        <Award className="w-4 h-4 text-gray-400" />
                                                                         {formatPoints(history.points_used)} điểm
                                                                     </span>
                                                                     <span className="text-gray-500 flex items-center gap-1">
@@ -842,7 +794,7 @@ const RewardHistory = () => {
                                                             </div>
 
                                                             <div className="flex items-center gap-2">
-                                                                <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                                                                <button className="cursor-pointer p-2 text-gray-400 hover:text-red-600 transition-colors">
                                                                     {expandedId === history.id ? (
                                                                         <ChevronUp className="w-5 h-5" />
                                                                     ) : (
@@ -943,7 +895,7 @@ const RewardHistory = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -953,8 +905,7 @@ const RewardHistory = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
-                                                <span>Tải thêm lượt đổi</span>
+                                                <span>Xem thêm lượt đổi</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}
@@ -985,12 +936,11 @@ const RewardHistory = () => {
                             <div className="sticky top-0 bg-gradient-to-r from-red-600 to-red-500 text-white p-5 rounded-t-2xl">
                                 <button
                                     onClick={() => setShowDialog(false)}
-                                    className="absolute right-4 top-4 p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                    className="cursor-pointer absolute right-4 top-4 p-2 hover:bg-white/20 rounded-xl transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                                 <div className="flex items-center gap-3">
-                                    <Gift className="w-6 h-6" />
                                     <h3 className="text-xl font-bold">Chi tiết đổi thưởng</h3>
                                 </div>
                             </div>
@@ -1021,19 +971,9 @@ const RewardHistory = () => {
                                                 <h3 className="text-lg font-bold text-gray-900">{selectedGridHistory.reward?.name}</h3>
                                                 <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                                                     <Clock className="w-3 h-3" />
-                                                    {formatDateTime(selectedGridHistory.created_at)}
+                                                    {formatDate(selectedGridHistory.created_at)}
                                                 </p>
                                             </div>
-                                            <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                                                selectedGridHistory.status === 'completed'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : selectedGridHistory.status === 'pending'
-                                                    ? 'bg-yellow-100 text-yellow-700'
-                                                    : 'bg-red-100 text-red-700'
-                                            }`}>
-                                                {selectedGridHistory.status === 'completed' ? 'Đã giao' : 
-                                                 selectedGridHistory.status === 'pending' ? 'Đang xử lý' : 'Đã hủy'}
-                                            </span>
                                         </div>
 
                                         {/* Recipient Information */}
@@ -1095,7 +1035,7 @@ const RewardHistory = () => {
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-gray-500">Thời gian đổi:</span>
-                                                    <span className="font-medium text-gray-900">{formatDateTime(selectedHistory.created_at)}</span>
+                                                    <span className="font-medium text-gray-900">{formatDate(selectedHistory.created_at)}</span>
                                                 </div>
                                             </div>
                                         </div>

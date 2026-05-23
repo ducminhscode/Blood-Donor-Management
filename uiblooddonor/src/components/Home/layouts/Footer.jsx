@@ -562,7 +562,7 @@ const FooterChatbot = () => {
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white/85 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 hover:text-white"
+                className="cursor-pointer inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white/85 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -580,7 +580,7 @@ const FooterChatbot = () => {
                     type="button"
                     onClick={handleCreateSession}
                     disabled={creatingSession}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-600 text-white text-sm hover:bg-red-700 disabled:bg-gray-300"
+                    className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-600 text-white text-sm hover:bg-red-700 disabled:bg-gray-300"
                   >
                     {creatingSession ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                     Mới
@@ -623,7 +623,7 @@ const FooterChatbot = () => {
                                   setEditingSessionCode(null);
                                   setDraftSessionName("");
                                 }}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                                className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
                               >
                                 <X className="w-4 h-4" />
                               </button>
@@ -631,7 +631,7 @@ const FooterChatbot = () => {
                                 type="button"
                                 disabled={updatingSession}
                                 onClick={() => handleUpdateSession(session)}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-white transition hover:bg-red-700 disabled:bg-slate-300"
+                                className="cursor-pointer inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-white transition hover:bg-red-700 disabled:bg-slate-300"
                               >
                                 {updatingSession ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                               </button>
@@ -652,7 +652,7 @@ const FooterChatbot = () => {
                               <button
                                 type="button"
                                 onClick={() => handleEditSession(session)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white hover:text-slate-700"
+                                className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white hover:text-slate-700"
                                 aria-label="Chỉnh sửa đoạn chat"
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
@@ -661,7 +661,7 @@ const FooterChatbot = () => {
                                 type="button"
                                 disabled={isDeleting}
                                 onClick={() => void handleDeleteSession(session)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-red-600 transition hover:bg-white hover:text-red-700 disabled:text-slate-300"
+                                className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-xl text-red-600 transition hover:bg-white hover:text-red-700 disabled:text-slate-300"
                                 aria-label="Xóa đoạn chat"
                               >
                                 {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -793,7 +793,7 @@ const FooterChatbot = () => {
                     <button
                       type="submit"
                       disabled={!input.trim() || loading || sending || connectionState !== "connected" || !sessionCode}
-                      className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-[linear-gradient(135deg,#dc2626,#fb7185)] text-white shadow-[0_16px_30px_rgba(239,68,68,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_34px_rgba(239,68,68,0.32)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                      className="cursor-pointer flex h-12 w-12 items-center justify-center rounded-[20px] bg-[linear-gradient(135deg,#dc2626,#fb7185)] text-white shadow-[0_16px_30px_rgba(239,68,68,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_34px_rgba(239,68,68,0.32)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
                     >
                       {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="h-5 w-5" />}
                     </button>
@@ -817,7 +817,7 @@ const FooterChatbot = () => {
             connectSocket(sessionCode);
           }
         }}
-        className="group relative focus:outline-none"
+        className="cursor-pointer group relative focus:outline-none"
       >
         <div className={`absolute inset-0 rounded-full bg-emerald-400 blur-sm ${open ? "opacity-0" : "animate-ping opacity-70"}`}></div>
         <div
@@ -891,7 +891,7 @@ const Footer = () => {
 
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-24 right-8 group z-50 transition-all duration-500 ${showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20 pointer-events-none"
+        className={`cursor-pointer fixed bottom-24 right-8 group z-50 transition-all duration-500 ${showScrollTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20 pointer-events-none"
           }`}
         aria-label="Scroll to top"
       >

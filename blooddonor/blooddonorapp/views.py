@@ -601,16 +601,17 @@ class DonorViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIV
 
         for rel in friend_relations:
             other_id = rel.addressee_id if rel.requester_id == donor.id else rel.requester_id
+            current_status = status_map[other_id]
 
             if rel.status == FriendStatus.BEFRIEND.value:
                 status_map[other_id] = 'friend'
             elif rel.status == FriendStatus.ADD_FRIEND.value:
                 if rel.requester_id == donor.id:
                     status_map[other_id] = 'pending_sent'
-                else:
+                elif current_status == 'none':
                     status_map[other_id] = 'pending_received'
             elif rel.status == FriendStatus.PENDING.value:
-                if rel.addressee_id == donor.id:
+                if rel.addressee_id == donor.id and current_status == 'none':
                     status_map[other_id] = 'pending_received'
 
         return Response(status_map, status=status.HTTP_200_OK)

@@ -107,7 +107,7 @@ function App() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="fixed bottom-6 left-6 z-[9999] inline-flex items-center gap-3 rounded-full border border-white/40 bg-white/85 px-4 py-3 text-sm font-semibold text-gray-800 shadow-xl backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark-theme-surface"
+            className="cursor-pointer fixed bottom-6 left-6 z-[9999] inline-flex items-center gap-3 rounded-full border border-white/40 bg-white/85 px-4 py-3 text-sm font-semibold text-gray-800 shadow-xl backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark-theme-surface"
             aria-label={theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
             title={theme === "dark" ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
           >

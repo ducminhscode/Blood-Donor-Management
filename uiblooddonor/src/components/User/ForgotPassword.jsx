@@ -278,7 +278,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl"
+              className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -374,7 +374,7 @@ const ForgotPassword = () => {
                 type="button"
                 onClick={handleResendOTP}
                 disabled={!canResend || loading || resending}
-                className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-semibold transition-all duration-300 hover:gap-3 disabled:text-gray-400 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-semibold transition-all duration-300 disabled:text-gray-400 disabled:cursor-not-allowed"
               >
                 {canResend ? (
                   <>
@@ -393,7 +393,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading || resending}
-              className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 transform hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl"
+              className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 transform hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -525,7 +525,7 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 transform hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl"
+              className="cursor-pointer w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 transform hover:scale-105 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg hover:shadow-xl"
             >
               {loading ? (
                 <div className="flex items-center justify-center">

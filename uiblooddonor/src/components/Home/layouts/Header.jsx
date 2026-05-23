@@ -66,6 +66,13 @@ const Header = () => {
             : `${baseClass} text-gray-700 hover:bg-gray-50 hover:text-red-600`;
     };
 
+    const getDropdownItemClass = (path) => {
+        const baseClass = "flex items-center space-x-3 px-4 py-2.5 text-sm transition-colors duration-200";
+        return isActiveTab(path)
+            ? `${baseClass} bg-red-50 text-red-600 font-medium`
+            : `${baseClass} text-gray-700 hover:bg-red-50 hover:text-red-600`;
+    };
+
     return (
         <nav className="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,7 +143,7 @@ const Header = () => {
                                 <div className="hidden sm:block relative" ref={dropdownRef}>
                                     <button
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                        className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-2xl pl-2 pr-4 py-1.5 transition-all duration-300 border border-gray-200 hover:shadow-md"
+                                        className="cursor-pointer flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-2xl pl-2 pr-4 py-1.5 transition-all duration-300 border border-gray-200 hover:shadow-md"
                                     >
                                         <div className="w-9 h-9 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center overflow-hidden shadow-sm">
                                             {user?.avatar ? (
@@ -174,7 +181,7 @@ const Header = () => {
                                             </div>
                                             <Link
                                                 to="/profile"
-                                                className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                className={getDropdownItemClass('/profile')}
                                                 onClick={() => setIsDropdownOpen(false)}
                                             >
                                                 <User className="h-4 w-4" />
@@ -185,7 +192,7 @@ const Header = () => {
                                                 <>
                                                     <Link
                                                         to="/friend-list"
-                                                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                        className={getDropdownItemClass('/friend-list')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <Users className="h-4 w-4" />
@@ -193,7 +200,7 @@ const Header = () => {
                                                     </Link>
                                                     <Link
                                                         to="/chat"
-                                                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                        className={getDropdownItemClass('/chat')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <MessageCircle className="h-4 w-4" />
@@ -201,7 +208,7 @@ const Header = () => {
                                                     </Link>
                                                     <Link
                                                         to="/reward-history"
-                                                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                        className={getDropdownItemClass('/reward-history')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <History className="h-4 w-4" />
@@ -209,7 +216,7 @@ const Header = () => {
                                                     </Link>
                                                     <Link
                                                         to="/event-registration"
-                                                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                        className={getDropdownItemClass('/event-registration')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <CalendarCheck2 className="h-4 w-4" />
@@ -217,7 +224,7 @@ const Header = () => {
                                                     </Link>
                                                     <Link
                                                         to="/emergency-response"
-                                                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                        className={getDropdownItemClass('/emergency-response')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <Ambulance className="h-4 w-4" />
@@ -230,7 +237,7 @@ const Header = () => {
                                                 <>
                                                     <Link
                                                         to="/staff-donation-event"
-                                                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                        className={getDropdownItemClass('/staff-donation-event')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <Heart className="h-4 w-4" />
@@ -238,7 +245,7 @@ const Header = () => {
                                                     </Link>
                                                     <Link
                                                         to="/staff-emergency-request"
-                                                        className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+                                                        className={getDropdownItemClass('/staff-emergency-request')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <Shield className="h-4 w-4" />
@@ -249,7 +256,7 @@ const Header = () => {
 
                                             <div className="border-t border-gray-100 mt-2 pt-2">
                                                 <button
-                                                    className="w-full text-left flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                                                    className="cursor-pointer w-full text-left flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
                                                     onClick={handleLogout}
                                                 >
                                                     <LogIn className="h-4 w-4 rotate-180" />

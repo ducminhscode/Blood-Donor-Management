@@ -296,44 +296,39 @@ const PendingList = () => {
                     ))}
                 </div>
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20">
-                    {/* Breadcrumb */}
-                    <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
-                        <button
-                            onClick={() => navigate("/friend-list")}
-                            className="hover:text-white transition-colors"
-                        >
-                            Danh sách bạn bè
-                        </button>
-                        <span>/</span>
-                        <span className="text-white font-medium">Lời mời kết bạn</span>
-                    </div>
-
-                    {/* Title and Stats */}
-                    <div className="flex flex-col md:flex-row items-start justify-between gap-6">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
-                                    <UserPlus className="w-8 h-8" />
-                                </div>
-                                <h1 className="text-3xl md:text-4xl font-bold">Lời mời kết bạn</h1>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-20 min-h-[22rem] flex flex-col justify-center">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                        <div>
+                            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
+                                <UserPlus className="w-4 h-4" />
+                                <span className="text-sm font-medium">Kết nối bạn bè</span>
                             </div>
+                            <h1 className="text-3xl md:text-4xl font-bold mb-2">Lời mời kết bạn</h1>
                             <p className="text-red-100 text-lg">
                                 Kết nối với những người muốn làm bạn với bạn
                             </p>
                         </div>
 
-                        <div className="flex-shrink-0">
-                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white/20 rounded-xl">
-                                        <BellRing className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <div className="text-3xl font-bold">{totalPendingRequests}</div>
-                                        <div className="text-sm text-white/80">Lời mời đang chờ</div>
-                                    </div>
-                                </div>
+                        <div className="flex flex-wrap gap-3">
+                            <button
+                                onClick={() => navigate("/friend-list")}
+                                className="cursor-pointer group flex items-center gap-2 px-5 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-300 backdrop-blur-sm"
+                            >
+                                <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                <span className="font-medium">Danh sách bạn bè</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="flex flex-wrap gap-4 mt-8">
+                        <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300">
+                            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <BellRing className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold">{totalPendingRequests}</div>
+                                <div className="text-sm text-white/80">Lời mời đang chờ</div>
                             </div>
                         </div>
                     </div>
@@ -365,7 +360,7 @@ const PendingList = () => {
             )}
 
             {/* Search & Filter Section */}
-            <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+            <div className="sticky top-20 z-20 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                         {/* Search Bar */}
@@ -382,7 +377,7 @@ const PendingList = () => {
                                 {searchTerm && (
                                     <button
                                         onClick={handleClearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -394,24 +389,22 @@ const PendingList = () => {
                         <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1">
                             <button
                                 onClick={() => handleSortChange('recent')}
-                                className={`px-5 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium ${
+                                className={`cursor-pointer px-5 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium ${
                                     sortBy === 'recent'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             >
-                                <TrendingUp className="w-4 h-4" />
                                 Mới nhất
                             </button>
                             <button
                                 onClick={() => handleSortChange('oldest')}
-                                className={`px-5 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium ${
+                                className={`cursor-pointer px-5 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 font-medium ${
                                     sortBy === 'oldest'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                 }`}
                             >
-                                <ClockIcon className="w-4 h-4" />
                                 Cũ nhất
                             </button>
                         </div>
@@ -425,7 +418,7 @@ const PendingList = () => {
                                 <span>Tìm kiếm: "{searchTerm}"</span>
                                 <button
                                     onClick={handleClearSearch}
-                                    className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                    className="cursor-pointer p-1 hover:bg-white/20 rounded-lg transition-colors"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
@@ -568,13 +561,13 @@ const PendingList = () => {
                                                     <div className="flex items-center gap-2">
                                                         <Droplet className="w-4 h-4 text-red-500" />
                                                         <span className="text-sm text-gray-600">
-                                                            Đã hiến: <span className="font-semibold text-gray-900">{request.donation_count || 0}</span> lần
+                                                            <span className="font-semibold text-gray-900">{request.donation_count || 0}</span> lần hiến máu
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <Award className="w-4 h-4 text-yellow-500" />
                                                         <span className="text-sm text-gray-600">
-                                                            Điểm: <span className="font-semibold text-gray-900">{request.points || 0}</span>
+                                                            <span className="font-semibold text-gray-900">{request.points || 0}</span> điểm
                                                         </span>
                                                     </div>
                                                 </div>
@@ -584,7 +577,7 @@ const PendingList = () => {
                                                     <button
                                                         onClick={() => handleAccept(request.id)}
                                                         disabled={processingId === request.id}
-                                                        className="flex-1 md:flex-none px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md hover:shadow-lg disabled:from-gray-400 disabled:to-gray-400 flex items-center justify-center gap-2 font-medium"
+                                                        className="cursor-pointer flex-1 md:flex-none px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md hover:shadow-lg disabled:from-gray-400 disabled:to-gray-400 flex items-center justify-center gap-2 font-medium"
                                                     >
                                                         {processingId === request.id ? (
                                                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -598,7 +591,7 @@ const PendingList = () => {
                                                     <button
                                                         onClick={() => handleReject(request.id)}
                                                         disabled={processingId === request.id}
-                                                        className="flex-1 md:flex-none px-6 py-2.5 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+                                                        className="cursor-pointer flex-1 md:flex-none px-6 py-2.5 border-2 border-red-600 text-red-600 rounded-xl hover:bg-red-50 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
                                                     >
                                                         <UserX className="w-4 h-4" />
                                                         Từ chối
@@ -617,7 +610,7 @@ const PendingList = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -627,7 +620,6 @@ const PendingList = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm lời mời</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>
@@ -661,7 +653,7 @@ const PendingList = () => {
                         {searchTerm ? (
                             <button
                                 onClick={handleClearSearch}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <X className="w-5 h-5" />
                                 Xóa tìm kiếm
@@ -669,7 +661,7 @@ const PendingList = () => {
                         ) : (
                             <button
                                 onClick={() => navigate('/search-donor')}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <Users className="w-5 h-5" />
                                 Tìm kiếm bạn bè

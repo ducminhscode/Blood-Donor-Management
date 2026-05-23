@@ -438,7 +438,7 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="chat-panel-icon-button w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
+            className="cursor-pointer chat-panel-icon-button w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
           >
             <IoHappy size={24} />
           </button>
@@ -458,7 +458,7 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="chat-panel-icon-button w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
+          className="cursor-pointer chat-panel-icon-button w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-100 hover:text-red-500 transition-all duration-200 text-gray-500"
         >
           <IoAttach size={22} />
         </button>
@@ -482,7 +482,7 @@ export default function ChatPanel({ selectedUser, setPreviews, currentEmail, onM
 
         <button
           type="submit"
-          className={`w-11 h-11 flex items-center justify-center rounded-full transition-all duration-200 shadow-md ${!text.trim()
+          className={`cursor-pointer w-11 h-11 flex items-center justify-center rounded-full transition-all duration-200 shadow-md ${!text.trim()
             ? 'bg-gray-300 cursor-not-allowed shadow-none'
             : 'bg-gradient-to-br from-red-500 to-red-600 hover:scale-105 hover:shadow-lg text-white'
             }`}
