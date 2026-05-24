@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, Ambulance, Phone, Syringe, AlertTriangle, Hospital, Grid, List, Filter as FilterIcon, Send, Eye, TrendingUp, CheckCircle2, RefreshCw, Loader } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, Ambulance, Phone, Syringe, AlertTriangle, Hospital, Grid, List, Filter as FilterIcon, Send, Eye, TrendingUp, CheckCircle2, RefreshCw, Loader, ClipboardCheck, TriangleAlert } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -261,15 +261,12 @@ const EmergencyResponse = () => {
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                                <Sparkles className="w-4 h-4" />
+                                <TriangleAlert className="w-4 h-4" />
                                 <span className="text-sm font-medium">Lịch sử hỗ trợ cấp cứu</span>
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Ambulance className="w-10 h-10" />
-                                </div>
-                                <h1 className="text-4xl md:text-5xl font-bold">Yêu cầu cấp cứu đã phản hồi</h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Yêu khẩn cấp cứu đã ứng cứu</h1>
                             </div>
 
                             <p className="text-lg text-red-100 max-w-2xl">
@@ -288,7 +285,7 @@ const EmergencyResponse = () => {
                                 </div>
                                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300">
                                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <Award className="w-6 h-6" />
+                                        <ClipboardCheck className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold">{originalCompletedCount}</div>
@@ -344,7 +341,7 @@ const EmergencyResponse = () => {
                                             setPage(1);
                                             loadResponses(false);
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -355,7 +352,7 @@ const EmergencyResponse = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <FilterIcon className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
@@ -365,7 +362,7 @@ const EmergencyResponse = () => {
                             <div className="relative status-dropdown">
                                 <button
                                     onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[160px] justify-between"
+                                    className="cursor-pointer flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[160px] justify-between"
                                 >
                                     <span className="text-gray-700 font-medium">{getStatusLabel()}</span>
                                     <ChevronRight className={`h-4 w-4 text-gray-500 transition-transform ${showStatusDropdown ? 'rotate-90' : ''}`} />
@@ -375,19 +372,19 @@ const EmergencyResponse = () => {
                                     <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
                                         <button
                                             onClick={() => handleStatusChange('all')}
-                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedStatus === 'all' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedStatus === 'all' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                         >
                                             Tất cả
                                         </button>
                                         <button
                                             onClick={() => handleStatusChange('1')}
-                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedStatus === '1' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedStatus === '1' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                         >
                                             Đã chấp nhận
                                         </button>
                                         <button
                                             onClick={() => handleStatusChange('2')}
-                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedStatus === '2' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedStatus === '2' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                         >
                                             Đã từ chối
                                         </button>
@@ -398,9 +395,8 @@ const EmergencyResponse = () => {
                             {/* Date Filter Button */}
                             <button
                                 onClick={() => setShowDatePicker(!showDatePicker)}
-                                className="hidden lg:flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                className="cursor-pointer hidden lg:flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                             >
-                                <Calendar className="w-4 h-4" />
                                 <span className="font-medium">Ngày phản hồi</span>
                             </button>
 
@@ -408,7 +404,7 @@ const EmergencyResponse = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -418,7 +414,7 @@ const EmergencyResponse = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -449,12 +445,12 @@ const EmergencyResponse = () => {
                                         type="date"
                                         value={dateRange.to}
                                         onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                        className="cursor-pointer w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
                                 </div>
                                 <button
                                     onClick={() => setShowDatePicker(false)}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Áp dụng
                                 </button>
@@ -467,7 +463,7 @@ const EmergencyResponse = () => {
                         <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-gray-900">Bộ lọc</h3>
-                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-200 rounded-lg">
+                                <button onClick={() => setShowFilters(false)} className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
@@ -481,7 +477,7 @@ const EmergencyResponse = () => {
                                                 handleStatusChange('all');
                                                 setShowFilters(false);
                                             }}
-                                            className={`px-3 py-2 rounded-lg border transition-all ${selectedStatus === 'all'
+                                            className={`cursor-pointer px-3 py-2 rounded-lg border transition-all ${selectedStatus === 'all'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -493,7 +489,7 @@ const EmergencyResponse = () => {
                                                 handleStatusChange('1');
                                                 setShowFilters(false);
                                             }}
-                                            className={`px-3 py-2 rounded-lg border transition-all ${selectedStatus === '1'
+                                            className={`cursor-pointer px-3 py-2 rounded-lg border transition-all ${selectedStatus === '1'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -505,7 +501,7 @@ const EmergencyResponse = () => {
                                                 handleStatusChange('2');
                                                 setShowFilters(false);
                                             }}
-                                            className={`px-3 py-2 rounded-lg border transition-all ${selectedStatus === '2'
+                                            className={`cursor-pointer px-3 py-2 rounded-lg border transition-all ${selectedStatus === '2'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -543,7 +539,7 @@ const EmergencyResponse = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -556,7 +552,7 @@ const EmergencyResponse = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -576,7 +572,7 @@ const EmergencyResponse = () => {
                             {selectedStatus !== 'all' && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Trạng thái: {getStatusLabel()}</span>
-                                    <button onClick={() => handleStatusChange('all')} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => handleStatusChange('all')} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -584,7 +580,7 @@ const EmergencyResponse = () => {
                             {dateRange.from && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Từ: {formatDate(dateRange.from)}</span>
-                                    <button onClick={() => setDateRange(prev => ({ ...prev, from: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, from: '' }))} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -592,7 +588,7 @@ const EmergencyResponse = () => {
                             {dateRange.to && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Đến: {formatDate(dateRange.to)}</span>
-                                    <button onClick={() => setDateRange(prev => ({ ...prev, to: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, to: '' }))} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -601,7 +597,7 @@ const EmergencyResponse = () => {
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <Search className="h-4 w-4" />
                                     <span>Tìm kiếm: "{searchTerm}"</span>
-                                    <button onClick={() => setSearchTerm("")} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setSearchTerm("")} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -609,7 +605,7 @@ const EmergencyResponse = () => {
                             {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) && (
                                 <button
                                     onClick={handleClearFilters}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
+                                    className="cursor-pointer px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
                                 >
                                     Xóa tất cả
                                 </button>
@@ -660,7 +656,7 @@ const EmergencyResponse = () => {
                                 </div>
                                 <button
                                     onClick={handleRefresh}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
                                 </button>
@@ -696,9 +692,8 @@ const EmergencyResponse = () => {
                         {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) ? (
                             <button
                                 onClick={handleClearFilters}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                <X className="w-5 h-5" />
                                 Xóa tất cả bộ lọc
                             </button>
                         ) : (
@@ -729,7 +724,7 @@ const EmergencyResponse = () => {
                             <button
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                                 <span>Làm mới</span>
@@ -772,10 +767,10 @@ const EmergencyResponse = () => {
                                                 {/* Blood Type Badge */}
                                                 <div className="absolute top-4 right-4">
                                                     <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl shadow-md">
+                                                        <div className="text-xs text-gray-500">Nhóm máu</div>
                                                         <div className="text-lg font-bold text-red-600">
                                                             {getBloodTypeText(emergency?.blood_type)}{getRhFactorText(emergency?.rh_factor)}
                                                         </div>
-                                                        <div className="text-xs text-gray-500">Nhóm máu</div>
                                                     </div>
                                                 </div>
 
@@ -894,11 +889,7 @@ const EmergencyResponse = () => {
                                                         </div>
                                                         <div className="flex items-center text-sm text-gray-600">
                                                             <Syringe className="w-4 h-4 text-red-500 mr-2" />
-                                                            <span>Cần {emergency?.blood_volume}ml</span>
-                                                        </div>
-                                                        <div className="flex items-center text-sm text-gray-600">
-                                                            <AlertTriangle className="w-4 h-4 text-red-500 mr-2" />
-                                                            <span>{emergency?.critical ? 'Cấp cứu' : 'Cần hỗ trợ'}</span>
+                                                            <span>Cần {emergency?.blood_volume}ml máu</span>
                                                         </div>
                                                     </div>
 
@@ -906,8 +897,8 @@ const EmergencyResponse = () => {
                                                         to={`/emergency-response/${response?.id}`}
                                                         className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md text-sm font-medium"
                                                     >
-                                                        <Eye className="w-4 h-4" />
                                                         Xem chi tiết
+                                                        <ChevronRight className="w-4 h-4" />
                                                     </Link>
                                                 </div>
                                             </div>
@@ -923,7 +914,7 @@ const EmergencyResponse = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -933,7 +924,6 @@ const EmergencyResponse = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm phản hồi</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>

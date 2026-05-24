@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
     Gift, Package, ArrowLeft, Star, Search, ShoppingBag, Clock,
     Sparkles, Filter, X, Heart, TrendingUp, Award, Zap,
-    ChevronRight, Tag, AlertCircle, ArrowUpAZ, ArrowDownZA,
+    ChevronRight, Tag, AlertCircle, ArrowUpAZ, ArrowDownZA, ChevronDown,
     TrendingDown, Loader2, Send, BadgeCheck, Shield, Droplet,
     MapPin, Calendar, Users, Eye, HeartHandshake
 } from 'lucide-react';
@@ -21,11 +21,19 @@ const Reward = () => {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('name');
-    const [sortOrder, setSortOrder] = useState('asc'); 
+    const [sortOrder, setSortOrder] = useState('asc');
     const [filterStock, setFilterStock] = useState('all');
     const [showFilters, setShowFilters] = useState(false);
     const [hoveredReward, setHoveredReward] = useState(null);
     const [pointsOrder, setPointsOrder] = useState('asc');
+    const [showStockDropdown, setShowStockDropdown] = useState(false);
+    const [hoverTimeout, setHoverTimeout] = useState(null);
+
+    const stockFilterOptions = [
+        { value: 'all', label: 'Tất cả' },
+        { value: 'inStock', label: 'Còn hàng' },
+        { value: 'outOfStock', label: 'Hết hàng' }
+    ];
 
     useEffect(() => {
         fetchRewards();
@@ -85,6 +93,16 @@ const Reward = () => {
 
     const handleClearSearch = () => {
         setSearchTerm('');
+    };
+
+    const handleStockFilterSelect = (option) => {
+        setFilterStock(option.value);
+        setShowStockDropdown(false);
+    };
+
+    const getStockFilterLabel = () => {
+        const current = stockFilterOptions.find(option => option.value === filterStock);
+        return current ? current.label : 'Tất cả';
     };
 
     const totalRewards = rewards.length;
@@ -163,20 +181,25 @@ const Reward = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/reward-category")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Danh mục
+                            Kho đổi thưởng
                         </button>
-                        <span>/</span>
+                        <span> / </span>
                         <span className="text-white font-medium">{categoryName}</span>
                     </div>
+
+                    <button
+                        onClick={() => navigate("/reward-category")}
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                    >
+                        <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                        <span>Quay lại</span>
+                    </button>
 
                     <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
                         <div>
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Gift className="w-8 h-8" />
-                                </div>
                                 <h1 className="text-3xl md:text-4xl font-bold">{categoryName}</h1>
                             </div>
                             <p className="text-red-100 text-lg">
@@ -236,7 +259,7 @@ const Reward = () => {
                                 {searchTerm && (
                                     <button
                                         onClick={handleClearSearch}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -247,7 +270,7 @@ const Reward = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <Filter className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
@@ -257,11 +280,10 @@ const Reward = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={toggleNameSort}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                                        sortBy === 'name'
+                                    className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${sortBy === 'name'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                 >
                                     <Tag className="w-4 h-4" />
                                     <span>
@@ -274,11 +296,10 @@ const Reward = () => {
 
                                 <button
                                     onClick={togglePointsSort}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                                        sortBy === 'points'
+                                    className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${sortBy === 'points'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                        }`}
                                 >
                                     {sortBy === 'points' && pointsOrder === 'asc' ? (
                                         <>
@@ -300,10 +321,57 @@ const Reward = () => {
                             </div>
 
                             {/* Stock Filter */}
+                            <div
+                                className="hidden lg:block relative min-w-[140px]"
+                                onMouseEnter={() => {
+                                    if (hoverTimeout) {
+                                        clearTimeout(hoverTimeout);
+                                    }
+                                    setShowStockDropdown(true);
+                                }}
+                                onMouseLeave={() => {
+                                    const timeout = setTimeout(() => setShowStockDropdown(false), 100);
+                                    setHoverTimeout(timeout);
+                                }}
+                            >
+                                <button className="cursor-pointer flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[140px] justify-between">
+                                    <span className="text-gray-700 font-medium">{getStockFilterLabel()}</span>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showStockDropdown ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {showStockDropdown && (
+                                    <div
+                                        className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn"
+                                        onMouseEnter={() => {
+                                            if (hoverTimeout) {
+                                                clearTimeout(hoverTimeout);
+                                            }
+                                            setShowStockDropdown(true);
+                                        }}
+                                        onMouseLeave={() => {
+                                            const timeout = setTimeout(() => setShowStockDropdown(false), 100);
+                                            setHoverTimeout(timeout);
+                                        }}
+                                    >
+                                        {stockFilterOptions.map((option) => {
+                                            const isSelected = filterStock === option.value;
+                                            return (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() => handleStockFilterSelect(option)}
+                                                    className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    <span>{option.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                             <select
                                 value={filterStock}
                                 onChange={(e) => setFilterStock(e.target.value)}
-                                className="hidden lg:block px-4 py-2 bg-gray-100 border-2 border-transparent rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300 cursor-pointer"
+                                className="hidden"
                             >
                                 <option value="all">Tất cả</option>
                                 <option value="inStock">Còn hàng</option>
@@ -319,7 +387,7 @@ const Reward = () => {
                                 <h3 className="font-semibold text-gray-900">Bộ lọc & Sắp xếp</h3>
                                 <button
                                     onClick={() => setShowFilters(false)}
-                                    className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                                    className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition-colors"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -333,11 +401,10 @@ const Reward = () => {
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
                                             onClick={toggleNameSort}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                                sortBy === 'name'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${sortBy === 'name'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             <Tag className="w-4 h-4" />
                                             <span>
@@ -348,11 +415,10 @@ const Reward = () => {
                                         </button>
                                         <button
                                             onClick={togglePointsSort}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${
-                                                sortBy === 'points'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition-all ${sortBy === 'points'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             {sortBy === 'points' && pointsOrder === 'asc' ? (
                                                 <>
@@ -384,11 +450,10 @@ const Reward = () => {
                                                 setFilterStock('all');
                                                 setShowFilters(false);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${
-                                                filterStock === 'all'
+                                            className={`cursor-pointer px-4 py-2 rounded-lg border transition-all ${filterStock === 'all'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             Tất cả
                                         </button>
@@ -397,11 +462,10 @@ const Reward = () => {
                                                 setFilterStock('inStock');
                                                 setShowFilters(false);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${
-                                                filterStock === 'inStock'
+                                            className={`cursor-pointer px-4 py-2 rounded-lg border transition-all ${filterStock === 'inStock'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             Còn hàng
                                         </button>
@@ -410,11 +474,10 @@ const Reward = () => {
                                                 setFilterStock('outOfStock');
                                                 setShowFilters(false);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${
-                                                filterStock === 'outOfStock'
+                                            className={`cursor-pointer px-4 py-2 rounded-lg border transition-all ${filterStock === 'outOfStock'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300'
-                                            }`}
+                                                }`}
                                         >
                                             Hết hàng
                                         </button>
@@ -432,7 +495,7 @@ const Reward = () => {
                                 <span>Tìm kiếm: "{searchTerm}"</span>
                                 <button
                                     onClick={handleClearSearch}
-                                    className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                    className="cursor-pointer p-1 hover:bg-white/20 rounded-lg transition-colors"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
@@ -517,11 +580,9 @@ const Reward = () => {
                                     )}
 
                                     {/* Hover Overlay */}
-                                    <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end justify-center pb-6 transition-opacity duration-300 ${
-                                        hoveredReward === reward.id ? 'opacity-100' : 'opacity-0'
-                                    }`}>
-                                        <button className="bg-white text-red-600 px-6 py-2.5 rounded-xl font-semibold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:shadow-xl">
-                                            <Eye className="w-4 h-4 inline mr-2" />
+                                    <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end justify-center pb-6 transition-opacity duration-300 ${hoveredReward === reward.id ? 'opacity-100' : 'opacity-0'
+                                        }`}>
+                                        <button className="cursor-pointer bg-white text-red-600 px-6 py-2.5 rounded-xl font-semibold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:shadow-xl">
                                             Xem chi tiết
                                         </button>
                                     </div>
@@ -587,18 +648,16 @@ const Reward = () => {
                                 {searchTerm && (
                                     <button
                                         onClick={handleClearSearch}
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                        className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                                     >
-                                        <X className="w-5 h-5" />
                                         Xóa tìm kiếm
                                     </button>
                                 )}
                                 {filterStock !== 'all' && (
                                     <button
                                         onClick={() => setFilterStock('all')}
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300"
+                                        className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300"
                                     >
-                                        <Package className="w-5 h-5" />
                                         Xem tất cả
                                     </button>
                                 )}

@@ -224,12 +224,11 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -261,13 +260,12 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 
                         <div className="space-y-3">
                             <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
-                                <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hospital className="w-4 h-4 text-red-500" />
+                                <p className="text-xs text-gray-500 mb-1">
                                     Bệnh viện trực thuộc
-                                </h5>
+                                </p>
                                 <div className="space-y-2">
                                     <p className="font-semibold text-gray-900">
-                                        {staff?.hospital?.name || 'Đang cập nhật'}
+                                        Bệnh viện {staff?.hospital?.name || 'Đang cập nhật'}
                                     </p>
                                     <p className="text-sm text-gray-600 flex items-start gap-1">
                                         <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
@@ -293,7 +291,6 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
@@ -598,10 +595,10 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                 <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all" onClick={e => e.stopPropagation()}>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-bold">Đăng ký tham gia sự kiện</h3>
+                            <h3 className="text-xl font-bold">Đăng ký tham gia hoạt động</h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -1001,7 +998,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -1010,7 +1007,6 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle className="w-5 h-5" />
                                         <span>Xác nhận đăng ký</span>
                                     </>
                                 )}
@@ -1019,7 +1015,7 @@ const RegistrationDialog = ({ isOpen, onClose, onSubmit, user, event, donorInfo 
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -1036,7 +1032,7 @@ const EventDetail = () => {
     const navigate = useNavigate();
 
     const [event, setEvent] = useState(null);
-    const [eventTitle, setEventTitle] = useState('Chi tiết sự kiện');
+    const [eventTitle, setEventTitle] = useState('Chi tiết hoạt động');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('info');
@@ -1082,7 +1078,7 @@ const EventDetail = () => {
             event?.name ||
             event?.event_name ||
             event?.eventTitle ||
-            'Chi tiết sự kiện';
+            'Chi tiết hoạt động';
 
         setEventTitle(nextTitle);
         document.title = `${nextTitle} | Dòng Máu Lạc Hồng`;
@@ -1143,7 +1139,7 @@ const EventDetail = () => {
             }
         } catch (err) {
             console.error("Error fetching event detail:", err);
-            setError("Không thể tải thông tin sự kiện. Vui lòng thử lại sau.");
+            setError("Không thể tải thông tin hoạt động. Vui lòng thử lại sau.");
         } finally {
             setLoading(false);
         }
@@ -1241,13 +1237,13 @@ const EventDetail = () => {
                         navigate('/login');
                         break;
                     case 403:
-                        showMessage('Bạn không có quyền đăng ký sự kiện này.', 'error');
+                        showMessage('Bạn không có quyền đăng ký hoạt động này.', 'error');
                         break;
                     case 404:
-                        showMessage('Không tìm thấy sự kiện.', 'error');
+                        showMessage('Không tìm thấy hoạt động.', 'error');
                         break;
                     case 409:
-                        showMessage('Người này đã đăng ký sự kiện này rồi.', 'error');
+                        showMessage('Người này đã đăng ký hoạt động này rồi.', 'error');
                         break;
                     default:
                         showMessage('Đăng ký thất bại. Vui lòng thử lại sau.', 'error');
@@ -1302,14 +1298,14 @@ const EventDetail = () => {
                             <AlertCircle className="w-12 h-12 text-red-600" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            {error ? 'Có lỗi xảy ra' : 'Không tìm thấy sự kiện'}
+                            {error ? 'Có lỗi xảy ra' : 'Không tìm thấy hoạt động'}
                         </h2>
                         <p className="text-gray-600 mb-6">
-                            {error || 'Sự kiện bạn đang tìm không tồn tại hoặc đã bị xóa'}
+                            {error || 'Hoạt động bạn đang tìm không tồn tại hoặc đã bị xóa'}
                         </p>
                         <button
                             onClick={() => navigate('/list-event')}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại danh sách
@@ -1372,9 +1368,9 @@ const EventDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/list-event")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Sự kiện
+                            Hoạt động hiến máu
                         </button>
                         <span>/</span>
                         <span className="text-white font-medium">{eventTitle || 'Chi tiết'}</span>
@@ -1382,15 +1378,14 @@ const EventDetail = () => {
 
                     <button
                         onClick={() => navigate("/list-event")}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại danh sách sự kiện</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
-                            <Calendar className="w-8 h-8" />
                             {eventTitle}
                         </h1>
                         <div className="flex items-center gap-3 mt-2">
@@ -1419,7 +1414,7 @@ const EventDetail = () => {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="text-gray-600 leading-relaxed">
-                                        {event.description || 'Chưa có mô tả chi tiết cho sự kiện này.'}
+                                        {event.description || 'Chưa có mô tả chi tiết cho hoạt động này.'}
                                     </p>
                                 </div>
                             </div>
@@ -1429,7 +1424,7 @@ const EventDetail = () => {
                                 {!user ? (
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600"
+                                        className="cursor-pointer w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600"
                                     >
                                         <span>Đăng nhập để tham gia</span>
                                     </button>
@@ -1437,7 +1432,7 @@ const EventDetail = () => {
                                     <button
                                         onClick={handleRegisterClick}
                                         disabled={getEventStatus(event.time_start) !== 'upcoming' && getEventStatus(event.time_start) !== 'ongoing'}
-                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="cursor-pointer w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <span>Tham gia ngay</span>
                                     </button>
@@ -1474,7 +1469,7 @@ const EventDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${activeTab === tab.id
+                                            className={`cursor-pointer py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${activeTab === tab.id
                                                 ? 'text-red-600'
                                                 : 'text-gray-500 hover:text-gray-700'
                                                 }`}
@@ -1499,7 +1494,7 @@ const EventDetail = () => {
                                                 value={formatDate(event.time_start)}
                                             />
                                             <InfoRow
-                                                icon={AlarmClock}
+                                                icon={Clock}
                                                 label="Giờ bắt đầu"
                                                 value={formatTime(event.time_start)}
                                             />
@@ -1589,7 +1584,7 @@ const EventDetail = () => {
                                                 value={
                                                     <button
                                                         onClick={() => setIsStaffDialogOpen(true)}
-                                                        className="flex items-center gap-1 hover:text-red-600 transition-colors group"
+                                                        className="cursor-pointer flex items-center gap-1 hover:text-red-600 transition-colors group"
                                                     >
                                                         <span>{`${event.staff?.account?.last_name || ''} ${event.staff?.account?.first_name || ''}`}</span>
                                                         {event.staff?.is_verified && (
@@ -1672,7 +1667,7 @@ const EventDetail = () => {
                     <div className="mt-12">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             <TrendingUp className="w-6 h-6 text-red-500" />
-                            Sự kiện cùng khu vực {provinceName && `- ${provinceName}`}
+                            Hoạt động cùng khu vực {provinceName && `- ${provinceName}`}
                         </h2>
 
                         {loadingRelated ? (
@@ -1735,9 +1730,9 @@ const EventDetail = () => {
                             <div className="text-center mt-6">
                                 <button
                                     onClick={() => navigate('/list-event', { state: { province: event.province } })}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300 shadow-sm border border-gray-200"
+                                    className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300 shadow-sm border border-gray-200"
                                 >
-                                    Xem thêm sự kiện
+                                    Xem thêm hoạt động
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>

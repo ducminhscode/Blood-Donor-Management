@@ -7,7 +7,7 @@ import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { UserContexts } from '../../configs/UserContexts';
 import { Helmet } from "react-helmet-async";
 
-const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue" }) => {
+const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", color = "blue", className = "" }) => {
     const getColorClasses = () => {
         const baseClasses = {
             normal: {
@@ -42,16 +42,16 @@ const VitalSignCard = ({ icon: Icon, label, value, unit, status = "normal", colo
     };
 
     return (
-        <div className={`rounded-xl p-4 border ${getColorClasses()} hover:shadow-md transition-all duration-300`}>
+        <div className={`medical-vital-card rounded-xl p-4 border ${getColorClasses()} hover:shadow-md transition-all duration-300 ${className}`}>
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg shadow-sm">
-                    <Icon className={`w-5 h-5 ${getTextColor()}`} />
+                <div className="medical-vital-card__icon p-2 bg-white rounded-lg shadow-sm">
+                    <Icon className={`medical-vital-card__icon-svg w-5 h-5 ${getTextColor()}`} />
                 </div>
                 <div>
-                    <p className="text-xs text-gray-500">{label}</p>
+                    <p className="medical-vital-card__label text-xs text-gray-500">{label}</p>
                     <div className="flex items-baseline gap-1">
-                        <p className={`text-xl font-bold ${getTextColor()}`}>{value || '---'}</p>
-                        {unit && <span className="text-xs text-gray-400">{unit}</span>}
+                        <p className={`medical-vital-card__value text-xl font-bold ${getTextColor()}`}>{value || '---'}</p>
+                        {unit && <span className="medical-vital-card__unit text-xs text-gray-400">{unit}</span>}
                     </div>
                 </div>
             </div>
@@ -64,7 +64,6 @@ const EligibilityBadge = ({ isEligible }) => {
     if (isEligible) {
         return (
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full border border-green-200 shadow-sm">
-                <CheckCircle2 className="w-4 h-4" />
                 <span className="font-semibold">Đủ điều kiện hiến máu</span>
             </div>
         );
@@ -72,7 +71,6 @@ const EligibilityBadge = ({ isEligible }) => {
 
     return (
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-100 to-red-100 text-red-700 rounded-full border border-red-200 shadow-sm">
-            <XCircle className="w-4 h-4" />
             <span className="font-semibold">Không đủ điều kiện</span>
         </div>
     );
@@ -90,12 +88,11 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <StethoscopeIcon className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -127,10 +124,9 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 
                         <div className="space-y-3">
                             <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
-                                <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hospital className="w-4 h-4 text-red-500" />
+                                <p className="text-xs text-gray-500 mb-1">
                                     Bệnh viện trực thuộc
-                                </h5>
+                                </p>
                                 <div className="space-y-2">
                                     <p className="font-semibold text-gray-900">
                                         {staff?.hospital?.name || 'Đang cập nhật'}
@@ -159,7 +155,6 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
@@ -248,9 +243,9 @@ const MedicalNote = ({ note, doctor }) => {
 };
 
 // Info Section Component
-const InfoSection = ({ title, icon: Icon, children }) => {
+const InfoSection = ({ title, icon: Icon, children, className = "" }) => {
     return (
-        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+        <div className={`medical-info-section bg-white rounded-2xl shadow-md p-6 border border-gray-100 ${className}`}>
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Icon className="w-5 h-5 text-red-500" />
                 {title}
@@ -264,6 +259,7 @@ const EventMedicalCheckUpDetail = () => {
     const { id, registration_id } = useParams();
     const navigate = useNavigate();
 
+    const [eventInfo, setEventInfo] = useState(null);
     const [checkup, setCheckup] = useState(null);
     const [bloodDonation, setBloodDonation] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -274,8 +270,20 @@ const EventMedicalCheckUpDetail = () => {
     const [isStaffDialogOpen, setIsStaffDialogOpen] = useState(false);
 
     useEffect(() => {
+        fetchEventDetail();
         fetchMedicalCheckup();
     }, [id, registration_id]);
+
+    const fetchEventDetail = async () => {
+        try {
+            const url = endpoints.donation_event_detail.replace('${id}', id);
+            const response = await authApis().get(url);
+            setEventInfo(response.data);
+        } catch (err) {
+            console.error("Error fetching event detail:", err);
+            setEventInfo(null);
+        }
+    };
 
     const fetchMedicalCheckup = async () => {
         setLoading(true);
@@ -318,6 +326,12 @@ const EventMedicalCheckUpDetail = () => {
         setMessage({ text, type });
         setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     };
+
+    const eventTitle =
+        eventInfo?.title ||
+        eventInfo?.name ||
+        eventInfo?.event_name ||
+        'Chi tiết đăng ký';
 
     if (loading) {
         return (
@@ -363,10 +377,10 @@ const EventMedicalCheckUpDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate(`/event-registration`)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
-                            Quay lại danh sách đăng ký
+                            Quay lại
                         </button>
                     </div>
                 </div>
@@ -426,16 +440,16 @@ const EventMedicalCheckUpDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/event-registration")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Sự kiện đã đăng ký
+                            Hoạt động đã tham gia
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/event-registration/${registration_id}`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Chi tiết đăng ký
+                            {eventTitle}
                         </button>
                         <span>/</span>
                         <span className="text-white font-medium">Kết quả khám sức khỏe</span>
@@ -443,15 +457,14 @@ const EventMedicalCheckUpDetail = () => {
 
                     <button
                         onClick={() => navigate(`/event-registration/${registration_id}`)}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại chi tiết đăng ký</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
-                            <StethoscopeIcon className="w-8 h-8" />
                             Kết quả khám sức khỏe
                         </h1>
                     </div>
@@ -484,7 +497,7 @@ const EventMedicalCheckUpDetail = () => {
                                 {checkup.is_eligible && bloodDonation && (
                                     <button
                                         onClick={() => navigate(`/event/${id}/registrations/${registration_id}/medical-checkup/${checkup.id}/blood-donation`)}
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                        className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
                                     >
                                         <FileHeart className="w-4 h-4" />
                                         Xem kết quả hiến máu
@@ -635,7 +648,6 @@ const EventMedicalCheckUpDetail = () => {
                                     <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                         <span className="text-gray-600">Trạng thái hiến máu</span>
                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-xs font-semibold">
-                                            <CheckCircle2 className="w-3 h-3" />
                                             Đã hiến máu
                                         </span>
                                     </div>
@@ -646,7 +658,6 @@ const EventMedicalCheckUpDetail = () => {
                             {staff && (
                                 <div className="mt-6 pt-4 border-t border-gray-100">
                                     <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                        <StethoscopeIcon className="w-4 h-4 text-red-500" />
                                         Nhân viên y tế
                                     </h3>
                                     <div className="flex items-center gap-3">
@@ -676,7 +687,7 @@ const EventMedicalCheckUpDetail = () => {
                                         </div>
                                         <button
                                             onClick={() => setIsStaffDialogOpen(true)}
-                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </button>
@@ -751,6 +762,34 @@ const EventMedicalCheckUpDetail = () => {
                 
                 .animate-fadeIn {
                     animation: fadeIn 0.2s ease-out;
+                }
+
+                [data-theme="dark"] .grid.sm\\:grid-cols-2.lg\\:grid-cols-3.gap-4 > div {
+                    background: linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96)) !important;
+                    border-color: rgba(71, 85, 105, 0.75) !important;
+                    box-shadow: 0 12px 28px rgba(2, 6, 23, 0.25) !important;
+                }
+
+                [data-theme="dark"] .grid.sm\\:grid-cols-2.lg\\:grid-cols-3.gap-4 > div .bg-white {
+                    background: rgba(15, 23, 42, 0.92) !important;
+                    border: 1px solid rgba(100, 116, 139, 0.35);
+                    box-shadow: none !important;
+                }
+
+                [data-theme="dark"] .grid.sm\\:grid-cols-2.lg\\:grid-cols-3.gap-4 > div p.text-xs {
+                    color: #cbd5e1 !important;
+                }
+
+                [data-theme="dark"] .grid.sm\\:grid-cols-2.lg\\:grid-cols-3.gap-4 > div p.text-xl {
+                    color: #f8fafc !important;
+                }
+
+                [data-theme="dark"] .grid.sm\\:grid-cols-2.lg\\:grid-cols-3.gap-4 > div span.text-xs {
+                    color: #94a3b8 !important;
+                }
+
+                [data-theme="dark"] .grid.sm\\:grid-cols-2.lg\\:grid-cols-3.gap-4 > div svg {
+                    color: #f87171 !important;
                 }
             `}</style>
         </div>

@@ -7,6 +7,7 @@ import {
     Sparkles, Shield, Truck, Clock, CreditCard, Copy, ThumbsUp,
     BadgeCheck, Gift as GiftIcon, Box,
     ChevronLeft,
+    ChevronDown,
     Droplet,
     ChevronRight,
     Bookmark, ArrowRight, Loader2, Send, TrendingUp, Award as AwardIcon,
@@ -37,6 +38,10 @@ const RewardDetail = () => {
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [selectedProvince, setSelectedProvince] = useState('');
+    const [loadingProvinces, setLoadingProvinces] = useState(false);
+    const [loadingDistricts, setLoadingDistricts] = useState(false);
+    const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
+    const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
     const [formStep, setFormStep] = useState(1);
     const [formErrors, setFormErrors] = useState({});
 
@@ -80,24 +85,44 @@ const RewardDetail = () => {
     useEffect(() => {
         const fetchDistricts = async () => {
             if (!selectedProvince) return;
+            setLoadingDistricts(true);
             try {
                 const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`);
                 const data = await response.json();
                 setDistricts(data.districts || []);
             } catch (error) {
                 console.error("Error fetching districts:", error);
+            } finally {
+                setLoadingDistricts(false);
             }
         };
         fetchDistricts();
     }, [selectedProvince]);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showProvinceDropdown && !event.target.closest('.province-dropdown')) {
+                setShowProvinceDropdown(false);
+            }
+            if (showDistrictDropdown && !event.target.closest('.district-dropdown')) {
+                setShowDistrictDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showProvinceDropdown, showDistrictDropdown]);
+
     const fetchProvinces = async () => {
+        setLoadingProvinces(true);
         try {
             const response = await fetch('https://provinces.open-api.vn/api/p/');
             const data = await response.json();
             setProvinces(data);
         } catch (error) {
             console.error("Error fetching provinces:", error);
+        } finally {
+            setLoadingProvinces(false);
         }
     };
 
@@ -129,15 +154,40 @@ const RewardDetail = () => {
         }
     };
 
-    const handleProvinceChange = (e) => {
-        const provinceName = e.target.value;
-        const selected = provinces.find(p => p.name === provinceName);
-        setSelectedProvince(selected?.code || '');
+    const handleProvinceSelect = (provinceCode, provinceName) => {
+        setSelectedProvince(provinceCode);
+        setDistricts([]);
         setRedeemForm(prev => ({
             ...prev,
             province: provinceName,
             sub_district: ''
         }));
+        setShowProvinceDropdown(false);
+        setShowDistrictDropdown(false);
+        setFormErrors(prev => ({
+            ...prev,
+            province: '',
+            sub_district: ''
+        }));
+    };
+
+    const handleDistrictSelect = (districtName) => {
+        setRedeemForm(prev => ({
+            ...prev,
+            sub_district: districtName
+        }));
+        setShowDistrictDropdown(false);
+        if (formErrors.sub_district) {
+            setFormErrors(prev => ({ ...prev, sub_district: '' }));
+        }
+    };
+
+    const getProvinceName = () => {
+        return redeemForm.province || 'Chọn tỉnh/thành phố';
+    };
+
+    const getDistrictName = () => {
+        return redeemForm.sub_district || 'Chọn quận/huyện';
     };
 
     const validateStep1 = () => {
@@ -276,7 +326,7 @@ const RewardDetail = () => {
                         <p className="text-gray-600 mb-6">Quà tặng bạn đang tìm không tồn tại hoặc đã bị xóa</p>
                         <button
                             onClick={() => navigate(-1)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại
@@ -359,14 +409,14 @@ const RewardDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/reward-category")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Danh mục
+                            Kho đổi thưởng
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/reward-category/${reward?.reward_category?.id}`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
                             {reward?.reward_category?.name || 'Quà tặng'}
                         </button>
@@ -376,10 +426,10 @@ const RewardDetail = () => {
 
                     <button
                         onClick={() => navigate(`/reward-category/${reward?.reward_category?.id}`)}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại {reward?.reward_category?.name}</span>
+                        <span>Quay lại</span>
                     </button>
                 </div>
 
@@ -452,7 +502,7 @@ const RewardDetail = () => {
                                     <div className="flex gap-6">
                                         <button
                                             onClick={() => setActiveTab('info')}
-                                            className={`pb-4 px-2 font-medium transition-all relative ${
+                                            className={`cursor-pointer pb-4 px-2 font-medium transition-all relative ${
                                                 activeTab === 'info'
                                                     ? 'text-red-600'
                                                     : 'text-gray-500 hover:text-gray-700'
@@ -465,7 +515,7 @@ const RewardDetail = () => {
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('details')}
-                                            className={`pb-4 px-2 font-medium transition-all relative ${
+                                            className={`cursor-pointer pb-4 px-2 font-medium transition-all relative ${
                                                 activeTab === 'details'
                                                     ? 'text-red-600'
                                                     : 'text-gray-500 hover:text-gray-700'
@@ -534,7 +584,7 @@ const RewardDetail = () => {
                                             <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
                                                 <button
                                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                                    className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-50"
+                                                    className="cursor-pointer w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-50"
                                                 >
                                                     <Minus className="w-4 h-4" />
                                                 </button>
@@ -544,7 +594,7 @@ const RewardDetail = () => {
                                                 <button
                                                     onClick={() => setQuantity(Math.min(reward.remaining_stock, quantity + 1))}
                                                     disabled={quantity >= reward.remaining_stock}
-                                                    className="w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-50"
+                                                    className="cursor-pointer w-12 h-12 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-50"
                                                 >
                                                     <Plus className="w-4 h-4" />
                                                 </button>
@@ -565,7 +615,7 @@ const RewardDetail = () => {
                                     <button
                                         onClick={handleContinue}
                                         disabled={!reward.remaining_stock || reward.remaining_stock < quantity}
-                                        className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-105 ${
+                                        className={`cursor-pointer flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl text-white font-semibold transition-all duration-300 transform hover:scale-105 ${
                                             reward.remaining_stock >= quantity
                                                 ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg shadow-red-500/25'
                                                 : 'bg-gray-400 cursor-not-allowed'
@@ -767,7 +817,7 @@ const RewardDetail = () => {
                                             <button
                                                 type="button"
                                                 onClick={handleNextStep}
-                                                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                                                className="cursor-pointer w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                                             >
                                                 Tiếp tục
                                                 <ArrowRight className="w-5 h-5" />
@@ -779,56 +829,107 @@ const RewardDetail = () => {
                                 {/* Step 2: Address Information */}
                                 {formStep === 2 && (
                                     <div className="space-y-4">
-                                        <div>
+                                        <div className="province-dropdown relative">
                                             <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Tỉnh/Thành phố <span className="text-red-500">*</span>
                                             </label>
-                                            <div className="relative">
-                                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
-                                                <select
-                                                    name="province"
-                                                    value={redeemForm.province}
-                                                    onChange={handleProvinceChange}
-                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all appearance-none ${
-                                                        formErrors.province
-                                                            ? 'border-red-500 focus:ring-red-500/20'
-                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20'
-                                                    }`}
-                                                >
-                                                    <option value="">Chọn tỉnh/thành phố</option>
-                                                    {provinces.map(p => (
-                                                        <option key={p.code} value={p.name}>{p.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => !loadingProvinces && setShowProvinceDropdown(!showProvinceDropdown)}
+                                                className={`w-full flex items-center justify-between pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white ${
+                                                    formErrors.province
+                                                        ? 'border-red-500 focus:ring-red-500/20'
+                                                        : 'border-gray-200 hover:border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                                                }`}
+                                                disabled={loadingProvinces}
+                                            >
+                                                <span className={redeemForm.province ? 'text-gray-900' : 'text-gray-400'}>
+                                                    {getProvinceName()}
+                                                </span>
+                                                {loadingProvinces ? (
+                                                    <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
+                                                ) : (
+                                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showProvinceDropdown ? 'rotate-180' : ''}`} />
+                                                )}
+                                            </button>
+
+                                            {showProvinceDropdown && (
+                                                <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleProvinceSelect('', '')}
+                                                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!redeemForm.province ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                    >
+                                                        Chọn tỉnh/thành phố
+                                                    </button>
+                                                    {loadingProvinces ? (
+                                                        <div className="px-4 py-3 text-center text-gray-500">
+                                                            <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                                        </div>
+                                                    ) : (
+                                                        provinces.map((province) => (
+                                                            <button
+                                                                key={province.code}
+                                                                type="button"
+                                                                onClick={() => handleProvinceSelect(province.code.toString(), province.name)}
+                                                                className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${redeemForm.province === province.name ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                            >
+                                                                {province.name}
+                                                            </button>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            )}
                                             {formErrors.province && (
                                                 <p className="mt-1 text-xs text-red-600">{formErrors.province}</p>
                                             )}
                                         </div>
 
-                                        <div>
+                                        <div className="district-dropdown relative">
                                             <label className="block text-sm font-semibold text-gray-700 mb-1">
                                                 Quận/Huyện <span className="text-red-500">*</span>
                                             </label>
-                                            <div className="relative">
-                                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
-                                                <select
-                                                    name="sub_district"
-                                                    value={redeemForm.sub_district}
-                                                    onChange={handleInputChange}
-                                                    disabled={!selectedProvince}
-                                                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all appearance-none ${
-                                                        formErrors.sub_district
-                                                            ? 'border-red-500 focus:ring-red-500/20'
-                                                            : 'border-gray-200 focus:border-red-500 focus:ring-red-500/20 disabled:bg-gray-100'
-                                                    }`}
-                                                >
-                                                    <option value="">Chọn quận/huyện</option>
-                                                    {districts.map(d => (
-                                                        <option key={d.code} value={d.name}>{d.name}</option>
+                                            <button
+                                                type="button"
+                                                onClick={() => selectedProvince && !loadingDistricts && setShowDistrictDropdown(!showDistrictDropdown)}
+                                                className={`w-full flex items-center justify-between pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all bg-white ${
+                                                    formErrors.sub_district
+                                                        ? 'border-red-500 focus:ring-red-500/20'
+                                                        : 'border-gray-200 hover:border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                                                } ${(!selectedProvince || loadingDistricts) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                disabled={!selectedProvince || loadingDistricts}
+                                            >
+                                                <span className={redeemForm.sub_district ? 'text-gray-900' : 'text-gray-400'}>
+                                                    {getDistrictName()}
+                                                </span>
+                                                {loadingDistricts ? (
+                                                    <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
+                                                ) : (
+                                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showDistrictDropdown ? 'rotate-180' : ''}`} />
+                                                )}
+                                            </button>
+
+                                            {showDistrictDropdown && selectedProvince && (
+                                                <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDistrictSelect('')}
+                                                        className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!redeemForm.sub_district ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                    >
+                                                        Chọn quận/huyện
+                                                    </button>
+                                                    {districts.map((district) => (
+                                                        <button
+                                                            key={district.code}
+                                                            type="button"
+                                                            onClick={() => handleDistrictSelect(district.name)}
+                                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${redeemForm.sub_district === district.name ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                        >
+                                                            {district.name}
+                                                        </button>
                                                     ))}
-                                                </select>
-                                            </div>
+                                                </div>
+                                            )}
                                             {formErrors.sub_district && (
                                                 <p className="mt-1 text-xs text-red-600">{formErrors.sub_district}</p>
                                             )}
@@ -919,14 +1020,14 @@ const RewardDetail = () => {
                                             <button
                                                 type="button"
                                                 onClick={handlePrevStep}
-                                                className="flex-1 px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold"
+                                                className="cursor-pointer flex-1 px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-300 font-semibold"
                                             >
                                                 Quay lại
                                             </button>
                                             <button
                                                 type="submit"
                                                 disabled={redeeming || !redeemForm.agree_terms}
-                                                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed shadow-lg"
+                                                className="cursor-pointer flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed shadow-lg"
                                             >
                                                 {redeeming ? (
                                                     <>
@@ -935,7 +1036,6 @@ const RewardDetail = () => {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <CheckCircle className="w-5 h-5" />
                                                         Xác nhận đổi quà
                                                     </>
                                                 )}
@@ -973,6 +1073,11 @@ const RewardDetail = () => {
                     0%, 100% { transform: translateY(0px) translateX(0px); }
                     50% { transform: translateY(-20px) translateX(10px); }
                 }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 
                 @keyframes shake {
                     0%, 100% { transform: translateX(0); }
@@ -987,6 +1092,10 @@ const RewardDetail = () => {
                 
                 .animate-float {
                     animation: float 15s ease-in-out infinite;
+                }
+
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out;
                 }
                 
                 .animate-shake {

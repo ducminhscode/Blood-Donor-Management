@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPlus, HeartPulse, Grid, List, Filter as FilterIcon, Send, TrendingUp, CheckCircle2, Loader2, Eye, RefreshCw } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPlus, HeartPulse, Grid, List, Filter as FilterIcon, Send, TrendingUp, CheckCircle2, Loader2, Eye, RefreshCw, HandHeart, ChevronDown } from 'lucide-react';
 import APIs, { endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -17,6 +17,7 @@ const EventList = () => {
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProvince, setSelectedProvince] = useState("");
+    const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [filterType, setFilterType] = useState('all');
     const [viewMode, setViewMode] = useState('grid');
@@ -35,6 +36,17 @@ const EventList = () => {
     useEffect(() => {
         fetchProvinces();
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showProvinceDropdown && !event.target.closest('.province-dropdown')) {
+                setShowProvinceDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showProvinceDropdown]);
 
     const fetchProvinces = async () => {
         setLoadingProvinces(true);
@@ -109,7 +121,7 @@ const EventList = () => {
 
         } catch (err) {
             console.error("Error fetching events:", err);
-            setError("Không thể tải danh sách sự kiện. Vui lòng thử lại sau.");
+            setError("Không thể tải danh sách hoạt động. Vui lòng thử lại sau.");
         } finally {
             if (isLoadMore) {
                 setLoadingMore(false);
@@ -188,8 +200,10 @@ const EventList = () => {
         setSearchTerm(e.target.value);
     };
 
-    const handleProvinceChange = (e) => {
-        setSelectedProvince(e.target.value);
+    const handleProvinceSelect = (provinceCode) => {
+        setSelectedProvince(provinceCode);
+        setShowProvinceDropdown(false);
+        setPage(1);
     };
 
     const handleClearFilters = () => {
@@ -285,15 +299,12 @@ const EventList = () => {
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                                <Sparkles className="w-4 h-4" />
+                                <HandHeart className="w-4 h-4" />
                                 <span className="text-sm font-medium">Cùng chung tay vì cộng đồng</span>
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <HeartPulse className="w-10 h-10" />
-                                </div>
-                                <h1 className="text-4xl md:text-5xl font-bold">Sự kiện hiến máu</h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Hoạt động hiến máu</h1>
                             </div>
 
                             <p className="text-lg text-red-100 max-w-2xl">
@@ -307,7 +318,7 @@ const EventList = () => {
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold">{originalTotalEvents}</div>
-                                        <div className="text-sm text-white/80">Sự kiện tổ chức</div>
+                                        <div className="text-sm text-white/80">Hoạt động tổ chức</div>
                                     </div>
                                 </div>
                             </div>
@@ -320,18 +331,18 @@ const EventList = () => {
                                     <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
                                         <Calendar className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-lg font-bold mb-1">Sự kiện sắp tới</h3>
+                                    <h3 className="text-lg font-bold mb-1">Hoạt động sắp tới</h3>
                                     {!user || user.role === 1 ? (
                                         <p className="text-white/80 text-sm">Đăng ký ngay để nhận thông báo</p>
                                     ) : user.role === 2 && (
-                                        <p className="text-white/80 text-sm">Xem những sự kiện hiến máu mà bạn đã tạo</p>
+                                        <p className="text-white/80 text-sm">Xem những hoạt động hiến máu mà bạn đã tạo</p>
                                     )}
                                 </div>
                                 <button
                                     onClick={handleFeatureCard}
-                                    className="w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
+                                    className="cursor-pointer w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
                                 >
-                                    {!user ? 'Đăng nhập để đăng ký' : (user.role === 2 ? 'Quản lý sự kiện' : 'Sự kiện đã đăng ký')}
+                                    {!user ? 'Đăng nhập để đăng ký' : (user.role === 2 ? 'Quản lý hoạt động' : 'Hoạt động đã đăng ký')}
                                 </button>
                             </div>
                         </div>
@@ -356,7 +367,7 @@ const EventList = () => {
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm sự kiện hiến máu..."
+                                    placeholder="Tìm kiếm hoạt động hiến máu..."
                                     value={searchTerm}
                                     onChange={handleSearchChange}
                                     className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300"
@@ -369,7 +380,7 @@ const EventList = () => {
                                             setPage(1);
                                             loadEvents(false);
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -380,7 +391,7 @@ const EventList = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <FilterIcon className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
@@ -390,7 +401,7 @@ const EventList = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setFilterType('all')}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'all'
+                                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'all'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -399,7 +410,7 @@ const EventList = () => {
                                 </button>
                                 <button
                                     onClick={() => setFilterType('ongoing')}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'ongoing'
+                                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'ongoing'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -408,7 +419,7 @@ const EventList = () => {
                                 </button>
                                 <button
                                     onClick={() => setFilterType('upcoming')}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'upcoming'
+                                    className={`cursor-pointer px-4 py-2 rounded-lg transition-all duration-300 font-medium ${filterType === 'upcoming'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -417,30 +428,60 @@ const EventList = () => {
                                 </button>
                             </div>
 
-                            {/* Province Select */}
-                            <select
-                                value={selectedProvince}
-                                onChange={handleProvinceChange}
-                                className="hidden lg:block px-4 py-2 bg-gray-100 border-2 border-transparent rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300 cursor-pointer"
-                                disabled={loadingProvinces}
-                            >
-                                <option value="">Tất cả tỉnh/thành</option>
-                                {loadingProvinces ? (
-                                    <option disabled>Đang tải...</option>
-                                ) : (
-                                    provinces.map(province => (
-                                        <option key={province.code} value={province.code}>
-                                            {province.name}
-                                        </option>
-                                    ))
+                            {/* Province Dropdown */}
+                            <div className="province-dropdown relative hidden lg:block min-w-[220px]">
+                                <button
+                                    type="button"
+                                    onClick={() => !loadingProvinces && setShowProvinceDropdown(!showProvinceDropdown)}
+                                    className={`w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300 ${loadingProvinces ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                    disabled={loadingProvinces}
+                                >
+                                    <span className={selectedProvince ? "text-gray-900" : "text-gray-900"}>
+                                        {selectedProvince
+                                            ? provinces.find(province => province.code === parseInt(selectedProvince))?.name
+                                            : "Tất cả Tỉnh/Thành phố"}
+                                    </span>
+                                    {loadingProvinces ? (
+                                        <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
+                                    ) : (
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showProvinceDropdown ? 'rotate-180' : ''}`} />
+                                    )}
+                                </button>
+
+                                {showProvinceDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleProvinceSelect("")}
+                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedProvince ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Tất cả Tỉnh/Thành
+                                        </button>
+                                        {loadingProvinces ? (
+                                            <div className="px-4 py-3 text-center text-gray-500">
+                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                            </div>
+                                        ) : (
+                                            provinces.map(province => (
+                                                <button
+                                                    key={province.code}
+                                                    type="button"
+                                                    onClick={() => handleProvinceSelect(province.code.toString())}
+                                                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedProvince === province.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    {province.name}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
                                 )}
-                            </select>
+                            </div>
 
                             {/* View Mode Toggle */}
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -450,7 +491,7 @@ const EventList = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -467,7 +508,7 @@ const EventList = () => {
                         <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-gray-900">Bộ lọc nâng cao</h3>
-                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-200 rounded-lg">
+                                <button onClick={() => setShowFilters(false)} className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
@@ -482,7 +523,7 @@ const EventList = () => {
                                                 setShowFilters(false);
                                                 setPage(1);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'all'
+                                            className={`cursor-pointer px-4 py-2 rounded-lg border transition-all ${filterType === 'all'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -495,7 +536,7 @@ const EventList = () => {
                                                 setShowFilters(false);
                                                 setPage(1);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'ongoing'
+                                            className={`cursor-pointer px-4 py-2 rounded-lg border transition-all ${filterType === 'ongoing'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -508,7 +549,7 @@ const EventList = () => {
                                                 setShowFilters(false);
                                                 setPage(1);
                                             }}
-                                            className={`px-4 py-2 rounded-lg border transition-all ${filterType === 'upcoming'
+                                            className={`cursor-pointer px-4 py-2 rounded-lg border transition-all ${filterType === 'upcoming'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -520,27 +561,59 @@ const EventList = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Tỉnh/Thành phố</label>
-                                    <select
-                                        value={selectedProvince}
-                                        onChange={(e) => {
-                                            handleProvinceChange(e);
-                                            setShowFilters(false);
-                                            setPage(1);
-                                        }}
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                                        disabled={loadingProvinces}
-                                    >
-                                        <option value="">Tất cả tỉnh/thành</option>
-                                        {loadingProvinces ? (
-                                            <option disabled>Đang tải...</option>
-                                        ) : (
-                                            provinces.map(province => (
-                                                <option key={province.code} value={province.code}>
-                                                    {province.name}
-                                                </option>
-                                            ))
+                                    <div className="province-dropdown relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => !loadingProvinces && setShowProvinceDropdown(!showProvinceDropdown)}
+                                            className={`w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300 ${loadingProvinces ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                            disabled={loadingProvinces}
+                                        >
+                                            <span className={selectedProvince ? "text-gray-900" : "text-gray-400"}>
+                                                {selectedProvince
+                                                    ? provinces.find(province => province.code === parseInt(selectedProvince))?.name
+                                                    : "Tất cả Tỉnh/Thành"}
+                                            </span>
+                                            {loadingProvinces ? (
+                                                <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
+                                            ) : (
+                                                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showProvinceDropdown ? 'rotate-180' : ''}`} />
+                                            )}
+                                        </button>
+
+                                        {showProvinceDropdown && (
+                                            <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        handleProvinceSelect("");
+                                                        setShowFilters(false);
+                                                    }}
+                                                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedProvince ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    Tất cả Tỉnh/Thành
+                                                </button>
+                                                {loadingProvinces ? (
+                                                    <div className="px-4 py-3 text-center text-gray-500">
+                                                        <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                                    </div>
+                                                ) : (
+                                                    provinces.map(province => (
+                                                        <button
+                                                            key={province.code}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                handleProvinceSelect(province.code.toString());
+                                                                setShowFilters(false);
+                                                            }}
+                                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedProvince === province.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                        >
+                                                            {province.name}
+                                                        </button>
+                                                    ))
+                                                )}
+                                            </div>
                                         )}
-                                    </select>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -551,7 +624,7 @@ const EventList = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -564,7 +637,7 @@ const EventList = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -584,7 +657,7 @@ const EventList = () => {
                             {filterType !== 'all' && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Trạng thái: {getFilterLabel()}</span>
-                                    <button onClick={() => setFilterType('all')} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setFilterType('all')} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -592,7 +665,7 @@ const EventList = () => {
                             {selectedProvince && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>{provinces.find(p => p.code === parseInt(selectedProvince))?.name}</span>
-                                    <button onClick={() => { setSelectedProvince(""); setPage(1); loadEvents(false); }} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => { setSelectedProvince(""); setPage(1); loadEvents(false); }} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -601,7 +674,7 @@ const EventList = () => {
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <Search className="h-4 w-4" />
                                     <span>Tìm kiếm: "{searchTerm}"</span>
-                                    <button onClick={() => setSearchTerm("")} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setSearchTerm("")} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -609,7 +682,7 @@ const EventList = () => {
                             {(selectedProvince || searchTerm || filterType !== 'all') && (
                                 <button
                                     onClick={handleClearFilters}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
+                                    className="cursor-pointer px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
                                 >
                                     Xóa tất cả
                                 </button>
@@ -655,7 +728,7 @@ const EventList = () => {
                                 </div>
                                 <button
                                     onClick={handleRefresh}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
                                 </button>
@@ -678,8 +751,8 @@ const EventList = () => {
 
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
                             {searchTerm || selectedProvince || filterType !== 'all'
-                                ? "Không tìm thấy sự kiện phù hợp"
-                                : "Chưa có sự kiện nào"}
+                                ? "Không tìm thấy hoạt động phù hợp"
+                                : "Chưa có hoạt động nào"}
                         </h3>
 
                         <p className="text-gray-600 mb-6 max-w-md mx-auto">
@@ -691,9 +764,8 @@ const EventList = () => {
                         {(searchTerm || selectedProvince || filterType !== 'all') && (
                             <button
                                 onClick={handleClearFilters}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                <X className="w-5 h-5" />
                                 Xóa tất cả bộ lọc
                             </button>
                         )}
@@ -709,14 +781,14 @@ const EventList = () => {
                                     <span className="font-bold text-lg">{totalEvents}</span>
                                 </div>
                                 <span className="text-gray-600">
-                                    sự kiện hiến máu {(searchTerm || selectedProvince) && "phù hợp"}
+                                    hoạt động hiến máu {(searchTerm || selectedProvince) && "phù hợp"}
                                 </span>
                             </div>
 
                             <button
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                                 <span>Làm mới</span>
@@ -862,7 +934,7 @@ const EventList = () => {
                                                     onClick={(e) => event.is_expire && e.preventDefault()}
                                                 >
                                                     <span className="font-medium">Xem chi tiết</span>
-                                                    <Eye className="w-4 h-4" />
+                                                    <ChevronRight className="w-4 h-4" />
                                                 </Link>
                                             </div>
                                         </div>
@@ -877,7 +949,7 @@ const EventList = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -887,8 +959,7 @@ const EventList = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
-                                                <span>Xem thêm sự kiện</span>
+                                                <span>Xem thêm hoạt động</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}
@@ -901,7 +972,7 @@ const EventList = () => {
                             <div className="text-center mt-12">
                                 <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
                                     <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                    <span>Đã hiển thị tất cả {totalEvents} sự kiện</span>
+                                    <span>Đã hiển thị tất cả {totalEvents} hoạt động</span>
                                 </div>
                             </div>
                         )}

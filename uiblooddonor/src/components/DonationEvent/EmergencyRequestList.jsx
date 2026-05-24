@@ -225,10 +225,7 @@ const EmergencyRequestList = () => {
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Ambulance className="w-10 h-10" />
-                                </div>
-                                <h1 className="text-4xl md:text-5xl font-bold">Yêu cầu máu cấp cứu</h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Yêu cầu hiến máu khẩn cấp</h1>
                             </div>
 
                             <p className="text-lg text-red-100 max-w-2xl">
@@ -238,7 +235,7 @@ const EmergencyRequestList = () => {
                             <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
                                 <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 hover:bg-white/20 transition-all duration-300">
                                     <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <HeartPulse className="w-6 h-6" />
+                                        <AlertTriangle className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold">{originalTotalRequests}</div>
@@ -264,9 +261,9 @@ const EmergencyRequestList = () => {
                                 </div>
                                 <button
                                     onClick={handleFeatureCard}
-                                    className="w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
+                                    className="cursor-pointer w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
                                 >
-                                    {!user ? 'Đăng nhập để đăng ký' : (user.role === 2 ? 'Quản lý yêu cầu' : 'Yêu cầu đã phản hồi')}
+                                    {!user ? 'Đăng nhập để đăng ký' : (user.role === 2 ? 'Quản lý yêu cầu' : 'Khẩn cấp đã ứng cứu')}
                                 </button>
                             </div>
                         </div>
@@ -304,7 +301,7 @@ const EmergencyRequestList = () => {
                                             setPage(1);
                                             loadRequests(false);
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -317,7 +314,7 @@ const EmergencyRequestList = () => {
                             <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -327,7 +324,7 @@ const EmergencyRequestList = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -351,7 +348,7 @@ const EmergencyRequestList = () => {
                                         setPage(1);
                                         loadRequests(false);
                                     }}
-                                    className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                                    className="cursor-pointer p-1 hover:bg-white/20 rounded-lg transition-colors"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
@@ -397,7 +394,7 @@ const EmergencyRequestList = () => {
                                 </div>
                                 <button
                                     onClick={handleRefresh}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
                                 </button>
@@ -433,9 +430,8 @@ const EmergencyRequestList = () => {
                         {searchTerm && (
                             <button
                                 onClick={handleClearFilters}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                <X className="w-5 h-5" />
                                 Xóa tìm kiếm
                             </button>
                         )}
@@ -458,7 +454,7 @@ const EmergencyRequestList = () => {
                             <button
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                                 <span>Làm mới</span>
@@ -497,10 +493,10 @@ const EmergencyRequestList = () => {
                                             {/* Blood Type Badge */}
                                             <div className="absolute top-4 right-4">
                                                 <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl shadow-md">
+                                                    <div className="text-xs text-gray-500">Nhóm máu</div>
                                                     <div className="text-lg font-bold text-red-600">
                                                         {getBloodTypeText(request.blood_type)}{getRhFactorText(request.rh_factor)}
                                                     </div>
-                                                    <div className="text-xs text-gray-500">Nhóm máu</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -546,7 +542,7 @@ const EmergencyRequestList = () => {
                                                 onClick={(e) => request.is_expire && e.preventDefault()}
                                             >
                                                 <span className="font-medium">
-                                                    {request.is_expire ? 'Đã hết hạn' : 'Xem chi tiết - Hỗ trợ ngay'}
+                                                    {request.is_expire ? 'Đã hết hạn' : 'Xem chi tiết'}
                                                 </span>
                                                 {!request.is_expire && (
                                                     <Eye className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -647,7 +643,7 @@ const EmergencyRequestList = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -657,7 +653,6 @@ const EmergencyRequestList = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm yêu cầu</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>

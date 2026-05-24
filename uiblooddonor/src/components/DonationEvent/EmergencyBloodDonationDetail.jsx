@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, HeartPulse, Activity, FileHeart, Award as AwardIcon, Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon, Syringe, FlaskConical, Ambulance, AlertTriangle, Hospital, Stethoscope, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, HeartPulse, Activity, FileHeart, Award as AwardIcon, Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon, Syringe, FlaskConical, Ambulance, AlertTriangle, Hospital, Stethoscope, Loader2, HandHeart } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
@@ -18,12 +18,11 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -55,10 +54,7 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 
                         <div className="space-y-3">
                             <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
-                                <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hospital className="w-4 h-4 text-red-500" />
-                                    Bệnh viện trực thuộc
-                                </h5>
+                                <p className="text-xs text-gray-500 mb-1">Bệnh viện trực thuộc</p>
                                 <div className="space-y-2">
                                     <p className="font-semibold text-gray-900">
                                         {staff?.hospital?.name || 'Đang cập nhật'}
@@ -87,7 +83,6 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
@@ -182,6 +177,7 @@ const EmergencyBloodDonationDetail = () => {
     const navigate = useNavigate();
 
     const [donation, setDonation] = useState(null);
+    const [emergencyRequest, setEmergencyRequest] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [message, setMessage] = useState({ text: '', type: '' });
@@ -190,7 +186,19 @@ const EmergencyBloodDonationDetail = () => {
 
     useEffect(() => {
         fetchBloodDonation();
+        fetchEmergencyRequest();
     }, [id, response_id, medical_check_up_id]);
+
+    const fetchEmergencyRequest = async () => {
+        try {
+            const url = endpoints.emergency_request_detail.replace('${id}', id);
+            const response = await authApis().get(url);
+            setEmergencyRequest(response.data);
+        } catch (err) {
+            console.error("Error fetching emergency request detail:", err);
+            setEmergencyRequest(null);
+        }
+    };
 
     const fetchBloodDonation = async () => {
         setLoading(true);
@@ -230,6 +238,8 @@ const EmergencyBloodDonationDetail = () => {
         const types = ['Hiến máu toàn phần', 'Hiến tiểu cầu', 'Hiến huyết tương', 'Hiến bạch cầu'];
         return types[donation?.donation_type] || 'Không xác định';
     };
+
+    const patientName = emergencyRequest?.patient_name || donation?.emergency_request?.patient_name || 'Đang tải tên bệnh nhân';
 
     if (loading) {
         return (
@@ -274,7 +284,7 @@ const EmergencyBloodDonationDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate(`/emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại kết quả khám
@@ -337,23 +347,23 @@ const EmergencyBloodDonationDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/emergency-response")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Phản hồi cấp cứu
+                            Khẩn cấp đã ứng cứu
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/emergency-response/${response_id}`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Chi tiết phản hồi
+                            {patientName}
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Kết quả khám
+                            Kết quả khám sức khỏe
                         </button>
                         <span>/</span>
                         <span className="text-white font-medium">Kết quả hiến máu</span>
@@ -361,15 +371,14 @@ const EmergencyBloodDonationDetail = () => {
 
                     <button
                         onClick={() => navigate(`/emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại kết quả khám</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
-                            <HeartPulse className="w-8 h-8" />
                             Kết quả hiến máu
                         </h1>
                     </div>
@@ -388,21 +397,6 @@ const EmergencyBloodDonationDetail = () => {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Left Column - Main Info */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Title Section */}
-                        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-4 flex-wrap">
-                                        <BloodTypeBadge
-                                            bloodType={donation.blood_type}
-                                            rhFactor={donation.rh_factor}
-                                        />
-                                        <DonationTypeBadge type={donation.donation_type} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Donation Info */}
                         <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -416,12 +410,12 @@ const EmergencyBloodDonationDetail = () => {
                                     value={getBloodTypeDisplay()}
                                 />
                                 <InfoCard
-                                    icon={Activity}
-                                    label="Loại hiến"
+                                    icon={HandHeart}
+                                    label="Loại hiến máu"
                                     value={getDonationTypeText()}
                                 />
                                 <InfoCard
-                                    icon={Droplet}
+                                    icon={Syringe}
                                     label="Thể tích máu"
                                     value={`${donation.blood_volume} ml`}
                                 />
@@ -479,7 +473,7 @@ const EmergencyBloodDonationDetail = () => {
                         <div className="bg-white rounded-2xl shadow-md p-6 sticky top-24 border border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <FileHeart className="w-5 h-5 text-red-500" />
-                                Thông tin hiến
+                                Thông tin hiến máu
                             </h2>
 
                             <div className="space-y-4">
@@ -494,7 +488,7 @@ const EmergencyBloodDonationDetail = () => {
                                 </div>
 
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Loại hiến</span>
+                                    <span className="text-gray-600">Loại hiến máu</span>
                                     <DonationTypeBadge type={donation.donation_type} />
                                 </div>
 
@@ -516,7 +510,6 @@ const EmergencyBloodDonationDetail = () => {
                             {staff && (
                                 <div className="mt-6 pt-4 border-t border-gray-100">
                                     <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                        <Stethoscope className="w-4 h-4 text-red-500" />
                                         Nhân viên y tế
                                     </h3>
                                     <div className="flex items-center gap-3">
@@ -546,7 +539,7 @@ const EmergencyBloodDonationDetail = () => {
                                         </div>
                                         <button
                                             onClick={() => setIsStaffDialogOpen(true)}
-                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </button>

@@ -745,7 +745,6 @@ const FriendList = () => {
                                 onClick={handleClearSearch}
                                 className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                <X className="w-5 h-5" />
                                 Xóa tìm kiếm
                             </button>
                         ) : (
@@ -914,7 +913,6 @@ const FriendList = () => {
 
                                             <div>
                                                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <Activity className="w-5 h-5 text-red-500" />
                                                     Thông số cơ thể
                                                 </h3>
                                                 <div className="grid grid-cols-3 gap-4">

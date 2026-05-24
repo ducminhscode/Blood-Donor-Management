@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, CalendarCheck, ClipboardCheck, Mars, Venus, Stethoscope, Ambulance, AlertTriangle, Syringe, Hospital, HeartPulse, Loader2, Eye, TrendingUp, RefreshCw, Activity } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, CalendarCheck, ClipboardCheck, Mars, Venus, Stethoscope, Ambulance, AlertTriangle, Syringe, Hospital, HeartPulse, Loader2, Eye, TrendingUp, RefreshCw, Activity, HandHeart } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -252,12 +252,11 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -289,10 +288,7 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 
                         <div className="space-y-3">
                             <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
-                                <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hospital className="w-4 h-4 text-red-500" />
-                                    Bệnh viện trực thuộc
-                                </h5>
+                                <p className="text-xs text-gray-500 mb-1">Bệnh viện trực thuộc</p>
                                 <div className="space-y-2">
                                     <p className="font-semibold text-gray-900">
                                         {staff?.hospital?.name || 'Đang cập nhật'}
@@ -321,7 +317,6 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
@@ -500,7 +495,7 @@ const EmergencyResponseDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate('/emergency-response')}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại danh sách phản hồi
@@ -565,25 +560,24 @@ const EmergencyResponseDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/emergency-response")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Phản hồi cấp cứu
+                            Khẩn cấp đã ứng cứu
                         </button>
                         <span>/</span>
-                        <span className="text-white font-medium">Chi tiết phản hồi</span>
+                        <span className="text-white font-medium">{patientName}</span>
                     </div>
 
                     <button
                         onClick={() => navigate("/emergency-response")}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại danh sách phản hồi</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
-                            <Ambulance className="w-8 h-8" />
                             Chi tiết phản hồi cấp cứu
                         </h1>
                     </div>
@@ -607,7 +601,7 @@ const EmergencyResponseDetail = () => {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                                        Bệnh nhân: {emergency?.patient_name}
+                                        Bệnh nhân {emergency?.patient_name}
                                     </h1>
                                     <div className="flex items-center gap-3 mt-4 mb-4 flex-wrap">
                                         <StatusBadge
@@ -624,7 +618,7 @@ const EmergencyResponseDetail = () => {
                                     {!checkingMedical && hasMedicalCheckup && isAccepted && (
                                         <button
                                             onClick={() => navigate(`/emergency-request/${emergency?.id}/responses/${id}/medical-checkup`)}
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                            className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
                                         >
                                             <Stethoscope className="w-4 h-4" />
                                             Xem kết quả khám sức khỏe
@@ -632,7 +626,7 @@ const EmergencyResponseDetail = () => {
                                     )}
 
                                     {checkingMedical && (
-                                        <button disabled className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-400 rounded-xl">
+                                        <button disabled className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-400 rounded-xl">
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                             Đang kiểm tra...
                                         </button>
@@ -653,7 +647,7 @@ const EmergencyResponseDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
+                                            className={`cursor-pointer py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
                                                 ? 'text-red-600'
                                                 : 'text-gray-500 hover:text-gray-700'
                                                 }`}
@@ -716,17 +710,17 @@ const EmergencyResponseDetail = () => {
                                                     value={emergency?.phone}
                                                 />
                                                 <InfoCard
-                                                    icon={Syringe}
+                                                    icon={Droplet}
                                                     label="Nhóm máu"
                                                     value={`${getBloodTypeText(emergency?.blood_type)}${getRhFactorText(emergency?.rh_factor)}`}
                                                 />
                                                 <InfoCard
-                                                    icon={Droplet}
+                                                    icon={Syringe}
                                                     label="Lượng máu cần"
                                                     value={`${emergency?.blood_volume}ml`}
                                                 />
                                                 <InfoCard
-                                                    icon={Activity}
+                                                    icon={HandHeart}
                                                     label="Loại hiến máu"
                                                     value={getDonationTypeText(emergency?.donation_type)}
                                                 />
@@ -816,7 +810,7 @@ const EmergencyResponseDetail = () => {
                                                         </div>
                                                         <button
                                                             onClick={() => setIsStaffDialogOpen(true)}
-                                                            className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1 transition-colors"
+                                                            className="cursor-pointer text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1 transition-colors"
                                                         >
                                                             Xem chi tiết
                                                             <ChevronRight className="w-4 h-4" />
@@ -837,11 +831,7 @@ const EmergencyResponseDetail = () => {
                                                         href={`tel:${emergency.staff.emergency_phone}`}
                                                         className="flex items-center gap-3 text-red-600 hover:text-red-700 transition-colors"
                                                     >
-                                                        <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                            <Phone className="w-5 h-5" />
-                                                        </div>
                                                         <div>
-                                                            <p className="text-sm text-red-600/80">Gọi ngay</p>
                                                             <p className="text-lg font-bold">{emergency.staff.emergency_phone}</p>
                                                         </div>
                                                     </a>
@@ -904,7 +894,7 @@ const EmergencyResponseDetail = () => {
                     <div className="space-y-6">
                         <div className="bg-white rounded-2xl shadow-md p-6 sticky top-24 border border-gray-100">
                             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <HeartPulse className="w-5 h-5 text-red-500" />
+                                <FileText className="w-5 h-5 text-red-500" />
                                 Tóm tắt phản hồi
                             </h2>
 
@@ -946,7 +936,6 @@ const EmergencyResponseDetail = () => {
                                     <span className="text-gray-600">Bệnh viện</span>
                                     <div className="text-right">
                                         <p className="text-sm font-semibold text-gray-900">{emergency?.hospital?.name}</p>
-                                        <p className="text-xs text-gray-500">{emergency?.hospital?.sub_district}</p>
                                     </div>
                                 </div>
                             </div>
@@ -955,7 +944,7 @@ const EmergencyResponseDetail = () => {
                             <div className="mt-6 space-y-3">
                                 <button
                                     onClick={() => window.print()}
-                                    className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2"
+                                    className="cursor-pointer w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2"
                                 >
                                     <Printer className="w-5 h-5" />
                                     In thông tin

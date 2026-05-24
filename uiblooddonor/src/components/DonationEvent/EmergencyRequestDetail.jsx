@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, Ambulance, AlertTriangle, Hospital, Syringe, HeartPulse, Stethoscope, TrendingUp, Loader2, Eye, Activity } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, Ambulance, AlertTriangle, Hospital, Syringe, HeartPulse, Stethoscope, TrendingUp, Loader2, Eye, Activity, HandHeart } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -159,12 +159,11 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -196,13 +195,12 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 
                         <div className="space-y-3">
                             <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
-                                <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hospital className="w-4 h-4 text-red-500" />
+                                <p className="text-xs text-gray-500 mb-1">
                                     Bệnh viện trực thuộc
-                                </h5>
+                                </p>
                                 <div className="space-y-2">
                                     <p className="font-semibold text-gray-900">
-                                        {staff?.hospital?.name || 'Đang cập nhật'}
+                                        Bệnh viện {staff?.hospital?.name || 'Đang cập nhật'}
                                     </p>
                                     <p className="text-sm text-gray-600 flex items-start gap-1">
                                         <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
@@ -221,14 +219,12 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Email</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Mail className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.email || 'Chưa cập nhật'}
                                     </span>
                                 </div>
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
@@ -301,7 +297,7 @@ const ResponseDialog = ({ isOpen, onClose, onSubmit, user, emergencyRequest }) =
                             <h3 className="text-xl font-bold">Xác nhận hỗ trợ</h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -343,7 +339,7 @@ const ResponseDialog = ({ isOpen, onClose, onSubmit, user, emergencyRequest }) =
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -352,7 +348,6 @@ const ResponseDialog = ({ isOpen, onClose, onSubmit, user, emergencyRequest }) =
                                     </>
                                 ) : (
                                     <>
-                                        <HeartPulse className="w-5 h-5" />
                                         <span>Xác nhận hỗ trợ</span>
                                     </>
                                 )}
@@ -361,7 +356,7 @@ const ResponseDialog = ({ isOpen, onClose, onSubmit, user, emergencyRequest }) =
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -451,9 +446,13 @@ const EmergencyRequestDetail = () => {
     const checkMyResponse = async () => {
         if (!user || user.role !== 1) return;
 
+        setHasResponded(false);
+        setMyResponse(null);
+
         try {
             const donorResponse = await authApis().get(endpoints.donor_me);
             const currentDonorId = donorResponse.data.id;
+            const currentRequestId = parseInt(id);
 
             const response = await authApis().get(endpoints.emergency_responses, {
                 params: {
@@ -462,20 +461,20 @@ const EmergencyRequestDetail = () => {
             });
 
             if (response.data && response.data.results && response.data.results.length > 0) {
-                const myResponseData = response.data.results.find(r => r.donor?.id === currentDonorId);
+                const myResponseData = response.data.results.find(r => {
+                    const responseRequestId = r.emergency_request?.id ?? r.emergency_request;
+                    return r.donor?.id === currentDonorId && parseInt(responseRequestId) === currentRequestId;
+                });
 
                 if (myResponseData) {
                     setHasResponded(true);
                     setMyResponse(myResponseData);
-                } else {
-                    setHasResponded(false);
                 }
-            } else {
-                setHasResponded(false);
             }
         } catch (error) {
             console.error("Error checking response:", error);
             setHasResponded(false);
+            setMyResponse(null);
         }
     };
 
@@ -638,7 +637,7 @@ const EmergencyRequestDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate('/list-emergency-request')}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại danh sách
@@ -704,9 +703,9 @@ const EmergencyRequestDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/list-emergency-request")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Yêu cầu cấp cứu
+                            Hiến máu khẩn cấp
                         </button>
                         <span>/</span>
                         <span className="text-white font-medium">{request.patient_name}</span>
@@ -714,16 +713,15 @@ const EmergencyRequestDetail = () => {
 
                     <button
                         onClick={() => navigate("/list-emergency-request")}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại danh sách</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
-                            <Ambulance className="w-8 h-8" />
-                            Yêu cầu máu cấp cứu
+                            Chi tiết yêu cầu hiến máu khẩn cấp
                         </h1>
                     </div>
                 </div>
@@ -746,7 +744,6 @@ const EmergencyRequestDetail = () => {
                                 <div>
                                     <div className="flex items-center gap-3 mb-3 flex-wrap">
                                         <span className={`${status.color} text-white px-3 py-1.5 rounded-full text-sm font-semibold shadow-md flex items-center gap-1 ${request.critical && !request.is_expire ? 'animate-pulse' : ''}`}>
-                                            <StatusIcon className="w-4 h-4" />
                                             {status.label}
                                         </span>
                                     </div>
@@ -760,7 +757,7 @@ const EmergencyRequestDetail = () => {
                                     {!user ? (
                                         <button
                                             onClick={() => navigate('/login')}
-                                            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600"
+                                            className="cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600"
                                         >
                                             <span>Đăng nhập để hỗ trợ</span>
                                         </button>
@@ -769,14 +766,12 @@ const EmergencyRequestDetail = () => {
                                             <button
                                                 onClick={handleResponseClick}
                                                 disabled={request.is_expire}
-                                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                <HeartPulse className="w-5 h-5" />
                                                 <span>Hỗ trợ ngay</span>
                                             </button>
                                         ) : (
-                                            <div className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 shadow-sm">
-                                                <CheckCircle className="w-5 h-5" />
+                                            <div className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 shadow-sm"> 
                                                 <span className="font-semibold">Đã đăng ký hỗ trợ</span>
                                             </div>
                                         )
@@ -793,7 +788,7 @@ const EmergencyRequestDetail = () => {
                                 {!user ? (
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600"
+                                        className="cursor-pointer w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600"
                                     >
                                         <span>Đăng nhập để hỗ trợ</span>
                                     </button>
@@ -802,9 +797,8 @@ const EmergencyRequestDetail = () => {
                                         <button
                                             onClick={handleResponseClick}
                                             disabled={request.is_expire}
-                                            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="cursor-pointer w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            <HeartPulse className="w-5 h-5" />
                                             <span>Hỗ trợ ngay</span>
                                         </button>
                                     ) : (
@@ -829,7 +823,7 @@ const EmergencyRequestDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${activeTab === tab.id
+                                            className={`cursor-pointer py-4 px-2 font-medium transition-all relative flex items-center gap-2 ${activeTab === tab.id
                                                 ? 'text-red-600'
                                                 : 'text-gray-500 hover:text-gray-700'
                                                 }`}
@@ -859,17 +853,17 @@ const EmergencyRequestDetail = () => {
                                                 value={request.phone}
                                             />
                                             <InfoRow
-                                                icon={Syringe}
+                                                icon={Droplet}
                                                 label="Nhóm máu cần"
                                                 value={`${getBloodTypeText(request.blood_type)}${getRhFactorText(request.rh_factor)}`}
                                             />
                                             <InfoRow
-                                                icon={Droplet}
+                                                icon={Syringe}
                                                 label="Lượng máu cần"
                                                 value={`${request.blood_volume}ml`}
                                             />
                                             <InfoRow
-                                                icon={Activity}
+                                                icon={HandHeart}
                                                 label="Loại hiến máu"
                                                 value={getDonationTypeText(request.donation_type)}
                                             />
@@ -953,7 +947,7 @@ const EmergencyRequestDetail = () => {
                                                 value={
                                                     <button
                                                         onClick={() => setIsStaffDialogOpen(true)}
-                                                        className="flex items-center gap-1 hover:text-red-600 transition-colors group"
+                                                        className="cursor-pointer flex items-center gap-1 hover:text-red-600 transition-colors group"
                                                     >
                                                         <span>{`${request.staff?.account?.last_name || ''} ${request.staff?.account?.first_name || ''}`}</span>
                                                         {request.staff?.is_verified && (
@@ -1034,7 +1028,7 @@ const EmergencyRequestDetail = () => {
                             <div className="text-center mt-6">
                                 <button
                                     onClick={() => navigate('/list-emergency-request')}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300 shadow-sm border border-gray-200"
+                                    className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300 shadow-sm border border-gray-200"
                                 >
                                     Xem thêm yêu cầu
                                     <ChevronRight className="w-4 h-4" />
