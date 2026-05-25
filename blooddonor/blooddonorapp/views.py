@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -711,6 +711,45 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
             return [DonorPermission()]
         return super().get_permissions()
 
+    def _send_registration_status_email(self, registration, status_value):
+        donor_account = registration.donor.account if registration.donor and registration.donor.account else None
+        recipient_email = donor_account.email if donor_account and donor_account.email else registration.email
+
+        if donor_account:
+            recipient_name = f"{donor_account.last_name} {donor_account.first_name}".strip()
+        else:
+            recipient_name = f"{registration.last_name} {registration.first_name}".strip()
+
+        status_labels = {
+            RegistrationStatus.APPROVED.value: "đã được chấp nhận",
+            RegistrationStatus.REJECTED.value: "đã bị từ chối",
+            RegistrationStatus.CHECKED_IN.value: "đã được xác nhận check-in",
+            RegistrationStatus.COMPLETED.value: "đã hoàn thành",
+        }
+
+        status_text = status_labels.get(status_value)
+        if not recipient_email or not status_text:
+            return
+
+        event_title = registration.donation_event.title if registration.donation_event else "hoạt động hiến máu"
+        subject = "[Dòng Máu Lạc Hồng] Cập nhật trạng thái đăng ký hiến máu"
+        message = (
+            f"Xin chào {recipient_name},\n\n"
+            f"Đăng ký tham gia '{event_title}' của bạn {status_text}.\n"
+            f"Trạng thái hiện tại: {registration.get_status_display()}.\n\n"
+            f"Vui lòng đăng nhập hệ thống để xem thêm chi tiết nếu cần.\n\n"
+            f"Trân trọng,\n"
+            f"Hệ thống Dòng Máu Lạc Hồng"
+        )
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient_email],
+            fail_silently=False,
+        )
+
     def create(self, request):
         serializer = DonationEventSerializer(data=request.data)
         if serializer.is_valid():
@@ -787,8 +826,8 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
 
                 if exists:
                     return Response(
-                        {"error": "Donor already registered for this event"},
-                        status=status.HTTP_400_BAD_REQUEST
+                        {"error": "Hoạt động này bạn đã tham gia."},
+                        status=status.HTTP_409_CONFLICT
                     )
 
             if EventRegistration.objects.filter(
@@ -925,6 +964,12 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
         with transaction.atomic():
             registration.status = RegistrationStatus.REJECTED.value
             registration.save(update_fields=['status'])
+            transaction.on_commit(
+                lambda registration=registration: self._send_registration_status_email(
+                    registration,
+                    RegistrationStatus.REJECTED.value
+                )
+            )
 
         return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
 
@@ -965,6 +1010,12 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
         with transaction.atomic():
             registration.status = RegistrationStatus.APPROVED.value
             registration.save(update_fields=['status'])
+            transaction.on_commit(
+                lambda registration=registration: self._send_registration_status_email(
+                    registration,
+                    RegistrationStatus.APPROVED.value
+                )
+            )
 
         return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
 
@@ -1005,6 +1056,12 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
         with transaction.atomic():
             registration.status = RegistrationStatus.CHECKED_IN.value
             registration.save(update_fields=['status'])
+            transaction.on_commit(
+                lambda registration=registration: self._send_registration_status_email(
+                    registration,
+                    RegistrationStatus.CHECKED_IN.value
+                )
+            )
 
         return Response(EventRegistrationSerializer(registration).data, status=status.HTTP_200_OK)
 
@@ -1036,6 +1093,12 @@ class DonationEventViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Retr
         with transaction.atomic():
             registration.status = RegistrationStatus.COMPLETED.value
             registration.save(update_fields=['status'])
+            transaction.on_commit(
+                lambda registration=registration: self._send_registration_status_email(
+                    registration,
+                    RegistrationStatus.COMPLETED.value
+                )
+            )
 
             if not registration.is_proxy:
                 donor = registration.donor
@@ -1246,6 +1309,43 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
     serializer_class = EmergencyRequestSerializer
     pagination_class = Pagination
 
+    def _send_emergency_response_status_email(self, response_obj, status_value):
+        donor_account = response_obj.donor.account if response_obj.donor and response_obj.donor.account else None
+        recipient_email = donor_account.email if donor_account and donor_account.email else None
+
+        if donor_account:
+            recipient_name = f"{donor_account.last_name} {donor_account.first_name}".strip()
+        else:
+            recipient_name = "người hiến máu"
+
+        status_labels = {
+            RegistrationStatus.CHECKED_IN.value: "đã được xác nhận check-in",
+            RegistrationStatus.COMPLETED.value: "đã hoàn thành",
+        }
+
+        status_text = status_labels.get(status_value)
+        if not recipient_email or not status_text:
+            return
+
+        patient_name = response_obj.emergency_request.patient_name if response_obj.emergency_request else "yêu cầu khẩn cấp"
+        subject = "[Dòng Máu Lạc Hồng] Cập nhật trạng thái phản hồi hiến máu khẩn cấp"
+        message = (
+            f"Xin chào {recipient_name},\n\n"
+            f"Phản hồi hiến máu khẩn cấp của bạn cho bệnh nhân '{patient_name}' {status_text}.\n"
+            f"Trạng thái hiện tại: {response_obj.get_status_registration_display()}.\n\n"
+            f"Vui lòng đăng nhập hệ thống để xem thêm chi tiết nếu cần.\n\n"
+            f"Trân trọng,\n"
+            f"Hệ thống Dòng Máu Lạc Hồng"
+        )
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient_email],
+            fail_silently=False,
+        )
+
     def get_queryset(self):
         queryset = EmergencyRequest.objects.filter(is_active=True, is_expire=False)
 
@@ -1271,10 +1371,59 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
             return [DonorPermission()]
         return super().get_permissions()
 
+    def _send_emergency_request_created_email(self, emergency_request):
+        donor_emails = list(
+            Donor.objects.filter(
+                is_active=True,
+                account__email__isnull=False
+            ).exclude(
+                account__email=''
+            ).values_list('account__email', flat=True).distinct()
+        )
+
+        if not donor_emails:
+            return
+
+        blood_type = emergency_request.get_blood_type_display() if emergency_request else "chưa xác định"
+        rh_text = "+" if emergency_request.rh_factor else "-"
+        donation_type = emergency_request.get_donation_type_display() if emergency_request else "chưa xác định"
+        patient_name = emergency_request.patient_name if emergency_request else "một yêu cầu khẩn cấp"
+        hospital_name = emergency_request.hospital.name if emergency_request and emergency_request.hospital else "bệnh viện"
+
+        subject = "[Dòng Máu Lạc Hồng] Có yêu cầu hiến máu khẩn cấp mới"
+        message = (
+            f"Hệ thống vừa ghi nhận một yêu cầu hiến máu khẩn cấp mới.\n\n"
+            f"Bệnh nhân: {patient_name}\n"
+            f"Bệnh viện: {hospital_name}\n"
+            f"Nhóm máu cần: {blood_type}{rh_text}\n"
+            f"Loại hiến máu: {donation_type}\n"
+            f"Thể tích cần: {emergency_request.blood_volume} ml\n\n"
+            f"Vui lòng đăng nhập hệ thống nếu bạn đủ điều kiện và muốn phản hồi hỗ trợ.\n\n"
+            f"Trân trọng,\n"
+            f"Hệ thống Dòng Máu Lạc Hồng"
+        )
+
+        EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[],
+            bcc=donor_emails,
+        ).send(fail_silently=False)
+
     def create(self, request):
         serializer = EmergencyRequestSerializer(data=request.data)
         if serializer.is_valid():
-            emergency_request = EmergencyRequest.objects.create(**serializer.validated_data, staff=request.user.staff)
+            with transaction.atomic():
+                emergency_request = EmergencyRequest.objects.create(
+                    **serializer.validated_data,
+                    staff=request.user.staff
+                )
+                transaction.on_commit(
+                    lambda emergency_request=emergency_request: self._send_emergency_request_created_email(
+                        emergency_request
+                    )
+                )
             return Response(EmergencyRequestSerializer(emergency_request).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1443,6 +1592,12 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
 
         response_obj.status_registration = RegistrationStatus.CHECKED_IN.value
         response_obj.save(update_fields=['status_registration'])
+        transaction.on_commit(
+            lambda response_obj=response_obj: self._send_emergency_response_status_email(
+                response_obj,
+                RegistrationStatus.CHECKED_IN.value
+            )
+        )
 
         return Response(EmergencyResponseSerializer(response_obj).data, status=status.HTTP_200_OK)
 
@@ -1471,6 +1626,12 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
         with transaction.atomic():
             response_obj.status_registration = RegistrationStatus.COMPLETED.value
             response_obj.save(update_fields=['status_registration'])
+            transaction.on_commit(
+                lambda response_obj=response_obj: self._send_emergency_response_status_email(
+                    response_obj,
+                    RegistrationStatus.COMPLETED.value
+                )
+            )
 
             donor = response_obj.donor
 

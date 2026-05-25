@@ -1228,9 +1228,15 @@ const EventDetail = () => {
             console.error("Error registering for event:", error);
 
             if (error.response) {
+                const serverError = error.response.data?.error;
+
                 switch (error.response.status) {
                     case 400:
-                        showMessage('Vui lòng kiểm tra lại thông tin.', 'error');
+                        if (serverError === 'Donor already registered for this event') {
+                            showMessage('Hoạt động này bạn đã tham gia.', 'error');
+                        } else {
+                            showMessage('Vui lòng kiểm tra lại thông tin.', 'error');
+                        }
                         break;
                     case 401:
                         showMessage('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.', 'error');
@@ -1243,7 +1249,12 @@ const EventDetail = () => {
                         showMessage('Không tìm thấy hoạt động.', 'error');
                         break;
                     case 409:
-                        showMessage('Người này đã đăng ký hoạt động này rồi.', 'error');
+                        showMessage(
+                            serverError === 'Donor already registered for this event'
+                                ? 'Hoạt động này bạn đã tham gia.'
+                                : (serverError || 'Hoạt động này bạn đã tham gia.'),
+                            'error'
+                        );
                         break;
                     default:
                         showMessage('Đăng ký thất bại. Vui lòng thử lại sau.', 'error');
