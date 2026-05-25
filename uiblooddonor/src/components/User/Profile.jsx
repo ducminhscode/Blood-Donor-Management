@@ -419,7 +419,8 @@ const Profile = () => {
     const formatBloodType = (bloodType, rhFactor) => {
         if (bloodType === undefined) return "Chưa cập nhật";
         const bloodMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
-        return `${bloodMap[bloodType] || '?'}${rhFactor === 0 ? '-' : '+'}`;
+        const isPositiveRh = rhFactor === true || rhFactor === 1 || rhFactor === '1' || rhFactor === 'true';
+        return `${bloodMap[bloodType] || '?'}${isPositiveRh ? '+' : '-'}`;
     };
 
     const tabs = [

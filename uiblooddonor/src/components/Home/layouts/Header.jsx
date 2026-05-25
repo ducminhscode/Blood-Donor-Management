@@ -1,4 +1,4 @@
-import { Droplet, LogIn, User, ChevronDown, Menu, X, Heart, Award, Shield, Clock, History, Users, CalendarCheck2, Ambulance, MessageCircle } from 'lucide-react';
+import { Droplet, LogIn, User, ChevronDown, Menu, X, Heart, Award, Shield, Clock, History, Users, CalendarCheck2, Ambulance, MessageCircle, TriangleAlert, HandHeart } from 'lucide-react';
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useContext, useRef, useEffect } from 'react';
 import { UserContexts, UserDispatchContext } from '../../../configs/UserContexts';
@@ -240,15 +240,15 @@ const Header = () => {
                                                         className={getDropdownItemClass('/staff-donation-event')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
-                                                        <Heart className="h-4 w-4" />
-                                                        <span>Quản lý sự kiện</span>
+                                                        <HandHeart className="h-4 w-4" />
+                                                        <span>Quản lý hoạt động</span>
                                                     </Link>
                                                     <Link
                                                         to="/staff-emergency-request"
                                                         className={getDropdownItemClass('/staff-emergency-request')}
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
-                                                        <Shield className="h-4 w-4" />
+                                                        <TriangleAlert className="h-4 w-4" />
                                                         <span>Hiến máu khẩn cấp</span>
                                                     </Link>
                                                 </>
@@ -319,7 +319,7 @@ const Header = () => {
                         </Link>
                         <Link to="/list-event" className={getMobileTabClass('/list-event')}>
                             <Heart className="w-5 h-5" />
-                            <span>Sự kiện</span>
+                            <span>Hoạt động</span>
                         </Link>
                         <Link to="/list-emergency-request" className={getMobileTabClass('/list-emergency-request')}>
                             <Clock className="w-5 h-5" />
@@ -352,10 +352,10 @@ const Header = () => {
                                         </Link>
                                         <Link to="/event-registration" className={getMobileTabClass('/event-registration')}>
                                             <Clock className="w-5 h-5" />
-                                            <span>Sự kiện đã đăng ký</span>
+                                            <span>Hoạt động đã đăng ký</span>
                                         </Link>
                                         <Link to="/emergency-response" className={getMobileTabClass('/emergency-response')}>
-                                            <Shield className="w-5 h-5" />
+                                            <TriangleAlert className="w-5 h-5" />
                                             <span>Yêu cầu đã phản hồi</span>
                                         </Link>
                                     </>
@@ -363,11 +363,11 @@ const Header = () => {
                                 {user?.role === 2 && (
                                     <>
                                         <Link to="/staff-donation-event" className={getMobileTabClass('/staff-donation-event')}>
-                                            <Heart className="w-5 h-5" />
-                                            <span>Quản lý sự kiện</span>
+                                            <HandHeart className="w-5 h-5" />
+                                            <span>Quản lý hoạt động</span>
                                         </Link>
                                         <Link to="/staff-emergency-request" className={getMobileTabClass('/staff-emergency-request')}>
-                                            <Shield className="w-5 h-5" />
+                                            <TriangleAlert className="w-5 h-5" />
                                             <span>Hiến máu khẩn cấp</span>
                                         </Link>
                                     </>

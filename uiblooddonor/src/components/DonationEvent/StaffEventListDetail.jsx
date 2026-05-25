@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, User, Mail, Phone, IdCard, Briefcase, Building, Calendar as CalendarIcon, UserPlus, Eye, ChevronLeft, RefreshCw, Info, FileText, NotepadText, InfoIcon, VenusAndMars, Edit, Trash2, Save, Upload, Image as ImageIcon, TrendingUp, Award as AwardIcon, Shield, CheckCircle2, Send, Grid, List, Filter as FilterIcon, XCircle as XCircleIcon, AlertTriangle } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, ChevronDown, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, Mail, Phone, IdCard, Briefcase, Building, Calendar as CalendarIcon, UserPlus, Eye, ChevronLeft, RefreshCw, Info, FileText, NotepadText, InfoIcon, VenusAndMars, Edit, Trash2, Save, Upload, Image as ImageIcon, TrendingUp, Award as AwardIcon, Shield, CheckCircle2, Send, Grid, List, Filter as FilterIcon, XCircle as XCircleIcon, AlertTriangle, User } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -28,6 +28,8 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
     const [loadingDistricts, setLoadingDistricts] = useState(false);
     const [selectedProvince, setSelectedProvince] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
+    const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
+    const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
 
     useEffect(() => {
         fetchProvinces();
@@ -67,8 +69,24 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
             });
             setImagePreview(event.image_url ? getImageUrl(event.image_url) : '');
             setError('');
+            setShowProvinceDropdown(false);
+            setShowDistrictDropdown(false);
         }
     }, [isOpen, event, provinces]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showProvinceDropdown && !event.target.closest('.province-dropdown')) {
+                setShowProvinceDropdown(false);
+            }
+            if (showDistrictDropdown && !event.target.closest('.district-dropdown')) {
+                setShowDistrictDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showProvinceDropdown, showDistrictDropdown]);
 
     const fetchProvinces = async () => {
         setLoadingProvinces(true);
@@ -103,22 +121,46 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
         }
     };
 
-    const handleProvinceChange = (e) => {
-        const code = e.target.value;
-        setSelectedProvince(code);
-        const provinceObj = provinces.find(p => p.code === parseInt(code));
+    const handleProvinceSelect = (provinceCode) => {
+        setSelectedProvince(provinceCode);
+        setSelectedDistrict('');
+        if (!provinceCode) {
+            setFormData(prev => ({ ...prev, province: '', sub_district: '' }));
+            setDistricts([]);
+            setShowProvinceDropdown(false);
+            return;
+        }
+
+        const provinceObj = provinces.find(p => p.code === parseInt(provinceCode));
         if (provinceObj) {
             setFormData(prev => ({ ...prev, province: provinceObj.name, sub_district: '' }));
         }
+        setShowProvinceDropdown(false);
     };
 
-    const handleDistrictChange = (e) => {
-        const code = e.target.value;
-        setSelectedDistrict(code);
-        const districtObj = districts.find(d => d.code === parseInt(code));
+    const handleDistrictSelect = (districtCode) => {
+        setSelectedDistrict(districtCode);
+        if (!districtCode) {
+            setFormData(prev => ({ ...prev, sub_district: '' }));
+            setShowDistrictDropdown(false);
+            return;
+        }
+
+        const districtObj = districts.find(d => d.code === parseInt(districtCode));
         if (districtObj) {
             setFormData(prev => ({ ...prev, sub_district: districtObj.name }));
         }
+        setShowDistrictDropdown(false);
+    };
+
+    const getProvinceName = (provinceCode) => {
+        const province = provinces.find(p => p.code === parseInt(provinceCode));
+        return province ? province.name : 'Chọn tỉnh/thành phố';
+    };
+
+    const getDistrictName = (districtCode) => {
+        const district = districts.find(d => d.code === parseInt(districtCode));
+        return district ? district.name : 'Chọn quận/huyện';
     };
 
     const handleImageChange = (e) => {
@@ -210,12 +252,11 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Edit className="w-5 h-5" />
                                 Chỉnh sửa sự kiện
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -278,7 +319,7 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
                                                     setImageFile(null);
                                                     setImagePreview('');
                                                 }}
-                                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-md"
+                                                className="cursor-pointer absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-md"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
@@ -306,49 +347,100 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
-                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div className="province-dropdown relative bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Tỉnh/Thành phố <span className="text-red-500">*</span>
                                 </label>
-                                <select
-                                    required
-                                    value={selectedProvince}
-                                    onChange={handleProvinceChange}
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                <button
+                                    type="button"
+                                    onClick={() => setShowProvinceDropdown(!showProvinceDropdown)}
+                                    className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
                                 >
-                                    <option value="">Chọn tỉnh/thành phố</option>
+                                    <span className={selectedProvince ? "text-gray-900" : "text-gray-400"}>
+                                        {selectedProvince ? getProvinceName(selectedProvince) : "Chọn tỉnh/thành phố"}
+                                    </span>
                                     {loadingProvinces ? (
-                                        <option disabled>Đang tải...</option>
+                                        <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
                                     ) : (
-                                        provinces.map(province => (
-                                            <option key={province.code} value={province.code}>
-                                                {province.name}
-                                            </option>
-                                        ))
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showProvinceDropdown ? 'rotate-180' : ''}`} />
                                     )}
-                                </select>
+                                </button>
+
+                                {showProvinceDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleProvinceSelect("")}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedProvince ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Chọn tỉnh/thành phố
+                                        </button>
+                                        {loadingProvinces ? (
+                                            <div className="px-4 py-3 text-center text-gray-500">
+                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                            </div>
+                                        ) : (
+                                            provinces.map(province => (
+                                                <button
+                                                    key={province.code}
+                                                    type="button"
+                                                    onClick={() => handleProvinceSelect(province.code.toString())}
+                                                    className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedProvince === province.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    {province.name}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div className="district-dropdown relative bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Quận/Huyện
                                 </label>
-                                <select
-                                    value={selectedDistrict}
-                                    onChange={handleDistrictChange}
+                                <button
+                                    type="button"
+                                    onClick={() => selectedProvince && !loadingDistricts && setShowDistrictDropdown(!showDistrictDropdown)}
+                                    className={`cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300 ${(!selectedProvince || loadingDistricts) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     disabled={!selectedProvince || loadingDistricts}
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 >
-                                    <option value="">Chọn quận/huyện</option>
+                                    <span className={selectedDistrict ? "text-gray-900" : "text-gray-400"}>
+                                        {selectedDistrict ? getDistrictName(selectedDistrict) : "Chọn quận/huyện"}
+                                    </span>
                                     {loadingDistricts ? (
-                                        <option disabled>Đang tải...</option>
+                                        <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
                                     ) : (
-                                        districts.map(district => (
-                                            <option key={district.code} value={district.code}>
-                                                {district.name}
-                                            </option>
-                                        ))
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showDistrictDropdown ? 'rotate-180' : ''}`} />
                                     )}
-                                </select>
+                                </button>
+
+                                {showDistrictDropdown && selectedProvince && (
+                                    <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDistrictSelect("")}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedDistrict ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Chọn quận/huyện
+                                        </button>
+                                        {loadingDistricts ? (
+                                            <div className="px-4 py-3 text-center text-gray-500">
+                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                            </div>
+                                        ) : (
+                                            districts.map(district => (
+                                                <button
+                                                    key={district.code}
+                                                    type="button"
+                                                    onClick={() => handleDistrictSelect(district.code.toString())}
+                                                    className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedDistrict === district.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    {district.name}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -396,11 +488,11 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
                             </p>
                         </div>
 
-                        <div className="flex gap-3 pt-4 sticky bottom-0 bg-white pb-2">
+                        <div className="sticky bottom-0 z-40 flex gap-3 pt-4 bg-white/95 pb-2 backdrop-blur-sm">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -409,7 +501,6 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
                                     </>
                                 ) : (
                                     <>
-                                        <Save className="w-5 h-5" />
                                         <span>Lưu thay đổi</span>
                                     </>
                                 )}
@@ -418,7 +509,7 @@ const EditEventDialog = ({ isOpen, onClose, onSuccess, event }) => {
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -442,12 +533,11 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <AlertCircle className="w-5 h-5" />
                                 {title}
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -469,7 +559,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                             <button
                                 onClick={onConfirm}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -478,7 +568,6 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                     </>
                                 ) : (
                                     <>
-                                        <Trash2 className="w-5 h-5" />
                                         <span>Xác nhận xóa</span>
                                     </>
                                 )}
@@ -487,7 +576,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -510,6 +599,7 @@ const StaffEventListDetail = () => {
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState("all");
+    const [showStatusDropdown, setShowStatusDropdown] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [viewMode, setViewMode] = useState('grid');
     const [dateRange, setDateRange] = useState({ from: '', to: '' });
@@ -546,6 +636,14 @@ const StaffEventListDetail = () => {
         { value: '3', label: 'Đã Check-in' },
         { value: '4', label: 'Đã hoàn thành' }
     ];
+
+    const getStatusFilterButtonClass = (optionValue, isSelected) => {
+        if (isSelected) {
+            return 'bg-red-50 text-red-600';
+        }
+
+        return 'text-gray-700 hover:bg-gray-50';
+    };
 
     const loadRegistrations = async (isLoadMore = false) => {
         const currentPage = isLoadMore ? page : 1;
@@ -680,6 +778,17 @@ const StaffEventListDetail = () => {
     }, [id]);
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showStatusDropdown && !event.target.closest('.status-dropdown')) {
+                setShowStatusDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showStatusDropdown]);
+
+    useEffect(() => {
         document.title = `${eventTitle} | Dòng Máu Lạc Hồng`;
     }, [eventTitle]);
 
@@ -772,20 +881,17 @@ const StaffEventListDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/staff-donation-event")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Quản lý sự kiện
+                            Quản lý hoạt động
                         </button>
                         <span>/</span>
-                        <span className="text-white font-medium">Danh sách đăng ký</span>
+                        <span className="text-white font-medium">Danh sách đăng ký tham gia</span>
                     </div>
 
                     <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Users className="w-8 h-8" />
-                                </div>
                                 <h1 className="text-3xl md:text-4xl font-bold">
                                     {eventInfo?.title || 'Danh sách đăng ký'}
                                 </h1>
@@ -817,14 +923,14 @@ const StaffEventListDetail = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={handleEditEvent}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all duration-300 border border-white/20"
+                                className="cursor-pointer flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all duration-300 border border-white/20"
                             >
                                 <Edit className="w-5 h-5" />
                                 <span className="font-medium">Chỉnh sửa</span>
                             </button>
                             <button
                                 onClick={() => setShowDeleteDialog(true)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-red-600/80 backdrop-blur-sm rounded-xl hover:bg-red-700 transition-all duration-300"
+                                className="cursor-pointer flex items-center gap-2 px-5 py-2.5 bg-red-600/80 backdrop-blur-sm rounded-xl hover:bg-red-700 transition-all duration-300"
                             >
                                 <Trash2 className="w-5 h-5" />
                                 <span className="font-medium">Xóa</span>
@@ -879,7 +985,7 @@ const StaffEventListDetail = () => {
                                             setPage(1);
                                             loadRegistrations(false);
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -890,49 +996,52 @@ const StaffEventListDetail = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <FilterIcon className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
                             </button>
 
                             {/* Status Filter */}
-                            <div className="relative group">
-                                <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
-                                    <span>Trạng thái</span>
-                                    <ChevronRight className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                            <div className="relative status-dropdown">
+                                <button
+                                    onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                                    className="cursor-pointer flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
+                                >
+                                    <span className={selectedStatus !== 'all' ? 'text-gray-900' : 'text-gray-900'}>
+                                        {selectedStatus !== 'all' ? statusConfig[selectedStatus]?.label : 'Trạng thái'}
+                                    </span>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
                                 </button>
 
-                                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                    <div className="p-2">
+                                {showStatusDropdown && (
+                                    <div className="absolute top-full right-0 mt-2 w-full min-w-64 max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
                                         {statusOptions.map((option) => {
                                             const isSelected = selectedStatus === option.value;
-                                            const status = option.value !== 'all' ? statusConfig[option.value] : null;
 
                                             return (
                                                 <button
                                                     key={option.value}
-                                                    onClick={() => handleStatusChange(option.value)}
-                                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${isSelected
-                                                        ? option.value === 'all'
-                                                            ? 'bg-red-600 text-white'
-                                                            : `${status.bgColor} ${status.textColor}`
-                                                        : 'hover:bg-gray-50 text-gray-700'
-                                                        }`}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        handleStatusChange(option.value);
+                                                        setShowStatusDropdown(false);
+                                                    }}
+                                                    className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${getStatusFilterButtonClass(option.value, isSelected)}`}
                                                 >
-                                                    <span className="flex-1 text-left font-medium">{option.label}</span>
+                                                    {option.label}
                                                 </button>
                                             );
                                         })}
                                     </div>
-                                </div>
+                                )}
                             </div>
 
                             {/* View Mode Toggle */}
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -942,7 +1051,7 @@ const StaffEventListDetail = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -959,9 +1068,8 @@ const StaffEventListDetail = () => {
                         <div className="relative">
                             <button
                                 onClick={() => setShowDatePicker(!showDatePicker)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                             >
-                                <CalendarIcon className="w-4 h-4" />
                                 <span className="text-sm">Ngày đăng ký</span>
                                 {(dateRange.from || dateRange.to) && (
                                     <span className="w-2 h-2 bg-red-500 rounded-full"></span>
@@ -991,7 +1099,7 @@ const StaffEventListDetail = () => {
                                 </div>
                                 <button
                                     onClick={() => setShowDatePicker(false)}
-                                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                                    className="cursor-pointer px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                                 >
                                     Áp dụng
                                 </button>
@@ -1004,7 +1112,7 @@ const StaffEventListDetail = () => {
                         <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-gray-900">Bộ lọc & Sắp xếp</h3>
-                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-200 rounded-lg">
+                                <button onClick={() => setShowFilters(false)} className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
@@ -1015,7 +1123,6 @@ const StaffEventListDetail = () => {
                                     <div className="grid grid-cols-2 gap-2">
                                         {statusOptions.map((option) => {
                                             const isSelected = selectedStatus === option.value;
-                                            const status = option.value !== 'all' ? statusConfig[option.value] : null;
 
                                             return (
                                                 <button
@@ -1024,12 +1131,7 @@ const StaffEventListDetail = () => {
                                                         handleStatusChange(option.value);
                                                         setShowFilters(false);
                                                     }}
-                                                    className={`px-3 py-2 rounded-lg border transition-all ${isSelected
-                                                        ? option.value === 'all'
-                                                            ? 'border-red-500 bg-red-50 text-red-600'
-                                                            : `${status.bgColor} ${status.textColor} border-${status.color.split('-')[1]}-200`
-                                                        : 'border-gray-200 hover:border-gray-300 bg-white'
-                                                        }`}
+                                                    className={`cursor-pointer px-3 py-2 rounded-lg border text-left transition-all ${getStatusFilterButtonClass(option.value, isSelected)}`}
                                                 >
                                                     <span className="text-sm">{option.label}</span>
                                                 </button>
@@ -1066,7 +1168,7 @@ const StaffEventListDetail = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -1079,7 +1181,7 @@ const StaffEventListDetail = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                 ? 'border-red-500 bg-red-50 text-red-600'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -1099,7 +1201,7 @@ const StaffEventListDetail = () => {
                             {selectedStatus !== 'all' && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Trạng thái: {statusConfig[selectedStatus]?.label}</span>
-                                    <button onClick={() => setSelectedStatus('all')} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setSelectedStatus('all')} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1107,7 +1209,7 @@ const StaffEventListDetail = () => {
                             {dateRange.from && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Từ: {formatDate(dateRange.from)}</span>
-                                    <button onClick={() => setDateRange(prev => ({ ...prev, from: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, from: '' }))} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1115,7 +1217,7 @@ const StaffEventListDetail = () => {
                             {dateRange.to && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Đến: {formatDate(dateRange.to)}</span>
-                                    <button onClick={() => setDateRange(prev => ({ ...prev, to: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, to: '' }))} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1124,7 +1226,7 @@ const StaffEventListDetail = () => {
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <Search className="h-4 w-4" />
                                     <span>Tìm kiếm: "{searchTerm}"</span>
-                                    <button onClick={() => setSearchTerm("")} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setSearchTerm("")} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1132,7 +1234,7 @@ const StaffEventListDetail = () => {
                             {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) && (
                                 <button
                                     onClick={handleClearFilters}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
+                                    className="cursor-pointer px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
                                 >
                                     Xóa tất cả
                                 </button>
@@ -1157,7 +1259,7 @@ const StaffEventListDetail = () => {
                             </div>
                             <button
                                 onClick={handleRefresh}
-                                className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                             >
                                 Thử lại
                             </button>
@@ -1212,9 +1314,8 @@ const StaffEventListDetail = () => {
                         {(searchTerm || selectedStatus !== 'all' || dateRange.from || dateRange.to) && (
                             <button
                                 onClick={handleClearFilters}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                <X className="w-5 h-5" />
                                 Xóa tất cả bộ lọc
                             </button>
                         )}
@@ -1237,7 +1338,7 @@ const StaffEventListDetail = () => {
                             <button
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                                 <span>Làm mới</span>
@@ -1312,7 +1413,7 @@ const StaffEventListDetail = () => {
                                                         e.stopPropagation();
                                                         handleViewDetail(registration.id);
                                                     }}
-                                                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg"
+                                                    className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg"
                                                 >
                                                     <span className="font-medium">Xem chi tiết</span>
                                                     <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -1376,10 +1477,10 @@ const StaffEventListDetail = () => {
                                                                 e.stopPropagation();
                                                                 handleViewDetail(registration.id);
                                                             }}
-                                                            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md text-sm flex items-center gap-2"
+                                                            className="cursor-pointer px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md text-sm flex items-center gap-2"
                                                         >
-                                                            <Eye className="w-4 h-4" />
                                                             <span>Chi tiết</span>
+                                                            <ChevronRight className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1396,7 +1497,7 @@ const StaffEventListDetail = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -1406,7 +1507,6 @@ const StaffEventListDetail = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm đăng ký</span>
                                                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                             </>

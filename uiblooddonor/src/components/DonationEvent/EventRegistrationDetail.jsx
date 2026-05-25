@@ -821,11 +821,7 @@ const EventRegistrationDetail = () => {
                                                         href={`tel:${event.staff.emergency_phone}`}
                                                         className="flex items-center gap-3 text-red-600 hover:text-red-700 transition-colors"
                                                     >
-                                                        <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                            <Phone className="w-5 h-5" />
-                                                        </div>
                                                         <div>
-                                                            <p className="text-sm text-red-600/80">Gọi ngay</p>
                                                             <p className="text-lg font-bold">{event.staff.emergency_phone}</p>
                                                         </div>
                                                     </a>

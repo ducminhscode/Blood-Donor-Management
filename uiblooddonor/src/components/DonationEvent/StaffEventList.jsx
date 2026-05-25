@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPlus, HeartPulse, Plus, Save, Loader2, Upload, Image as ImageIcon, UserCog, Settings, Edit, Trash2, ChevronDown, Send, Grid, List, TrendingUp, Award as AwardIcon, Shield, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPlus, HeartPulse, Plus, Save, Loader2, Upload, Image as ImageIcon, UserCog, Settings, Edit, Trash2, ChevronDown, Send, Grid, List, TrendingUp, Award as AwardIcon, Shield, CheckCircle2, Eye, EyeOff, HandHeart } from 'lucide-react';
 import APIs, { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -30,6 +30,8 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
     const [loadingDistricts, setLoadingDistricts] = useState(false);
     const [selectedProvince, setSelectedProvince] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
+    const [showProvinceDropdown, setShowProvinceDropdown] = useState(false);
+    const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
 
     const user = useContext(UserContexts);
 
@@ -47,6 +49,20 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
     }, [selectedProvince]);
 
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showProvinceDropdown && !event.target.closest('.province-dropdown')) {
+                setShowProvinceDropdown(false);
+            }
+            if (showDistrictDropdown && !event.target.closest('.district-dropdown')) {
+                setShowDistrictDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showProvinceDropdown, showDistrictDropdown]);
+
+    useEffect(() => {
         if (isOpen) {
             setFormData(prev => ({
                 ...prev,
@@ -55,6 +71,8 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
             setError('');
             setSelectedProvince('');
             setSelectedDistrict('');
+            setShowProvinceDropdown(false);
+            setShowDistrictDropdown(false);
             setImageFile(null);
             setImagePreview('');
         }
@@ -86,22 +104,47 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
         }
     };
 
-    const handleProvinceChange = (e) => {
-        const code = e.target.value;
-        setSelectedProvince(code);
-        const provinceObj = provinces.find(p => p.code === parseInt(code));
+    const handleProvinceSelect = (provinceCode) => {
+        setSelectedProvince(provinceCode);
+        setSelectedDistrict('');
+        setShowProvinceDropdown(false);
+        setShowDistrictDropdown(false);
+
+        if (!provinceCode) {
+            setFormData(prev => ({ ...prev, province: '', sub_district: '' }));
+            setDistricts([]);
+            return;
+        }
+
+        const provinceObj = provinces.find(p => p.code === parseInt(provinceCode));
         if (provinceObj) {
             setFormData(prev => ({ ...prev, province: provinceObj.name, sub_district: '' }));
         }
     };
 
-    const handleDistrictChange = (e) => {
-        const code = e.target.value;
-        setSelectedDistrict(code);
-        const districtObj = districts.find(d => d.code === parseInt(code));
+    const handleDistrictSelect = (districtCode) => {
+        setSelectedDistrict(districtCode);
+        setShowDistrictDropdown(false);
+
+        if (!districtCode) {
+            setFormData(prev => ({ ...prev, sub_district: '' }));
+            return;
+        }
+
+        const districtObj = districts.find(d => d.code === parseInt(districtCode));
         if (districtObj) {
             setFormData(prev => ({ ...prev, sub_district: districtObj.name }));
         }
+    };
+
+    const getProvinceName = (provinceCode) => {
+        const province = provinces.find(p => p.code === parseInt(provinceCode));
+        return province ? province.name : 'Chọn tỉnh/thành phố';
+    };
+
+    const getDistrictName = (districtCode) => {
+        const district = districts.find(d => d.code === parseInt(districtCode));
+        return district ? district.name : 'Chọn quận/huyện';
     };
 
     const handleImageChange = (e) => {
@@ -125,7 +168,7 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
         e.preventDefault();
 
         if (!formData.title.trim()) {
-            setError('Vui lòng nhập tên sự kiện');
+            setError('Vui lòng nhập tên hoạt động');
             return;
         }
         if (!formData.location.trim()) {
@@ -182,7 +225,7 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
                 const errorMessages = Object.values(errors).flat();
                 setError(errorMessages[0] || 'Có lỗi xảy ra, vui lòng thử lại');
             } else {
-                setError('Không thể tạo sự kiện. Vui lòng thử lại sau.');
+                setError('Không thể tạo hoạt động. Vui lòng thử lại sau.');
             }
         } finally {
             setLoading(false);
@@ -199,12 +242,11 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Plus className="w-5 h-5" />
-                                Tạo sự kiện hiến máu mới
+                                Tạo hoạt động hiến máu mới
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -223,26 +265,26 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
 
                         <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Tên sự kiện <span className="text-red-500">*</span>
+                                Tên hoạt động <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 required
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                placeholder="Nhập tên sự kiện"
+                                placeholder="Nhập tên hoạt động"
                                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                             />
                         </div>
 
                         <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Mô tả sự kiện
+                                Mô tả hoạt động
                             </label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="Nhập mô tả chi tiết về sự kiện"
+                                placeholder="Nhập mô tả chi tiết về hoạt động"
                                 rows="4"
                                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                             />
@@ -250,7 +292,7 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
 
                         <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Hình ảnh sự kiện
+                                Hình ảnh hoạt động
                             </label>
                             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-200 border-dashed rounded-xl hover:border-red-500 transition-colors">
                                 <div className="space-y-1 text-center">
@@ -267,7 +309,7 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
                                                     setImageFile(null);
                                                     setImagePreview('');
                                                 }}
-                                                className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-md"
+                                                className="cursor-pointer absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-md"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
@@ -295,49 +337,100 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
-                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div className="province-dropdown relative bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Tỉnh/Thành phố <span className="text-red-500">*</span>
                                 </label>
-                                <select
-                                    required
-                                    value={selectedProvince}
-                                    onChange={handleProvinceChange}
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                <button
+                                    type="button"
+                                    onClick={() => setShowProvinceDropdown(!showProvinceDropdown)}
+                                    className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
                                 >
-                                    <option value="">Chọn tỉnh/thành phố</option>
+                                    <span className={selectedProvince ? "text-gray-900" : "text-gray-400"}>
+                                        {selectedProvince ? getProvinceName(selectedProvince) : "Chọn tỉnh/thành phố"}
+                                    </span>
                                     {loadingProvinces ? (
-                                        <option disabled>Đang tải...</option>
+                                        <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
                                     ) : (
-                                        provinces.map(province => (
-                                            <option key={province.code} value={province.code}>
-                                                {province.name}
-                                            </option>
-                                        ))
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showProvinceDropdown ? 'rotate-180' : ''}`} />
                                     )}
-                                </select>
+                                </button>
+
+                                {showProvinceDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleProvinceSelect("")}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedProvince ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Chọn tỉnh/thành phố
+                                        </button>
+                                        {loadingProvinces ? (
+                                            <div className="px-4 py-3 text-center text-gray-500">
+                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                            </div>
+                                        ) : (
+                                            provinces.map(province => (
+                                                <button
+                                                    key={province.code}
+                                                    type="button"
+                                                    onClick={() => handleProvinceSelect(province.code.toString())}
+                                                    className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedProvince === province.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    {province.name}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                            <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                            <div className="district-dropdown relative bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Quận/Huyện
                                 </label>
-                                <select
-                                    value={selectedDistrict}
-                                    onChange={handleDistrictChange}
+                                <button
+                                    type="button"
+                                    onClick={() => selectedProvince && !loadingDistricts && setShowDistrictDropdown(!showDistrictDropdown)}
+                                    className={`cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300 ${(!selectedProvince || loadingDistricts) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     disabled={!selectedProvince || loadingDistricts}
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 >
-                                    <option value="">Chọn quận/huyện</option>
+                                    <span className={selectedDistrict ? "text-gray-900" : "text-gray-400"}>
+                                        {selectedDistrict ? getDistrictName(selectedDistrict) : "Chọn quận/huyện"}
+                                    </span>
                                     {loadingDistricts ? (
-                                        <option disabled>Đang tải...</option>
+                                        <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
                                     ) : (
-                                        districts.map(district => (
-                                            <option key={district.code} value={district.code}>
-                                                {district.name}
-                                            </option>
-                                        ))
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showDistrictDropdown ? 'rotate-180' : ''}`} />
                                     )}
-                                </select>
+                                </button>
+
+                                {showDistrictDropdown && selectedProvince && (
+                                    <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDistrictSelect("")}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedDistrict ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Chọn quận/huyện
+                                        </button>
+                                        {loadingDistricts ? (
+                                            <div className="px-4 py-3 text-center text-gray-500">
+                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                            </div>
+                                        ) : (
+                                            districts.map(district => (
+                                                <button
+                                                    key={district.code}
+                                                    type="button"
+                                                    onClick={() => handleDistrictSelect(district.code.toString())}
+                                                    className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedDistrict === district.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    {district.name}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -376,7 +469,7 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -385,8 +478,7 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
                                     </>
                                 ) : (
                                     <>
-                                        <Save className="w-5 h-5" />
-                                        <span>Tạo sự kiện</span>
+                                        <span>Tạo hoạt động</span>
                                     </>
                                 )}
                             </button>
@@ -394,7 +486,7 @@ const CreateEventDialog = ({ isOpen, onClose, onSuccess }) => {
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -428,10 +520,12 @@ const StaffEventList = () => {
     const [page, setPage] = useState(1);
     const [hasNextPage, setHasNextPage] = useState(true);
     const [totalEvents, setTotalEvents] = useState(0);
+    const [createdEventsCount, setCreatedEventsCount] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchProvinces();
+        loadCreatedEventsCount();
     }, []);
 
     const fetchProvinces = async () => {
@@ -445,6 +539,15 @@ const StaffEventList = () => {
             setProvinces([]);
         } finally {
             setLoadingProvinces(false);
+        }
+    };
+
+    const loadCreatedEventsCount = async () => {
+        try {
+            const response = await authApis().get(`${endpoints.staff_donation_event}?page=1&page_size=1`);
+            setCreatedEventsCount(response.data.count || 0);
+        } catch (err) {
+            console.error("Error fetching total created events:", err);
         }
     };
 
@@ -506,7 +609,7 @@ const StaffEventList = () => {
 
         } catch (err) {
             console.error("Error fetching staff events:", err);
-            setError("Không thể tải danh sách sự kiện. Vui lòng thử lại sau.");
+            setError("Không thể tải danh sách hoạt động. Vui lòng thử lại sau.");
         } finally {
             if (isLoadMore) {
                 setLoadingMore(false);
@@ -595,6 +698,7 @@ const StaffEventList = () => {
     const handleCreateEventSuccess = () => {
         setPage(1);
         loadEvents(false);
+        loadCreatedEventsCount();
     };
 
     const handleSearchChange = (e) => {
@@ -650,7 +754,7 @@ const StaffEventList = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Helmet>
-                <title>Quản lý sự kiện | Dòng Máu Lạc Hồng</title>
+                <title>Quản lý hoạt động | Dòng Máu Lạc Hồng</title>
             </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white">
@@ -680,19 +784,16 @@ const StaffEventList = () => {
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                                <UserCog className="w-4 h-4" />
-                                <span className="text-sm font-medium">Quản lý sự kiện</span>
+                                <HandHeart className="w-4 h-4" />
+                                <span className="text-sm font-medium">Quản lý hoạt động</span>
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Calendar className="w-10 h-10" />
-                                </div>
-                                <h1 className="text-4xl md:text-5xl font-bold">Sự kiện hiến máu của tôi</h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Hoạt động hiến máu đã tổ chức</h1>
                             </div>
 
                             <p className="text-lg text-red-100 max-w-2xl">
-                                Quản lý các sự kiện hiến máu bạn đã tạo. Theo dõi số lượng người đăng ký và kết quả.
+                                Quản lý các hoạt động hiến máu bạn đã tạo. Theo dõi số lượng người đăng ký và kết quả.
                             </p>
 
                             <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
@@ -701,8 +802,8 @@ const StaffEventList = () => {
                                         <Calendar className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <div className="text-2xl font-bold">{totalEvents}</div>
-                                        <div className="text-sm text-white/80">Sự kiện đã tạo</div>
+                                        <div className="text-2xl font-bold">{createdEventsCount}</div>
+                                        <div className="text-sm text-white/80">Hoạt động đã tạo</div>
                                     </div>
                                 </div>
                             </div>
@@ -715,14 +816,14 @@ const StaffEventList = () => {
                                     <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
                                         <Plus className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-lg font-bold mb-1">Tạo sự kiện mới</h3>
-                                    <p className="text-white/80 text-sm">Tạo sự kiện hiến máu để kêu gọi cộng đồng</p>
+                                    <h3 className="text-lg font-bold mb-1">Tạo hoạt động mới</h3>
+                                    <p className="text-white/80 text-sm">Tạo hoạt động hiến máu để kêu gọi cộng đồng</p>
                                 </div>
                                 <button
                                     onClick={handleCreateEvent}
-                                    className="w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
+                                    className="cursor-pointer w-full bg-white text-red-600 py-2.5 rounded-xl font-semibold hover:bg-red-50 transition-all duration-300"
                                 >
-                                    Tạo sự kiện hiến máu
+                                    Tạo hoạt động hiến máu
                                 </button>
                             </div>
                         </div>
@@ -747,7 +848,7 @@ const StaffEventList = () => {
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-red-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Tìm kiếm sự kiện của bạn..."
+                                    placeholder="Tìm kiếm hoạt động của bạn..."
                                     value={searchTerm}
                                     onChange={handleSearchChange}
                                     className="w-full pl-12 pr-12 py-3 bg-gray-100 border-2 border-transparent rounded-xl focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/20 outline-none transition-all duration-300"
@@ -760,7 +861,7 @@ const StaffEventList = () => {
                                             setPage(1);
                                             loadEvents(false);
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -771,7 +872,7 @@ const StaffEventList = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <Filter className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
@@ -781,7 +882,7 @@ const StaffEventList = () => {
                             <div className="relative status-dropdown">
                                 <button
                                     onClick={() => setShowStatusDropdown(!showStatusDropdown)}
-                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[160px] justify-between"
+                                    className="cursor-pointer flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[160px] justify-between"
                                 >
                                     <span className="text-gray-700 font-medium">{getStatusLabel()}</span>
                                     <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showStatusDropdown ? 'rotate-180' : ''}`} />
@@ -798,7 +899,7 @@ const StaffEventList = () => {
                                             <button
                                                 key={option.value}
                                                 onClick={() => handleFilterTypeChange(option.value)}
-                                                className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${filterType === option.value ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${filterType === option.value ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                             >
                                                 {option.label}
                                             </button>
@@ -811,7 +912,7 @@ const StaffEventList = () => {
                             <div className="relative province-dropdown">
                                 <button
                                     onClick={() => setShowProvinceDropdown(!showProvinceDropdown)}
-                                    className="flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[180px] justify-between"
+                                    className="cursor-pointer flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-300 min-w-[180px] justify-between"
                                     disabled={loadingProvinces}
                                 >
                                     <span className="text-gray-700 font-medium truncate">{getProvinceLabel()}</span>
@@ -822,7 +923,7 @@ const StaffEventList = () => {
                                     <div className="absolute top-full left-0 mt-2 w-[280px] max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
                                         <button
                                             onClick={() => handleProvinceChange('')}
-                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedProvince ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedProvince ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                         >
                                             Tất cả tỉnh/thành
                                         </button>
@@ -835,7 +936,7 @@ const StaffEventList = () => {
                                                 <button
                                                     key={province.code}
                                                     onClick={() => handleProvinceChange(province.code.toString())}
-                                                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedProvince === province.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                    className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedProvince === province.code.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
                                                 >
                                                     {province.name}
                                                 </button>
@@ -849,7 +950,7 @@ const StaffEventList = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -859,7 +960,7 @@ const StaffEventList = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                         ? 'bg-white text-red-600 shadow-md'
                                         : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -876,7 +977,7 @@ const StaffEventList = () => {
                         <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-gray-900">Bộ lọc nâng cao</h3>
-                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-200 rounded-lg">
+                                <button onClick={() => setShowFilters(false)} className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
@@ -896,7 +997,7 @@ const StaffEventList = () => {
                                                     handleFilterTypeChange(option.value);
                                                     setShowFilters(false);
                                                 }}
-                                                className={`px-4 py-2 rounded-lg border transition-all ${filterType === option.value
+                                                className={`cursor-pointer px-4 py-2 rounded-lg border transition-all ${filterType === option.value
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
                                                     }`}
@@ -933,7 +1034,7 @@ const StaffEventList = () => {
                             {filterType !== 'all' && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Trạng thái: {getStatusLabel()}</span>
-                                    <button onClick={() => handleFilterTypeChange('all')} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => handleFilterTypeChange('all')} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -941,7 +1042,7 @@ const StaffEventList = () => {
                             {selectedProvince && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>{provinces.find(p => p.code === parseInt(selectedProvince))?.name}</span>
-                                    <button onClick={() => { setSelectedProvince(""); setPage(1); loadEvents(false); }} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => { setSelectedProvince(""); setPage(1); loadEvents(false); }} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -950,7 +1051,7 @@ const StaffEventList = () => {
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <Search className="h-4 w-4" />
                                     <span>"{searchTerm}"</span>
-                                    <button onClick={() => { setSearchTerm(""); setPage(1); loadEvents(false); }} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => { setSearchTerm(""); setPage(1); loadEvents(false); }} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -958,7 +1059,7 @@ const StaffEventList = () => {
                             {(selectedProvince || searchTerm || filterType !== 'all') && (
                                 <button
                                     onClick={handleClearFilters}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
+                                    className="cursor-pointer px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
                                 >
                                     Xóa tất cả
                                 </button>
@@ -974,10 +1075,10 @@ const StaffEventList = () => {
                 <div className="lg:hidden mb-6">
                     <button
                         onClick={handleCreateEvent}
-                        className="w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg"
+                        className="cursor-pointer w-full py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg"
                     >
                         <Plus className="w-5 h-5" />
-                        Tạo sự kiện mới
+                        Tạo hoạt động mới
                     </button>
                 </div>
 
@@ -1015,7 +1116,7 @@ const StaffEventList = () => {
                                 </div>
                                 <button
                                     onClick={handleRefresh}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
                                 </button>
@@ -1037,22 +1138,22 @@ const StaffEventList = () => {
                         </div>
 
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                            {searchTerm || selectedProvince || filterType !== 'all' ? "Không tìm thấy sự kiện" : "Chưa có sự kiện nào"}
+                            {searchTerm || selectedProvince || filterType !== 'all' ? "Không tìm thấy hoạt động" : "Chưa có hoạt động nào"}
                         </h3>
 
                         <p className="text-gray-600 mb-6 max-w-md mx-auto">
                             {searchTerm || selectedProvince || filterType !== 'all'
                                 ? "Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác"
-                                : "Hãy tạo sự kiện hiến máu đầu tiên của bạn để kêu gọi cộng đồng"}
+                                : "Hãy tạo hoạt động hiến máu đầu tiên của bạn để kêu gọi cộng đồng"}
                         </p>
 
                         {!searchTerm && !selectedProvince && filterType === 'all' && (
                             <button
                                 onClick={handleCreateEvent}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
                                 <Plus className="w-5 h-5" />
-                                Tạo sự kiện ngay
+                                Tạo hoạt động ngay
                             </button>
                         )}
                     </div>
@@ -1066,13 +1167,13 @@ const StaffEventList = () => {
                                 <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
                                     <span className="font-bold text-lg">{totalEvents}</span>
                                 </div>
-                                <span className="text-gray-600">sự kiện {filterType !== 'all' && "phù hợp"}</span>
+                                <span className="text-gray-600">hoạt động {filterType !== 'all' && "phù hợp"}</span>
                             </div>
 
                             <button
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
                                 <svg className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1128,7 +1229,7 @@ const StaffEventList = () => {
                                                 to={`/staff-donation-event/${event.id}/registrations`}
                                                 className="w-full flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md hover:shadow-lg"
                                             >
-                                                <span>Quản lý sự kiện</span>
+                                                <span>Quản lý hoạt động</span>
                                                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                                             </Link>
                                         </div>
@@ -1183,7 +1284,7 @@ const StaffEventList = () => {
                                                     to={`/staff-donation-event/${event.id}/registrations`}
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md"
                                                 >
-                                                    <span>Quản lý sự kiện</span>
+                                                    <span>Quản lý hoạt động</span>
                                                     <ChevronRight className="h-4 w-4" />
                                                 </Link>
                                             </div>
@@ -1199,7 +1300,7 @@ const StaffEventList = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -1209,8 +1310,7 @@ const StaffEventList = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
-                                                <span>Xem thêm sự kiện</span>
+                                                <span>Xem thêm hoạt động</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}
@@ -1223,7 +1323,7 @@ const StaffEventList = () => {
                             <div className="text-center mt-12">
                                 <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
                                     <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                    <span>Đã hiển thị tất cả {totalEvents} sự kiện</span>
+                                    <span>Đã hiển thị tất cả {totalEvents} hoạt động</span>
                                 </div>
                             </div>
                         )}

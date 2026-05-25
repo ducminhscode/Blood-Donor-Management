@@ -645,7 +645,7 @@ const EventMedicalCheckUpDetail = () => {
                                 )}
 
                                 {bloodDonation && (
-                                    <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                                    <div className="flex items-center justify-between pb-3 border-gray-100">
                                         <span className="text-gray-600">Trạng thái hiến máu</span>
                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-xs font-semibold">
                                             Đã hiến máu
