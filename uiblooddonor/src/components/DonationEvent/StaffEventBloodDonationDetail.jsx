@@ -779,7 +779,7 @@ const StaffEventBloodDonationDetail = () => {
                         <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                             {/* Action Buttons */}
                             {(canEditOrDelete() && !isCompleted) ? (
-                                <div className="flex gap-3 mt-4">
+                                <div className="flex gap-3 mt-3">
                                     <button
                                         onClick={() => setShowEditDialog(true)}
                                         className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium"

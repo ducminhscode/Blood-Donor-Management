@@ -524,44 +524,6 @@ const EmergencyMedicalCheckUpDetail = () => {
                             </div>
                         </div>
 
-                        {/* Patient Information */}
-                        {emergency && (
-                            <InfoSection title="Thông tin bệnh nhân" icon={User}>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <InfoCard
-                                        icon={User}
-                                        label="Họ và tên"
-                                        value={emergency.patient_name}
-                                    />
-                                    <InfoCard
-                                        icon={Phone}
-                                        label="Số điện thoại"
-                                        value={emergency.phone}
-                                    />
-                                    <InfoCard
-                                        icon={Droplet}
-                                        label="Nhóm máu cần"
-                                        value={`${getBloodTypeText(emergency.blood_type)}${getRhFactorText(emergency.rh_factor)}`}
-                                    />
-                                    <InfoCard
-                                        icon={Syringe}
-                                        label="Lượng máu cần"
-                                        value={`${emergency.blood_volume}ml`}
-                                    />
-                                    <InfoCard
-                                        icon={HandHeart}
-                                        label="Loại hiến máu"
-                                        value={getDonationTypeText(emergency.donation_type)}
-                                    />
-                                    <InfoCard
-                                        icon={Hospital}
-                                        label="Bệnh viện"
-                                        value={emergency.hospital?.name}
-                                    />
-                                </div>
-                            </InfoSection>
-                        )}
-
                         {/* Vital Signs */}
                         <InfoSection title="Chỉ số sức khỏe" icon={Activity}>
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

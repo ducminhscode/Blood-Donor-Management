@@ -628,7 +628,7 @@ const EmergencyRequestList = () => {
                                                     <span className="font-medium">
                                                         {request.is_expire ? 'Đã hết hạn' : 'Xem chi tiết - Hỗ trợ ngay'}
                                                     </span>
-                                                    <Eye className="w-4 h-4" />
+                                                    <ChevronRight className="w-4 h-4" />
                                                 </Link>
                                             </div>
                                         </div>

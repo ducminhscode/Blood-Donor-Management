@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, HeartPulse, Activity, FileHeart, Award as AwardIcon, Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon, Syringe, FlaskConical, Loader2, Save, Ambulance, Hospital, AlertTriangle, Stethoscope, TrendingUp, Eye, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Share2, ArrowLeft, Users, Award, CheckCircle, AlertCircle, XCircle, Phone, Mail, Globe, Navigation, Copy, ChevronRight, ChevronDown, Sparkles, Target, Shield, ThumbsUp, Bookmark, Bell, CalendarDays, MapPinned, Building2, User, UserCheck, MessageCircle, Share, ExternalLink, ClipboardClock, AlarmClock, CalendarCog, BadgeCheck, X, FileText, UserCircle, IdCard, Briefcase, Home, CalendarClock, Clock3, Clock12, Ban, CheckCircle2, Timer, Hourglass, UserPlus, UserMinus, Edit, Printer, Download, Send, MessageSquare, HeartPulse, Activity, FileHeart, Award as AwardIcon, Medal, Trophy, Gift, ThumbsUp as ThumbsUpIcon, Syringe, FlaskConical, Loader2, Save, Ambulance, Hospital, AlertTriangle, Stethoscope, TrendingUp, Eye, Trash2, HandHeart } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { getImageUrl } from '../../utils/Image';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
@@ -18,12 +18,11 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -56,8 +55,7 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                         <div className="space-y-3">
                             <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                                 <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hospital className="w-4 h-4 text-red-500" />
-                                    Bệnh viện trực thuộc
+                                    <p className="text-xs text-gray-500 mb-1">Bệnh viện trực thuộc</p>
                                 </h5>
                                 <div className="space-y-2">
                                     <p className="font-semibold text-gray-900">
@@ -80,14 +78,12 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Email</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Mail className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.email || 'Chưa cập nhật'}
                                     </span>
                                 </div>
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
@@ -187,6 +183,8 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
         blood_taker: '',
         donation_note: ''
     });
+    const [showBloodTypeDropdown, setShowBloodTypeDropdown] = useState(false);
+    const [showDonationTypeDropdown, setShowDonationTypeDropdown] = useState(false);
 
     useEffect(() => {
         if (donation) {
@@ -200,6 +198,22 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
             });
         }
     }, [donation]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleClickOutside = (event) => {
+            if (showBloodTypeDropdown && !event.target.closest('.blood-type-dropdown')) {
+                setShowBloodTypeDropdown(false);
+            }
+            if (showDonationTypeDropdown && !event.target.closest('.donation-type-dropdown')) {
+                setShowDonationTypeDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, showBloodTypeDropdown, showDonationTypeDropdown]);
 
     if (!isOpen) return null;
 
@@ -216,6 +230,39 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
         }));
     };
 
+    const handleBloodTypeSelect = (bloodType) => {
+        setFormData(prev => ({
+            ...prev,
+            blood_type: bloodType
+        }));
+        setShowBloodTypeDropdown(false);
+    };
+
+    const handleDonationTypeSelect = (donationType) => {
+        setFormData(prev => ({
+            ...prev,
+            donation_type: donationType
+        }));
+        setShowDonationTypeDropdown(false);
+    };
+
+    const getBloodTypeLabel = (bloodType) => {
+        if (bloodType === '') return 'Chọn nhóm máu';
+        const labels = { '0': 'O', '1': 'A', '2': 'B', '3': 'AB' };
+        return labels[bloodType] || 'Chọn nhóm máu';
+    };
+
+    const getDonationTypeLabel = (donationType) => {
+        if (donationType === '') return 'Chọn loại hiến máu';
+        const labels = {
+            '0': 'Máu toàn phần',
+            '1': 'Tiểu cầu',
+            '2': 'Huyết tương',
+            '3': 'Bạch cầu'
+        };
+        return labels[donationType] || 'Chọn loại hiến máu';
+    };
+
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto animate-fadeIn" onClick={onClose}>
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
@@ -224,12 +271,11 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Edit className="w-5 h-5" />
                                 Chỉnh sửa kết quả hiến máu
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -242,19 +288,58 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
                                 Nhóm máu <span className="text-red-500">*</span>
                             </label>
                             <div className="grid grid-cols-2 gap-4">
-                                <select
-                                    name="blood_type"
-                                    value={formData.blood_type}
-                                    onChange={handleChange}
-                                    required
-                                    className="px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                                >
-                                    <option value="">Chọn nhóm máu</option>
-                                    <option value="0">O</option>
-                                    <option value="1">A</option>
-                                    <option value="2">B</option>
-                                    <option value="3">AB</option>
-                                </select>
+                                <div className="blood-type-dropdown relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowBloodTypeDropdown(!showBloodTypeDropdown)}
+                                        className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
+                                    >
+                                        <span className={formData.blood_type !== '' ? "text-gray-900" : "text-gray-400"}>
+                                            {getBloodTypeLabel(formData.blood_type)}
+                                        </span>
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showBloodTypeDropdown ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {showBloodTypeDropdown && (
+                                        <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                Chọn nhóm máu
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('0')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '0' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                O
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('1')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '1' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                A
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('2')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '2' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                B
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('3')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '3' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                AB
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                                 <label className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
                                     <input
                                         type="checkbox"
@@ -288,19 +373,58 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Loại hiến máu <span className="text-red-500">*</span>
                             </label>
-                            <select
-                                name="donation_type"
-                                value={formData.donation_type}
-                                onChange={handleChange}
-                                required
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                            >
-                                <option value="">Chọn loại hiến máu</option>
-                                <option value="0">Máu toàn phần</option>
-                                <option value="1">Tiểu cầu</option>
-                                <option value="2">Huyết tương</option>
-                                <option value="3">Bạch cầu</option>
-                            </select>
+                            <div className="donation-type-dropdown relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDonationTypeDropdown(!showDonationTypeDropdown)}
+                                    className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
+                                >
+                                    <span className={formData.donation_type !== '' ? "text-gray-900" : "text-gray-400"}>
+                                        {getDonationTypeLabel(formData.donation_type)}
+                                    </span>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showDonationTypeDropdown ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {showDonationTypeDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDonationTypeSelect('')}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Chọn loại hiến máu
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDonationTypeSelect('0')}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '0' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Máu toàn phần
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDonationTypeSelect('1')}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '1' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Tiểu cầu
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDonationTypeSelect('2')}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '2' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Huyết tương
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDonationTypeSelect('3')}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '3' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Bạch cầu
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
@@ -336,7 +460,7 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -345,7 +469,6 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
                                     </>
                                 ) : (
                                     <>
-                                        <Save className="w-5 h-5" />
                                         <span>Lưu thay đổi</span>
                                     </>
                                 )}
@@ -354,7 +477,7 @@ const EditDonationDialog = ({ isOpen, onClose, onSubmit, donation, loading }) =>
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -383,7 +506,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -405,7 +528,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                             <button
                                 onClick={onConfirm}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -423,7 +546,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -440,6 +563,7 @@ const StaffEmergencyBloodDonationDetail = () => {
     const navigate = useNavigate();
 
     const [donation, setDonation] = useState(null);
+    const [responseDetail, setResponseDetail] = useState(null);
     const [responseStatus, setResponseStatus] = useState(null);
     const [loading, setLoading] = useState(false);
     const [updating, setUpdating] = useState(false);
@@ -453,6 +577,8 @@ const StaffEmergencyBloodDonationDetail = () => {
         title: '',
         message: ''
     });
+    const patientName = responseDetail?.emergency_request?.patient_name || donation?.emergency_request?.patient_name || 'Đang tải tên bệnh nhân';
+    const donorName = `${responseDetail?.donor?.account?.last_name || donation?.donor?.account?.last_name || ''} ${responseDetail?.donor?.account?.first_name || donation?.donor?.account?.first_name || ''}`.trim() || 'Đang tải người hiến máu';
 
     useEffect(() => {
         fetchBloodDonation();
@@ -487,6 +613,7 @@ const StaffEmergencyBloodDonationDetail = () => {
                 .replace('${id}', id)
                 .replace('${response_id}', response_id);
             const response = await authApis().get(url);
+            setResponseDetail(response.data);
             setResponseStatus(response.data.status_registration);
         } catch (err) {
             console.error("Error fetching response status:", err);
@@ -600,7 +727,7 @@ const StaffEmergencyBloodDonationDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại kết quả khám
@@ -664,30 +791,30 @@ const StaffEmergencyBloodDonationDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/staff-emergency-request")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Quản lý yêu cầu
+                            Hiến máu khẩn cấp
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Danh sách phản hồi
+                            {patientName}
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Chi tiết phản hồi
+                            {donorName}
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Kết quả khám
+                            Kết quả khám sức khỏe
                         </button>
                         <span>/</span>
                         <span className="text-white font-medium">Kết quả hiến máu</span>
@@ -695,15 +822,14 @@ const StaffEmergencyBloodDonationDetail = () => {
 
                     <button
                         onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại kết quả khám</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
-                            <HeartPulse className="w-8 h-8" />
                             Kết quả hiến máu
                         </h1>
                     </div>
@@ -724,24 +850,12 @@ const StaffEmergencyBloodDonationDetail = () => {
                     <div className="lg:col-span-2 space-y-6">
                         {/* Title Section */}
                         <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-4 flex-wrap">
-                                        <BloodTypeBadge
-                                            bloodType={donation.blood_type}
-                                            rhFactor={donation.rh_factor}
-                                        />
-                                        <DonationTypeBadge type={donation.donation_type} />
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* Action Buttons */}
-                            {canEditOrDelete() && !isCompleted && (
-                                <div className="flex gap-3 mt-4">
+                            {canEditOrDelete() && !isCompleted ? (
+                                <div className="flex gap-3 mt-3">
                                     <button
                                         onClick={() => setShowEditDialog(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium"
+                                        className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium"
                                     >
                                         <Edit className="w-4 h-4" />
                                         Chỉnh sửa
@@ -752,11 +866,18 @@ const StaffEmergencyBloodDonationDetail = () => {
                                             title: 'Xóa kết quả hiến máu',
                                             message: 'Bạn có chắc chắn muốn xóa kết quả hiến máu này?'
                                         })}
-                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                        className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
                                     >
                                         <XCircle className="w-4 h-4" />
                                         Xóa
                                     </button>
+                                </div>
+                            ) : (
+                                <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                    <p className="text-sm text-blue-700 flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        Phản hồi đã hoàn thành, không thể chỉnh sửa hoặc xóa kết quả hiến máu.
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -774,12 +895,12 @@ const StaffEmergencyBloodDonationDetail = () => {
                                     value={getBloodTypeDisplay()}
                                 />
                                 <InfoCard
-                                    icon={Activity}
+                                    icon={HandHeart}
                                     label="Loại hiến"
                                     value={getDonationTypeText()}
                                 />
                                 <InfoCard
-                                    icon={Droplet}
+                                    icon={Syringe}
                                     label="Thể tích máu"
                                     value={`${donation.blood_volume} ml`}
                                 />
@@ -885,7 +1006,6 @@ const StaffEmergencyBloodDonationDetail = () => {
                             {staff && (
                                 <div className="mt-6 pt-4 border-t border-gray-100">
                                     <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                        <Stethoscope className="w-4 h-4 text-red-500" />
                                         Nhân viên y tế
                                     </h3>
                                     <div className="flex items-center gap-3">
@@ -915,7 +1035,7 @@ const StaffEmergencyBloodDonationDetail = () => {
                                         </div>
                                         <button
                                             onClick={() => setIsStaffDialogOpen(true)}
-                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="cursor-pointer p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </button>

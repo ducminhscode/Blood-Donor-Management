@@ -17,9 +17,10 @@ import {
     Share, ExternalLink, ClipboardClock, CalendarCog,
     RefreshCw, Loader2, PlusCircle,
     NotebookPen, Ambulance, Hospital, Syringe,
-    AlertTriangle, HeartHandshake, FlaskConical,
+    AlertTriangle, HeartHandshake, FlaskConical, ChevronDown,
     TrendingUp, Award as AwardIcon, Shield as ShieldIcon,
-    Users as UsersIcon, Map as MapIcon, Loader
+    Users as UsersIcon, Map as MapIcon, Loader,
+    HandHeart
 } from 'lucide-react';
 import { authApis, endpoints } from '../../configs/APIs';
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
@@ -124,12 +125,11 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Stethoscope className="w-5 h-5" />
                                 Thông tin nhân viên y tế
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -161,10 +161,7 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
 
                         <div className="space-y-3">
                             <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
-                                <h5 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                    <Hospital className="w-4 h-4 text-red-500" />
-                                    Bệnh viện trực thuộc
-                                </h5>
+                                <p className="text-xs text-gray-500 mb-1">Bệnh viện trực thuộc</p>
                                 <div className="space-y-2">
                                     <p className="font-semibold text-gray-900">
                                         {staff?.hospital?.name || 'Đang cập nhật'}
@@ -186,14 +183,12 @@ const StaffDetailDialog = ({ isOpen, onClose, staff }) => {
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Email</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Mail className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.email || 'Chưa cập nhật'}
                                     </span>
                                 </div>
                                 <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-3 border border-gray-100">
                                     <p className="text-xs text-gray-500 mb-1">Số điện thoại</p>
                                     <span className="text-sm font-semibold text-gray-900 flex items-center gap-1 truncate">
-                                        <Phone className="w-4 h-4 text-gray-400" />
                                         {staff?.account?.phone || 'Chưa cập nhật'}
                                     </span>
                                 </div>
@@ -248,6 +243,20 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
         doctor: '',
         medical_note: ''
     });
+    const [showResultDropdown, setShowResultDropdown] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleClickOutside = (event) => {
+            if (showResultDropdown && !event.target.closest('.result-dropdown')) {
+                setShowResultDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen, showResultDropdown]);
 
     if (!isOpen) return null;
 
@@ -264,6 +273,15 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
         }));
     };
 
+    const handleResultSelect = (value) => {
+        setFormData(prev => ({ ...prev, is_eligible: value }));
+        setShowResultDropdown(false);
+    };
+
+    const getResultLabel = () => {
+        return formData.is_eligible ? 'Đủ điều kiện' : 'Không đủ điều kiện';
+    };
+
     const today = new Date().toISOString().split('T')[0];
 
     return (
@@ -274,12 +292,11 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <NotebookPen className="w-5 h-5" />
                                 Tạo phiếu khám sức khỏe
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -328,7 +345,6 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         step="0.1"
                                         required
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                                        placeholder="Ví dụ: 65"
                                     />
                                 </div>
                                 <div>
@@ -343,7 +359,6 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         step="0.1"
                                         required
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                                        placeholder="Ví dụ: 170"
                                     />
                                 </div>
                                 <div>
@@ -355,7 +370,6 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="blood_pressure"
                                         value={formData.blood_pressure}
                                         onChange={handleChange}
-                                        placeholder="120/80"
                                         required
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
                                     />
@@ -371,7 +385,6 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         required
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                                        placeholder="Ví dụ: 72"
                                     />
                                 </div>
                                 <div>
@@ -386,7 +399,6 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         step="0.1"
                                         required
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                                        placeholder="Ví dụ: 36.5"
                                     />
                                 </div>
                                 <div>
@@ -400,7 +412,6 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                         onChange={handleChange}
                                         required
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
-                                        placeholder="Ví dụ: 135"
                                     />
                                 </div>
                             </div>
@@ -516,19 +527,39 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                 <ClipboardCheck className="w-4 h-4 text-red-600" />
                                 Kết luận
                             </h4>
-                            <div>
+                            <div className="result-dropdown relative">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Kết quả khám <span className="text-red-500">*</span>
                                 </label>
-                                <select
-                                    name="is_eligible"
-                                    value={formData.is_eligible}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                <button
+                                    type="button"
+                                    onClick={() => setShowResultDropdown(!showResultDropdown)}
+                                    className="w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
                                 >
-                                    <option value={true}>Đủ điều kiện</option>
-                                    <option value={false}>Không đủ điều kiện</option>
-                                </select>
+                                    <span className={formData.is_eligible ? "text-gray-900" : "text-gray-900"}>
+                                        {getResultLabel()}
+                                    </span>
+                                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showResultDropdown ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {showResultDropdown && (
+                                    <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleResultSelect(true)}
+                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.is_eligible === true ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Đủ điều kiện
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleResultSelect(false)}
+                                            className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.is_eligible === false ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Không đủ điều kiện
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -552,7 +583,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -561,7 +592,6 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                     </>
                                 ) : (
                                     <>
-                                        <PlusCircle className="w-5 h-5" />
                                         <span>Tạo phiếu khám</span>
                                     </>
                                 )}
@@ -570,7 +600,7 @@ const CreateMedicalCheckupDialog = ({ isOpen, onClose, onSubmit, loading }) => {
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -594,12 +624,11 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <AlertCircle className="w-5 h-5" />
                                 Xác nhận thay đổi trạng thái
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -621,7 +650,7 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                             <button
                                 onClick={onConfirm}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md"
                             >
                                 {loading ? (
                                     <>
@@ -630,7 +659,6 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle className="w-5 h-5" />
                                         <span>Xác nhận</span>
                                     </>
                                 )}
@@ -639,7 +667,7 @@ const ConfirmStatusDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -849,7 +877,7 @@ const StaffResponseDetail = () => {
                         </p>
                         <button
                             onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg"
                         >
                             <ArrowLeft className="w-5 h-5" />
                             Quay lại danh sách phản hồi
@@ -914,37 +942,33 @@ const StaffResponseDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/staff-emergency-request")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Quản lý yêu cầu
+                            Hiến máu khẩn cấp
                         </button>
                         <span>/</span>
                         <button
                             onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Danh sách phản hồi
+                            {emergency?.patient_name || 'Yêu cầu cấp cứu'}
                         </button>
                         <span>/</span>
-                        <span className="text-white font-medium">Chi tiết phản hồi</span>
+                        <span className="text-white font-medium">{donorAccount.last_name} {donorAccount.first_name}</span>
                     </div>
 
                     <button
                         onClick={() => navigate(`/staff-emergency-request/${id}/responses`)}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại danh sách phản hồi</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div>
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
-                            <Ambulance className="w-8 h-8" />
                             Chi tiết phản hồi cấp cứu
                         </h1>
-                        <p className="text-red-100 text-lg">
-                            {donorAccount.last_name} {donorAccount.first_name}
-                        </p>
                     </div>
                 </div>
 
@@ -980,7 +1004,7 @@ const StaffResponseDetail = () => {
                                 {medicalCheckup && (
                                     <button
                                         onClick={() => navigate(`/staff-emergency-request/${id}/responses/${response_id}/medical-checkup`)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                        className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
                                     >
                                         <Stethoscope className="w-4 h-4" />
                                         Xem kết quả khám
@@ -989,7 +1013,7 @@ const StaffResponseDetail = () => {
                                 {!medicalCheckup && canCreateMedicalCheckup() && (
                                     <button
                                         onClick={() => setShowCreateMedicalDialog(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
+                                        className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 font-medium"
                                     >
                                         <NotebookPen className="w-4 h-4" />
                                         Tạo phiếu khám
@@ -1010,7 +1034,7 @@ const StaffResponseDetail = () => {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
-                                            className={`py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
+                                            className={`cursor-pointer py-4 px-2 font-medium transition-all relative whitespace-nowrap flex items-center gap-2 ${activeTab === tab.id
                                                     ? 'text-red-600'
                                                     : 'text-gray-500 hover:text-gray-700'
                                                 }`}
@@ -1084,10 +1108,10 @@ const StaffResponseDetail = () => {
                                                 <InfoCard
                                                     icon={Droplet}
                                                     label="Nhóm máu"
-                                                    value={donor?.blood_type !== undefined ? getBloodTypeDisplay(donor.blood_type, donor.rh_factor) : 'Chưa cập nhật'}
+                                                    value={donor?.blood_type !== null ? getBloodTypeDisplay(donor.blood_type, donor.rh_factor) : 'Chưa cập nhật'}
                                                 />
                                                 <InfoCard
-                                                    icon={AwardIcon}
+                                                    icon={Target}
                                                     label="Số lần hiến máu"
                                                     value={`${donor.donation_count || 0} lần`}
                                                 />
@@ -1107,7 +1131,7 @@ const StaffResponseDetail = () => {
                                     <div className="space-y-6">
                                         <div>
                                             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                <Heart className="w-5 h-5 text-red-500" />
+                                                <User className="w-5 h-5 text-red-500" />
                                                 Thông tin bệnh nhân
                                             </h3>
                                             <div className="grid md:grid-cols-2 gap-4">
@@ -1122,17 +1146,17 @@ const StaffResponseDetail = () => {
                                                     value={emergency.phone}
                                                 />
                                                 <InfoCard
-                                                    icon={Syringe}
+                                                    icon={Droplet}
                                                     label="Nhóm máu cần"
                                                     value={getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor)}
                                                 />
                                                 <InfoCard
-                                                    icon={Droplet}
+                                                    icon={Syringe}
                                                     label="Lượng máu cần"
                                                     value={`${emergency.blood_volume}ml`}
                                                 />
                                                 <InfoCard
-                                                    icon={FlaskConical}
+                                                    icon={HandHeart}
                                                     label="Loại hiến máu"
                                                     value={getDonationTypeText(emergency.donation_type)}
                                                 />
@@ -1194,7 +1218,7 @@ const StaffResponseDetail = () => {
                                                         </div>
                                                         <button
                                                             onClick={() => setIsStaffDialogOpen(true)}
-                                                            className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1 transition-colors"
+                                                            className="cursor-pointer text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1 transition-colors"
                                                         >
                                                             Xem chi tiết
                                                             <ChevronRight className="w-4 h-4" />
@@ -1241,7 +1265,7 @@ const StaffResponseDetail = () => {
                                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                                     <span className="text-gray-600">Nhóm máu người hiến</span>
                                     <span className="font-bold text-red-600">
-                                        {donor?.blood_type !== undefined ? getBloodTypeDisplay(donor.blood_type, donor.rh_factor) : 'Chưa cập nhật'}
+                                        {donor?.blood_type !== null ? getBloodTypeDisplay(donor.blood_type, donor.rh_factor) : 'Chưa cập nhật'}
                                     </span>
                                 </div>
 
@@ -1275,9 +1299,8 @@ const StaffResponseDetail = () => {
                                             <button
                                                 onClick={() => openConfirmDialog(3)}
                                                 disabled={updatingStatus}
-                                                className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl hover:from-purple-700 hover:to-purple-600 transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md disabled:opacity-50"
+                                                className="cursor-pointer w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-xl hover:from-purple-700 hover:to-purple-600 transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md disabled:opacity-50"
                                             >
-                                                <UserCheck className="w-5 h-5" />
                                                 Check-in
                                             </button>
                                         )}
@@ -1285,9 +1308,8 @@ const StaffResponseDetail = () => {
                                             <button
                                                 onClick={() => openConfirmDialog(4)}
                                                 disabled={updatingStatus}
-                                                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-500 text-white rounded-xl hover:from-emerald-700 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md disabled:opacity-50"
+                                                className="cursor-pointer w-full py-3 bg-gradient-to-r from-emerald-600 to-green-500 text-white rounded-xl hover:from-emerald-700 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2 font-semibold shadow-md disabled:opacity-50"
                                             >
-                                                <CheckCircle className="w-5 h-5" />
                                                 Hoàn thành
                                             </button>
                                         )}
@@ -1296,7 +1318,7 @@ const StaffResponseDetail = () => {
 
                                 <button
                                     onClick={() => window.print()}
-                                    className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2"
+                                    className="cursor-pointer w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2"
                                 >
                                     <Printer className="w-5 h-5" />
                                     In thông tin

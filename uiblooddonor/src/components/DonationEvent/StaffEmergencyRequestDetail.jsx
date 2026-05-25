@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, User, Mail, Phone, IdCard, Briefcase, Building, Calendar as CalendarIcon, UserPlus, Eye, ChevronLeft, RefreshCw, Info, FileText, NotepadText, InfoIcon, VenusAndMars, Edit, Trash2, Save, Upload, Image as ImageIcon, Ambulance, Hospital, Syringe, AlertOctagon, HeartHandshake, Timer, CheckCircle2, AlertTriangle, ExternalLink, Send, Grid, List, Filter as FilterIcon, TrendingUp, Stethoscope, BadgeCheck, Shield } from 'lucide-react';
+import { Calendar, MapPin, Clock, Droplet, Heart, Search, Filter, AlertCircle, ChevronRight, X, Sparkles, Users, Activity, Award, MapPinned, Bell, HeartPulse, CheckCircle, XCircle, Clock as ClockIcon, UserCheck, UserX, Loader2, CalendarCheck, User, Mail, Phone, IdCard, Briefcase, Building, Calendar as CalendarIcon, UserPlus, Eye, ChevronLeft, RefreshCw, Info, FileText, NotepadText, InfoIcon, VenusAndMars, Edit, Trash2, Save, Upload, Image as ImageIcon, Ambulance, Hospital, Syringe, AlertOctagon, HeartHandshake, Timer, CheckCircle2, AlertTriangle, ExternalLink, Send, Grid, List, Filter as FilterIcon, TrendingUp, Stethoscope, BadgeCheck, Shield, HandHeart, ChevronDown } from 'lucide-react';
 import { authApis, endpoints } from "../../configs/APIs";
 import { formatDate, formatTime, formatDateTime } from '../../utils/Format';
 import { getImageUrl } from '../../utils/Image';
@@ -19,12 +19,11 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <AlertCircle className="w-5 h-5" />
                                 {title}
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -46,7 +45,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                             <button
                                 onClick={onConfirm}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -55,7 +54,6 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                     </>
                                 ) : (
                                     <>
-                                        <Trash2 className="w-5 h-5" />
                                         <span>Xác nhận xóa</span>
                                     </>
                                 )}
@@ -64,7 +62,7 @@ const ConfirmDeleteDialog = ({ isOpen, onClose, onConfirm, title, message, loadi
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -95,6 +93,10 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
     const [hospitals, setHospitals] = useState([]);
     const [loadingHospitals, setLoadingHospitals] = useState(false);
     const [selectedHospital, setSelectedHospital] = useState('');
+    const [staffHospitalId, setStaffHospitalId] = useState(null);
+    const [showBloodTypeDropdown, setShowBloodTypeDropdown] = useState(false);
+    const [showDonationTypeDropdown, setShowDonationTypeDropdown] = useState(false);
+    const [showHospitalDropdown, setShowHospitalDropdown] = useState(false);
 
     useEffect(() => {
         fetchHospitals();
@@ -116,14 +118,50 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
             });
             setSelectedHospital(emergency.hospital?.id?.toString() || '');
             setError('');
+            setShowBloodTypeDropdown(false);
+            setShowDonationTypeDropdown(false);
+            setShowHospitalDropdown(false);
         }
     }, [isOpen, emergency]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showBloodTypeDropdown && !event.target.closest('.blood-type-dropdown')) {
+                setShowBloodTypeDropdown(false);
+            }
+            if (showDonationTypeDropdown && !event.target.closest('.donation-type-dropdown')) {
+                setShowDonationTypeDropdown(false);
+            }
+            if (showHospitalDropdown && !event.target.closest('.hospital-dropdown')) {
+                setShowHospitalDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showBloodTypeDropdown, showDonationTypeDropdown, showHospitalDropdown]);
 
     const fetchHospitals = async () => {
         setLoadingHospitals(true);
         try {
+            const staffResponse = await authApis().get(endpoints["staff_me"]);
+            const staffHospitalIdValue = staffResponse.data?.hospital?.id ?? null;
+            setStaffHospitalId(staffHospitalIdValue);
+
+            if (!staffHospitalIdValue) {
+                setHospitals([]);
+                setSelectedHospital('');
+                setFormData(prev => ({ ...prev, hospital: null }));
+                return;
+            }
+
             const response = await authApis().get(endpoints.hospital);
-            setHospitals(response.data.results || response.data);
+            const allHospitals = response.data.results || response.data;
+            const visibleHospitals = allHospitals.filter(hospital => hospital.id === staffHospitalIdValue);
+
+            setHospitals(visibleHospitals);
+            setSelectedHospital(staffHospitalIdValue.toString());
+            setFormData(prev => ({ ...prev, hospital: staffHospitalIdValue }));
         } catch (error) {
             console.error("Error fetching hospitals:", error);
         } finally {
@@ -131,13 +169,52 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
         }
     };
 
-    const handleHospitalChange = (e) => {
-        const hospitalId = e.target.value;
-        setSelectedHospital(hospitalId);
-        const hospitalObj = hospitals.find(h => h.id === parseInt(hospitalId));
-        if (hospitalObj) {
-            setFormData(prev => ({ ...prev, hospital: hospitalObj.id }));
+    const handleHospitalSelect = (hospitalId) => {
+        if (!staffHospitalId) return;
+
+        if (!hospitalId) {
+            setSelectedHospital(staffHospitalId.toString());
+            setFormData(prev => ({ ...prev, hospital: staffHospitalId }));
+            setShowHospitalDropdown(false);
+            return;
         }
+
+        setSelectedHospital(staffHospitalId.toString());
+        setFormData(prev => ({ ...prev, hospital: staffHospitalId }));
+        setShowHospitalDropdown(false);
+    };
+
+    const getHospitalLabel = () => {
+        if (!selectedHospital) return 'Chọn bệnh viện';
+        const hospital = hospitals.find(h => h.id === parseInt(selectedHospital));
+        return hospital?.name || 'Chọn bệnh viện';
+    };
+
+    const handleBloodTypeSelect = (bloodType) => {
+        setFormData(prev => ({ ...prev, blood_type: bloodType }));
+        setShowBloodTypeDropdown(false);
+    };
+
+    const handleDonationTypeSelect = (donationType) => {
+        setFormData(prev => ({ ...prev, donation_type: donationType }));
+        setShowDonationTypeDropdown(false);
+    };
+
+    const getBloodTypeLabel = (bloodType) => {
+        if (bloodType === '') return 'Chọn nhóm máu';
+        const labels = { '0': 'O', '1': 'A', '2': 'B', '3': 'AB' };
+        return labels[bloodType] || 'Chọn nhóm máu';
+    };
+
+    const getDonationTypeLabel = (donationType) => {
+        if (donationType === '') return 'Chọn loại hiến máu';
+        const labels = {
+            '0': 'Máu toàn phần',
+            '1': 'Tiểu cầu',
+            '2': 'Huyết tương',
+            '3': 'Bạch cầu'
+        };
+        return labels[donationType] || 'Chọn loại hiến máu';
     };
 
     const handleSubmit = async (e) => {
@@ -212,12 +289,11 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                     <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-6 py-4 rounded-t-2xl sticky top-0 z-10">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold flex items-center gap-2">
-                                <Ambulance className="w-5 h-5" />
                                 Chỉnh sửa yêu cầu hiến máu
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                                className="cursor-pointer p-2 hover:bg-white/20 rounded-xl transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -268,22 +344,60 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
 
                         <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <div className="grid md:grid-cols-2 gap-4">
-                                <div>
+                                <div className="blood-type-dropdown relative">
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Nhóm máu <span className="text-red-500">*</span>
                                     </label>
-                                    <select
-                                        required
-                                        value={formData.blood_type}
-                                        onChange={(e) => setFormData({ ...formData, blood_type: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowBloodTypeDropdown(!showBloodTypeDropdown)}
+                                        className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
                                     >
-                                        <option value="">Chọn nhóm máu</option>
-                                        <option value="0">O</option>
-                                        <option value="1">A</option>
-                                        <option value="2">B</option>
-                                        <option value="3">AB</option>
-                                    </select>
+                                        <span className={formData.blood_type !== '' ? "text-gray-900" : "text-gray-400"}>
+                                            {getBloodTypeLabel(formData.blood_type)}
+                                        </span>
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showBloodTypeDropdown ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {showBloodTypeDropdown && (
+                                        <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                Chọn nhóm máu
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('0')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '0' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                O
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('1')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '1' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                A
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('2')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '2' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                B
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleBloodTypeSelect('3')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.blood_type === '3' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                AB
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -304,22 +418,60 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
 
                         <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
                             <div className="grid md:grid-cols-2 gap-4">
-                                <div>
+                                <div className="donation-type-dropdown relative">
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Loại hiến máu <span className="text-red-500">*</span>
                                     </label>
-                                    <select
-                                        required
-                                        value={formData.donation_type}
-                                        onChange={(e) => setFormData({ ...formData, donation_type: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all"
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowDonationTypeDropdown(!showDonationTypeDropdown)}
+                                        className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white hover:border-red-300"
                                     >
-                                        <option value="">Chọn loại hiến máu</option>
-                                        <option value="0">Máu toàn phần</option>
-                                        <option value="1">Tiểu cầu</option>
-                                        <option value="2">Huyết tương</option>
-                                        <option value="3">Bạch cầu</option>
-                                    </select>
+                                        <span className={formData.donation_type !== '' ? "text-gray-900" : "text-gray-400"}>
+                                            {getDonationTypeLabel(formData.donation_type)}
+                                        </span>
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showDonationTypeDropdown ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {showDonationTypeDropdown && (
+                                        <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-30 animate-fadeIn">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDonationTypeSelect('')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                Chọn loại hiến máu
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDonationTypeSelect('0')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '0' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                Máu toàn phần
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDonationTypeSelect('1')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '1' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                Tiểu cầu
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDonationTypeSelect('2')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '2' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                Huyết tương
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDonationTypeSelect('3')}
+                                                className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${formData.donation_type === '3' ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                            >
+                                                Bạch cầu
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -342,23 +494,53 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Bệnh viện tiếp nhận
                             </label>
-                            <select
-                                value={selectedHospital}
-                                onChange={handleHospitalChange}
-                                disabled={loadingHospitals}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                            >
-                                <option value="">Chọn bệnh viện</option>
-                                {loadingHospitals ? (
-                                    <option disabled>Đang tải...</option>
-                                ) : (
-                                    hospitals.map(hospital => (
-                                        <option key={hospital.id} value={hospital.id}>
-                                            {hospital.name}
-                                        </option>
-                                    ))
+                            <div className="hospital-dropdown relative">
+                                <button
+                                    type="button"
+                                    onClick={() => !loadingHospitals && hospitals.length > 1 && setShowHospitalDropdown(!showHospitalDropdown)}
+                                    disabled={loadingHospitals}
+                                    className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-white hover:border-red-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                >
+                                    <span className={selectedHospital ? "text-gray-900" : "text-gray-400"}>
+                                        {getHospitalLabel()}
+                                    </span>
+                                    {loadingHospitals ? (
+                                        <Loader2 className="h-4 w-4 text-gray-500 animate-spin" />
+                                    ) : hospitals.length <= 1 ? (
+                                        <Hospital className="h-4 w-4 text-gray-400" />
+                                    ) : (
+                                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${showHospitalDropdown ? 'rotate-180' : ''}`} />
+                                    )}
+                                </button>
+
+                                {showHospitalDropdown && hospitals.length > 1 && (
+                                    <div className="absolute top-full left-0 mt-2 w-full max-h-[300px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-y-auto z-30 animate-fadeIn">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHospitalSelect('')}
+                                            className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${!selectedHospital ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                        >
+                                            Chọn bệnh viện
+                                        </button>
+                                        {loadingHospitals ? (
+                                            <div className="px-4 py-3 text-center text-gray-500">
+                                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                                            </div>
+                                        ) : (
+                                            hospitals.map(hospital => (
+                                                <button
+                                                    key={hospital.id}
+                                                    type="button"
+                                                    onClick={() => handleHospitalSelect(hospital.id.toString())}
+                                                    className={`cursor-pointer w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${selectedHospital === hospital.id.toString() ? 'bg-red-50 text-red-600' : 'text-gray-700'}`}
+                                                >
+                                                    {hospital.name}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
                                 )}
-                            </select>
+                            </div>
                         </div>
 
                         <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-100">
@@ -421,7 +603,7 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                                className="cursor-pointer flex-1 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
                             >
                                 {loading ? (
                                     <>
@@ -430,7 +612,6 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                                     </>
                                 ) : (
                                     <>
-                                        <Save className="w-5 h-5" />
                                         <span>Lưu thay đổi</span>
                                     </>
                                 )}
@@ -439,7 +620,7 @@ const UpdateEmergencyDialog = ({ isOpen, onClose, onSuccess, emergency }) => {
                                 type="button"
                                 onClick={onClose}
                                 disabled={loading}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
+                                className="cursor-pointer flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50"
                             >
                                 Hủy
                             </button>
@@ -554,7 +735,9 @@ const StaffEmergencyRequestDetail = () => {
                 setResponses(results);
             }
 
-            setTotalResponses(response.data.count || results.length);
+            if (!searchTerm && !dateRange.from && !dateRange.to) {
+                setTotalResponses(response.data.count || results.length);
+            }
             setHasNextPage(response.data.next !== null);
 
         } catch (err) {
@@ -720,64 +903,57 @@ const StaffEmergencyRequestDetail = () => {
                     <div className="flex items-center gap-2 text-sm text-white/80 mb-6">
                         <button
                             onClick={() => navigate("/staff-emergency-request")}
-                            className="hover:text-white transition-colors"
+                            className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Quản lý yêu cầu
+                            Hiến máu khẩn cấp
                         </button>
                         <span>/</span>
-                        <span className="text-white font-medium">Chi tiết yêu cầu</span>
+                        <span className="text-white font-medium">{patientName}</span>
                     </div>
 
                     <button
                         onClick={() => navigate("/staff-emergency-request")}
-                        className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
+                        className="cursor-pointer inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 group mb-4"
                     >
                         <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                        <span>Quay lại danh sách</span>
+                        <span>Quay lại</span>
                     </button>
 
                     <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-3 flex-wrap">
-                                <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
-                                    <Ambulance className="w-8 h-8" />
-                                </div>
                                 <h1 className="text-3xl md:text-4xl font-bold">
                                     Yêu cầu hiến máu khẩn cấp
                                 </h1>
                                 <span className={`${getStatusColor(emergency)} text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md`}>
                                     {getStatusText(emergency)}
                                 </span>
-                                {emergency?.critical && !emergency?.is_expire && (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-red-600 text-white animate-pulse shadow-md">
-                                        <AlertOctagon className="w-4 h-4" />
-                                        KHẨN CẤP
-                                    </span>
-                                )}
-                                {emergency?.is_expire && (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-600 text-white">
-                                        <Timer className="w-4 h-4" />
-                                        ĐÃ HẾT HẠN
-                                    </span>
-                                )}
                             </div>
                             {emergency && (
                                 <div className="flex flex-wrap gap-4 text-red-100">
                                     <span className="flex items-center gap-1.5">
+                                        <User className="w-4 h-4" />
+                                        {emergency.patient_name}
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
                                         <Droplet className="w-4 h-4" />
-                                        Nhóm máu: {getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor)}
+                                        {getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor)}
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <HandHeart className="w-4 h-4" />
+                                        {getDonationTypeText(emergency.donation_type)}
                                     </span>
                                     <span className="flex items-center gap-1.5">
                                         <Syringe className="w-4 h-4" />
-                                        {getDonationTypeText(emergency.donation_type)} - {emergency.blood_volume} ml
+                                        {emergency.blood_volume} ml
                                     </span>
                                     <span className="flex items-center gap-1.5">
                                         <Hospital className="w-4 h-4" />
                                         {emergency.hospital?.name || 'Chưa có'}
                                     </span>
                                     <span className="flex items-center gap-1.5">
-                                        <Calendar className="w-4 h-4" />
-                                        Tạo lúc: {formatDateTime(emergency.created_at)}
+                                        <Phone className="w-4 h-4" />
+                                        {emergency.phone}
                                     </span>
                                 </div>
                             )}
@@ -787,14 +963,14 @@ const StaffEmergencyRequestDetail = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={handleEditEmergency}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all duration-300 border border-white/20"
+                                className="cursor-pointer flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all duration-300 border border-white/20"
                             >
                                 <Edit className="w-5 h-5" />
                                 <span className="font-medium">Chỉnh sửa</span>
                             </button>
                             <button
                                 onClick={() => setShowDeleteDialog(true)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-red-600/80 backdrop-blur-sm rounded-xl hover:bg-red-700 transition-all duration-300"
+                                className="cursor-pointer flex items-center gap-2 px-5 py-2.5 bg-red-600/80 backdrop-blur-sm rounded-xl hover:bg-red-700 transition-all duration-300"
                             >
                                 <Trash2 className="w-5 h-5" />
                                 <span className="font-medium">Xóa</span>
@@ -807,54 +983,6 @@ const StaffEmergencyRequestDetail = () => {
                         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                    <User className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold truncate max-w-[200px]">{emergency?.patient_name || '---'}</div>
-                                    <div className="text-sm text-white/80">Bệnh nhân</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                    <Phone className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold">{emergency?.phone || '---'}</div>
-                                    <div className="text-sm text-white/80">Số điện thoại</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                    <Droplet className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold">{emergency ? getBloodTypeDisplay(emergency.blood_type, emergency.rh_factor) : '---'}</div>
-                                    <div className="text-sm text-white/80">Nhóm máu</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                    <Syringe className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold">{emergency?.blood_volume || '---'} ml</div>
-                                    <div className="text-sm text-white/80">Thể tích máu</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/20 transition-all duration-300">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                                     <HeartHandshake className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -864,17 +992,6 @@ const StaffEmergencyRequestDetail = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Emergency Note */}
-                    {emergency?.emergency_note && (
-                        <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20">
-                            <div className="flex items-center gap-2 mb-2">
-                                <NotepadText className="w-5 h-5" />
-                                <p className="text-sm font-semibold">Ghi chú</p>
-                            </div>
-                            <p className="text-white/90">{emergency.emergency_note}</p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Wave Separator */}
@@ -908,7 +1025,7 @@ const StaffEmergencyRequestDetail = () => {
                                             setPage(1);
                                             loadResponses(false);
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
+                                        className="cursor-pointer absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-400" />
                                     </button>
@@ -919,7 +1036,7 @@ const StaffEmergencyRequestDetail = () => {
                         <div className="flex items-center gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
+                                className="cursor-pointer lg:hidden flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex-1 justify-center"
                             >
                                 <FilterIcon className="h-5 w-5" />
                                 <span className="font-medium">Bộ lọc</span>
@@ -928,9 +1045,8 @@ const StaffEmergencyRequestDetail = () => {
                             {/* Date Filter */}
                             <button
                                 onClick={() => setShowDatePicker(!showDatePicker)}
-                                className="hidden lg:flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                                className="cursor-pointer hidden lg:flex items-center gap-2 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                             >
-                                <Calendar className="w-4 h-4" />
                                 <span className="font-medium">Ngày phản hồi</span>
                             </button>
 
@@ -938,7 +1054,7 @@ const StaffEmergencyRequestDetail = () => {
                             <div className="hidden lg:flex gap-2 bg-gray-100 rounded-xl p-1">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -948,7 +1064,7 @@ const StaffEmergencyRequestDetail = () => {
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                                    className={`cursor-pointer p-2 rounded-lg transition-all duration-300 ${viewMode === 'list'
                                             ? 'bg-white text-red-600 shadow-md'
                                             : 'text-gray-600 hover:text-gray-900'
                                         }`}
@@ -984,7 +1100,7 @@ const StaffEmergencyRequestDetail = () => {
                                 </div>
                                 <button
                                     onClick={() => setShowDatePicker(false)}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Áp dụng
                                 </button>
@@ -997,7 +1113,7 @@ const StaffEmergencyRequestDetail = () => {
                         <div className="lg:hidden mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 animate-fadeIn">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="font-semibold text-gray-900">Bộ lọc</h3>
-                                <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-200 rounded-lg">
+                                <button onClick={() => setShowFilters(false)} className="cursor-pointer p-2 hover:bg-gray-200 rounded-lg">
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
@@ -1031,7 +1147,7 @@ const StaffEmergencyRequestDetail = () => {
                                                 setViewMode('grid');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'grid'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -1044,7 +1160,7 @@ const StaffEmergencyRequestDetail = () => {
                                                 setViewMode('list');
                                                 setShowFilters(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
+                                            className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${viewMode === 'list'
                                                     ? 'border-red-500 bg-red-50 text-red-600'
                                                     : 'border-gray-200 hover:border-gray-300 bg-white'
                                                 }`}
@@ -1064,7 +1180,7 @@ const StaffEmergencyRequestDetail = () => {
                             {dateRange.from && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Từ: {formatDate(dateRange.from)}</span>
-                                    <button onClick={() => setDateRange(prev => ({ ...prev, from: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, from: '' }))} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1072,7 +1188,7 @@ const StaffEmergencyRequestDetail = () => {
                             {dateRange.to && (
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <span>Đến: {formatDate(dateRange.to)}</span>
-                                    <button onClick={() => setDateRange(prev => ({ ...prev, to: '' }))} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setDateRange(prev => ({ ...prev, to: '' }))} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1081,7 +1197,7 @@ const StaffEmergencyRequestDetail = () => {
                                 <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl text-sm shadow-lg shadow-red-500/25">
                                     <Search className="h-4 w-4" />
                                     <span>Tìm kiếm: "{searchTerm}"</span>
-                                    <button onClick={() => setSearchTerm("")} className="p-1 hover:bg-white/20 rounded-lg">
+                                    <button onClick={() => setSearchTerm("")} className="cursor-pointer p-1 hover:bg-white/20 rounded-lg">
                                         <X className="h-3 w-3" />
                                     </button>
                                 </span>
@@ -1089,7 +1205,7 @@ const StaffEmergencyRequestDetail = () => {
                             {(searchTerm || dateRange.from || dateRange.to) && (
                                 <button
                                     onClick={handleClearFilters}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
+                                    className="cursor-pointer px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-colors border border-gray-200 rounded-xl hover:border-red-200"
                                 >
                                     Xóa tất cả
                                 </button>
@@ -1135,7 +1251,7 @@ const StaffEmergencyRequestDetail = () => {
                                 </div>
                                 <button
                                     onClick={handleRefresh}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
+                                    className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-300"
                                 >
                                     Thử lại
                                 </button>
@@ -1171,9 +1287,8 @@ const StaffEmergencyRequestDetail = () => {
                         {(searchTerm || dateRange.from || dateRange.to) && (
                             <button
                                 onClick={handleClearFilters}
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+                                className="cursor-pointer inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                <X className="w-5 h-5" />
                                 Xóa tất cả bộ lọc
                             </button>
                         )}
@@ -1196,7 +1311,7 @@ const StaffEmergencyRequestDetail = () => {
                             <button
                                 onClick={handleRefresh}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
+                                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 transition-all duration-300 border border-gray-200 rounded-xl hover:border-red-200 hover:bg-red-50 group"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                                 <span>Làm mới</span>
@@ -1287,7 +1402,7 @@ const StaffEmergencyRequestDetail = () => {
                                                         e.stopPropagation();
                                                         handleViewResponseDetail(response);
                                                     }}
-                                                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg"
+                                                    className="cursor-pointer w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-300 bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-700 hover:to-red-600 shadow-md hover:shadow-lg"
                                                 >
                                                     <span className="font-medium">Xem chi tiết</span>
                                                     <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -1352,10 +1467,10 @@ const StaffEmergencyRequestDetail = () => {
                                                                 e.stopPropagation();
                                                                 handleViewResponseDetail(response);
                                                             }}
-                                                            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md text-sm flex items-center gap-2 whitespace-nowrap"
+                                                            className="cursor-pointer px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-md text-sm flex items-center gap-2 whitespace-nowrap"
                                                         >
-                                                            <Eye className="w-4 h-4" />
                                                             <span>Chi tiết</span>
+                                                            <ChevronRight className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1372,7 +1487,7 @@ const StaffEmergencyRequestDetail = () => {
                                 <button
                                     onClick={handleLoadMore}
                                     disabled={loadingMore}
-                                    className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
+                                    className="cursor-pointer group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         {loadingMore ? (
@@ -1382,7 +1497,6 @@ const StaffEmergencyRequestDetail = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <Send className="w-5 h-5" />
                                                 <span>Xem thêm phản hồi</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </>

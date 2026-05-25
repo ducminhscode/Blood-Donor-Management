@@ -895,7 +895,7 @@ const Profile = () => {
                                                         <Droplet className="w-5 h-5 text-red-500 mt-0.5" />
                                                         <div>
                                                             <p className="text-sm text-gray-500">Nhóm máu</p>
-                                                            <p className="font-medium text-gray-900">{formatBloodType(donorInfo.blood_type, donorInfo.rh_factor)}</p>
+                                                            <p className="font-medium text-gray-900">{donorInfo.blood_type !== null && donorInfo.rh_factor !== null ? formatBloodType(donorInfo.blood_type, donorInfo.rh_factor) : 'Chưa cập nhật'}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">

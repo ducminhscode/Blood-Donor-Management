@@ -1497,6 +1497,8 @@ class EmergencyRequestViewSet(viewsets.ViewSet, generics.ListAPIView, generics.R
                 ).first()
 
                 if blood_donation:
+                    donor.blood_type = blood_donation.blood_type
+                    donor.rh_factor = blood_donation.rh_factor
                     donor.donation_count += 1
                     donor.last_donation = timezone.now()
                     donor.points += 200

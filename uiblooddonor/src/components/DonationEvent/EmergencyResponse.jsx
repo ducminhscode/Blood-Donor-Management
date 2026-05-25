@@ -701,8 +701,7 @@ const EmergencyResponse = () => {
                                 to="/list-emergency-request"
                                 className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg hover:shadow-xl"
                             >
-                                <HeartPulse className="w-5 h-5" />
-                                Khám phá yêu cầu cấp cứu
+                                Hiến máu khẩn cấp
                             </Link>
                         )}
                     </div>
