@@ -1,0 +1,19 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/admin/stats-index.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="module stats-quick">
+    <h2>Các biểu đồ thống kê của hệ thống</h2>
+    <div class="stats-quick-grid">
+        <a href="/admin/stats-event/" class="stats-quick-link stats-quick-link--featured">Thống kê hoạt động hiến máu</a>
+        <a href="/admin/stats-completed-registration/" class="stats-quick-link">Thống kê lượt đăng ký tham gia</a>
+        <a href="/admin/stats-user-join-event/" class="stats-quick-link">Thống kê số người tham gia</a>
+    </div>
+</div>
+{{ block.super }}
+{% endblock %}

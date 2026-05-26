@@ -1,0 +1,78 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Thống kê lượt đăng ký tham gia hoạt động hiến máu | Blood Donor Management Admin{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="{% static 'css/admin/stats-common.css' %}">
+{% endblock %}
+
+{% block content %}
+{{ monthly_chart|json_script:"monthly-chart-data" }}
+{{ quarterly_chart|json_script:"quarterly-chart-data" }}
+{{ yearly_chart|json_script:"yearly-chart-data" }}
+
+<div class="stats-shell">
+    <section class="stats-hero">
+        <div class="hero-copy">
+            <h1>Thống kê lượt đăng ký tham gia hoạt động hiến máu</h1>
+            <p>
+                Biểu đồ dưới đây tổng hợp số phiếu đăng ký tham gia hoạt động hiến máu đã hoàn thành theo tháng,
+                quý và năm. Dữ liệu được tính từ các phiếu đăng ký đã hoàn thành và theo thời điểm cập nhật trạng thái hoàn thành.
+            </p>
+            <form class="year-filter" method="get">
+                <label for="year">Chọn năm</label>
+                <select id="year" name="year">
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Cập nhật biểu đồ</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="stats-summary">
+        <div class="summary-card">
+            <div class="label">Phiếu đã hoàn thành</div>
+            <div class="value">{{ total_completed_registrations }}</div>
+            <div class="hint">Số phiếu đăng ký được hoàn thành.</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Năm hiển thị</div>
+            <div class="value">{{ selected_year }}</div>
+            <div class="hint">Biểu đồ tháng, quý và 5 năm gần nhất đang theo năm được chọn.</div>
+        </div>
+    </section>
+
+    <section class="chart-grid">
+        <article class="chart-card">
+            <h2>Theo tháng</h2>
+            <p>Số phiếu đăng ký hiến máu đã hoàn thành trong từng tháng của năm {{ selected_year }}.</p>
+            <div class="chart-wrap">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </article>
+
+        <article class="chart-card">
+            <h2>Theo quý</h2>
+            <p>Tổng hợp theo 4 quý của năm {{ selected_year }}.</p>
+            <div class="chart-wrap">
+                <canvas id="quarterlyChart"></canvas>
+            </div>
+        </article>
+
+        <article class="chart-card">
+            <h2>Theo năm</h2>
+            <p>Xu hướng trong 5 năm gần nhất tính đến năm {{ selected_year }}.</p>
+            <div class="chart-wrap">
+                <canvas id="yearlyChart"></canvas>
+            </div>
+        </article>
+    </section>
+</div>
+
+<script src="{% static 'js/admin/stats-charts.js' %}"></script>
+{% endblock %}
