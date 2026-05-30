@@ -804,7 +804,7 @@ const StaffResponseDetail = () => {
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
         if (bloodType === undefined || rhFactor === undefined) return 'Chưa cập nhật';
         const bloodTypeMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
-        return `${bloodTypeMap[bloodType]}${rhFactor === 0 ? '-' : '+'}`;
+        return `${bloodTypeMap[bloodType]}${rhFactor ? '+' : '-'}`;
     };
 
     const getDonationTypeText = (type) => {

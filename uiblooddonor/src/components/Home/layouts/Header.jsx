@@ -106,7 +106,7 @@ const Header = () => {
                         {user?.role === 1 && (
                             <Link to="/reward-category" className={getTabClass('/reward-category')}>
                                 <div className="flex items-center">
-                                    Kho đổi thưởng
+                                    Quà tri ân
                                 </div>
                             </Link>
                         )}
@@ -212,7 +212,7 @@ const Header = () => {
                                                         onClick={() => setIsDropdownOpen(false)}
                                                     >
                                                         <History className="h-4 w-4" />
-                                                        <span>Lịch sử đổi thưởng</span>
+                                                        <span>Lịch sử nhận quà tri ân</span>
                                                     </Link>
                                                     <Link
                                                         to="/event-registration"
@@ -329,7 +329,7 @@ const Header = () => {
                         {user?.role === 1 && (
                             <Link to="/reward-category" className={getMobileTabClass('/reward-category')}>
                                 <Award className="w-5 h-5" />
-                                <span>Đổi thưởng</span>
+                                <span>Quà tri ân</span>
                             </Link>
                         )}
 

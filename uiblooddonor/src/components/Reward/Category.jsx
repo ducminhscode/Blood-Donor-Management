@@ -270,7 +270,7 @@ const Category = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Helmet>
-                <title>Đổi thưởng | Dòng Máu Lạc Hồng</title>
+                <title>Quà tri ân | Dòng Máu Lạc Hồng</title>
             </Helmet>
             <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white">
                 <div className="absolute inset-0 opacity-10">
@@ -304,7 +304,7 @@ const Category = () => {
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <h1 className="text-4xl md:text-5xl font-bold">Kho đổi thưởng</h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Danh mục quà tri ân</h1>
                             </div>
 
                             <p className="text-lg text-red-100 max-w-2xl">

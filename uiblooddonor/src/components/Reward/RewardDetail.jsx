@@ -44,6 +44,8 @@ const RewardDetail = () => {
     const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
     const [formStep, setFormStep] = useState(1);
     const [formErrors, setFormErrors] = useState({});
+    const [donorInfo, setDonorInfo] = useState(null);
+    const [idNumberTouched, setIdNumberTouched] = useState(false);
 
     const [redeemForm, setRedeemForm] = useState({
         quantity: 1,
@@ -81,6 +83,37 @@ const RewardDetail = () => {
     useEffect(() => {
         setRedeemForm(prev => ({ ...prev, quantity }));
     }, [quantity]);
+
+    useEffect(() => {
+        const fetchDonorInfo = async () => {
+            if (user_current?.role !== 1) {
+                setDonorInfo(null);
+                return;
+            }
+
+            try {
+                const response = await authApis().get(endpoints.donor_me);
+                setDonorInfo(response.data);
+            } catch (error) {
+                console.error("Error fetching donor info:", error);
+            }
+        };
+
+        if (user_current) {
+            fetchDonorInfo();
+        }
+    }, [user_current]);
+
+    useEffect(() => {
+        if (idNumberTouched) {
+            return;
+        }
+
+        setRedeemForm(prev => ({
+            ...prev,
+            id_number: donorInfo?.identification || ''
+        }));
+    }, [donorInfo, idNumberTouched]);
 
     useEffect(() => {
         const fetchDistricts = async () => {
@@ -147,6 +180,9 @@ const RewardDetail = () => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+        if (name === 'id_number') {
+            setIdNumberTouched(true);
+        }
         setRedeemForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
 
         if (formErrors[name]) {
@@ -411,7 +447,7 @@ const RewardDetail = () => {
                             onClick={() => navigate("/reward-category")}
                             className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Kho đổi thưởng
+                            Danh mục quà tri ân
                         </button>
                         <span>/</span>
                         <button

@@ -97,7 +97,7 @@ const RewardHistory = () => {
 
         } catch (error) {
             console.error("Error fetching reward history:", error);
-            setError("Không thể tải lịch sử đổi thưởng. Vui lòng thử lại sau");
+            setError("Không thể tải lịch sử nhận quà tri ân. Vui lòng thử lại sau");
         } finally {
             if (isLoadMore) {
                 setLoadingMore(false);
@@ -249,7 +249,7 @@ const RewardHistory = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Helmet>
-                <title>Lịch sử đổi thưởng | Dòng Máu Lạc Hồng</title>
+                <title>Lịch sử nhận quà tri ân | Dòng Máu Lạc Hồng</title>
             </Helmet>
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-r from-red-700 via-red-600 to-red-500 text-white">
@@ -280,15 +280,15 @@ const RewardHistory = () => {
                         <div className="text-center lg:text-left">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                                 <History className="w-4 h-4" />
-                                <span className="text-sm font-medium">Lịch sử lượt đổi thưởng của bạn</span>
+                                <span className="text-sm font-medium">Lịch sử lượt nhận quà tri ân của bạn</span>
                             </div>
 
                             <div className="flex items-center gap-3 mb-4 justify-center lg:justify-start">
-                                <h1 className="text-4xl md:text-5xl font-bold">Lịch sử đổi thưởng</h1>
+                                <h1 className="text-4xl md:text-5xl font-bold">Lịch sử nhận quà tri ân</h1>
                             </div>
 
                             <p className="text-lg text-red-100 max-w-2xl">
-                                Theo dõi chi tiết các lượt đổi thưởng của bạn
+                                Theo dõi chi tiết các lượt nhận quà tri ân của bạn
                             </p>
 
                             <div className="flex flex-wrap gap-4 mt-8 justify-center lg:justify-start">
@@ -298,7 +298,7 @@ const RewardHistory = () => {
                                     </div>
                                     <div>
                                         <div className="text-2xl font-bold">{stats.total}</div>
-                                        <div className="text-sm text-white/80">Lượt đổi thưởng</div>
+                                        <div className="text-sm text-white/80">Lượt nhận quà tri ân</div>
                                     </div>
                                 </div>
                             </div>
@@ -626,18 +626,18 @@ const RewardHistory = () => {
 
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">
                             {selectedDate
-                                ? `Không có lượt đổi thưởng ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')}`
+                                ? `Không có lượt nhận quà tri ân ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')}`
                                 : searchTerm
-                                    ? "Không tìm thấy lượt đổi thưởng phù hợp"
-                                    : "Chưa có lượt đổi thưởng nào"}
+                                    ? "Không tìm thấy lượt nhận quà tri ân phù hợp"
+                                    : "Chưa có lượt nhận quà tri ân nào"}
                         </h3>
 
                         <p className="text-gray-600 mb-6 max-w-md mx-auto">
                             {selectedDate
-                                ? "Hãy chọn ngày khác để xem lịch sử đổi thưởng"
+                                ? "Hãy chọn ngày khác để xem lịch sử nhận quà tri ân"
                                 : searchTerm
                                     ? "Thử tìm kiếm với từ khóa khác"
-                                    : "Bạn chưa thực hiện lượt đổi thưởng nào. Hãy khám phá các quà tặng hấp dẫn!"}
+                                    : "Bạn chưa thực hiện lượt nhận quà tri ân nào. Hãy khám phá các quà tặng hấp dẫn!"}
                         </p>
 
                         {(selectedDate || searchTerm) && (
@@ -664,7 +664,7 @@ const RewardHistory = () => {
                                     <span className="font-bold text-lg">{filteredHistories.length}</span>
                                 </div>
                                 <span className="text-gray-600">
-                                    lượt đổi thưởng
+                                    lượt nhận quà tri ân
                                     {selectedDate && ` ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')}`}
                                     {searchTerm && " phù hợp với tìm kiếm"}
                                 </span>
@@ -855,7 +855,7 @@ const RewardHistory = () => {
                                                                     <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
                                                                         <h5 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                                                             <ShoppingBag className="w-4 h-4 text-red-500" />
-                                                                            Chi tiết đổi thưởng
+                                                                            Chi tiết nhận quà tri ân
                                                                         </h5>
                                                                         <div className="space-y-2">
                                                                             <div className="flex justify-between">
@@ -918,7 +918,7 @@ const RewardHistory = () => {
                             <div className="text-center mt-8">
                                 <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
                                     <CheckCircle className="w-5 h-5 text-green-500" />
-                                    <span>Đã hiển thị tất cả {totalItems} lượt đổi thưởng</span>
+                                    <span>Đã hiển thị tất cả {totalItems} lượt nhận quà tri ân</span>
                                 </div>
                             </div>
                         )}
@@ -940,7 +940,7 @@ const RewardHistory = () => {
                                     <X className="w-5 h-5" />
                                 </button>
                                 <div className="flex items-center gap-3">
-                                    <h3 className="text-xl font-bold">Chi tiết đổi thưởng</h3>
+                                    <h3 className="text-xl font-bold">Chi tiết nhận quà tri ân</h3>
                                 </div>
                             </div>
 
@@ -1017,7 +1017,7 @@ const RewardHistory = () => {
                                         <div className="bg-gray-50 rounded-xl p-4">
                                             <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                                 <ShoppingBag className="w-4 h-4 text-red-500" />
-                                                Chi tiết đổi thưởng
+                                                Chi tiết nhận quà tri ân
                                             </h4>
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">

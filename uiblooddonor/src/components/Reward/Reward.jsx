@@ -183,7 +183,7 @@ const Reward = () => {
                             onClick={() => navigate("/reward-category")}
                             className="cursor-pointer hover:text-white transition-colors"
                         >
-                            Kho đổi thưởng
+                            Danh mục quà tri ân
                         </button>
                         <span> / </span>
                         <span className="text-white font-medium">{categoryName}</span>
@@ -595,7 +595,7 @@ const Reward = () => {
                                     </h3>
 
                                     <p className="text-gray-500 text-sm line-clamp-2 mb-3 min-h-[40px]">
-                                        {reward.description || 'Quà tặng hấp dẫn từ chương trình đổi thưởng'}
+                                        {reward.description || 'Quà tri ân hấp dẫn từ chương trình hiến máu'}
                                     </p>
 
                                     <div className="flex items-center justify-between">

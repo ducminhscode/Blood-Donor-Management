@@ -253,7 +253,7 @@ const FriendList = () => {
     const getBloodTypeDisplay = (bloodType, rhFactor) => {
         if (bloodType === undefined || rhFactor === undefined) return 'Chưa cập nhật';
         const bloodMap = { 0: 'O', 1: 'A', 2: 'B', 3: 'AB' };
-        return `${bloodMap[bloodType] || '?'}${rhFactor === 0 ? '-' : '+'}`;
+        return `${bloodMap[bloodType] || '?'}${rhFactor ? '+' : '-'}`;
     };
 
     const displayedResultsCount = searchTerm.trim() ? resultsCount : totalFriends;
