@@ -4,6 +4,7 @@ import { useContext } from 'react';
 import { UserContexts, UserDispatchContext } from '../../configs/UserContexts';
 import { getImageUrl } from '../../utils/Image';
 import { authApis, endpoints } from '../../configs/APIs';
+import { formatDateTime } from '../../utils/Format';
 import { Helmet } from 'react-helmet-async';
 
 const Profile = () => {
@@ -955,7 +956,7 @@ const Profile = () => {
                                                         <Syringe className="w-5 h-5 text-red-500 mt-0.5" />
                                                         <div>
                                                             <p className="text-sm text-gray-500">Lần hiến cuối</p>
-                                                            <p className="font-medium text-gray-900">{formatDate(donorInfo.last_donation)}</p>
+                                                            <p className="font-medium text-gray-900">{formatDateTime(donorInfo.last_donation)}</p>
                                                         </div>
                                                     </div>
                                                 </div>

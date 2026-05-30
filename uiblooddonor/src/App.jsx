@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Home from "./components/Home/Home";
 import Login from "./components/User/Login";
 import Profile from "./components/User/Profile";
@@ -45,6 +45,18 @@ import ChatBox from "./components/User/ChatBox/ChatBox";
 import { Moon, Sun } from "lucide-react";
 
 const THEME_STORAGE_KEY = "blood-donor-theme";
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [pathname]);
+
+  return null;
+};
 
 const getInitialTheme = () => {
   if (typeof window === "undefined") {
@@ -104,6 +116,7 @@ function App() {
     <UserContexts.Provider value={user}>
       <UserDispatchContext.Provider value={dispatch}>
         <BrowserRouter>
+          <ScrollToTop />
           <button
             type="button"
             onClick={toggleTheme}

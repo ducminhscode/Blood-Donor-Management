@@ -1336,19 +1336,6 @@ const StaffEmergencyRequestDetail = () => {
                                                     <User className="w-10 h-10 text-red-600" />
                                                 </div>
 
-                                                {/* Status Badge */}
-                                                <div className="absolute top-4 left-4">
-                                                    <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold shadow-md ${donorInfo.statusResponse === 1
-                                                            ? 'bg-green-500 text-white'
-                                                            : donorInfo.statusResponse === 2
-                                                                ? 'bg-red-500 text-white'
-                                                                : 'bg-gray-500 text-white'
-                                                        }`}>
-                                                        {donorInfo.statusResponse === 1 ? 'Đã chấp nhận' :
-                                                            donorInfo.statusResponse === 2 ? 'Đã từ chối' : 'Đang xử lý'}
-                                                    </span>
-                                                </div>
-
                                                 {/* Response Date */}
                                                 <div className="absolute top-4 right-4">
                                                     <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-xl text-xs font-semibold">

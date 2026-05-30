@@ -628,14 +628,28 @@ const StaffEventList = () => {
     );
 
     const getEventStatus = (event) => {
+        if (!event) return 'ended';
+
         if (event.is_expire === true) {
             return 'ended';
         }
+
+        if (typeof event.status === 'string') {
+            const normalizedStatus = event.status.toLowerCase();
+            if (['ongoing', 'upcoming', 'ended'].includes(normalizedStatus)) {
+                return normalizedStatus;
+            }
+        }
+
         const now = new Date().getTime();
         const start = new Date(event.time_start).getTime();
+
+        if (Number.isNaN(start)) {
+            return 'ended';
+        }
+
         if (start > now) return 'upcoming';
-        if (start <= now) return 'ongoing';
-        return 'ended';
+        return 'ongoing';
     };
 
     const getStatusColor = (event) => {
@@ -736,7 +750,32 @@ const StaffEventList = () => {
         loadEvents(false);
     };
 
-    const filteredEvents = events;
+    const selectedProvinceName = selectedProvince
+        ? provinces.find(p => p.code === parseInt(selectedProvince))?.name
+        : '';
+
+    const filteredEvents = events.filter(event => {
+        const matchesSearch = searchTerm === '' ||
+            event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            event.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const eventProvince = (event.province || '').toString().trim().toLowerCase();
+        const matchesProvince = !selectedProvinceName ||
+            eventProvince === selectedProvinceName.toLowerCase() ||
+            eventProvince === selectedProvince.toLowerCase();
+
+        const status = getEventStatus(event);
+        const matchesStatus = filterType === 'all' ||
+            (filterType === 'ongoing' && status === 'ongoing') ||
+            (filterType === 'upcoming' && status === 'upcoming') ||
+            (filterType === 'ended' && status === 'ended');
+
+        return matchesSearch && matchesProvince && matchesStatus;
+    });
+
+    const visibleEventsCount = (searchTerm || selectedProvince || filterType !== 'all')
+        ? filteredEvents.length
+        : totalEvents;
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -1165,7 +1204,7 @@ const StaffEventList = () => {
                         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-red-500/25">
-                                    <span className="font-bold text-lg">{totalEvents}</span>
+                                    <span className="font-bold text-lg">{visibleEventsCount}</span>
                                 </div>
                                 <span className="text-gray-600">hoạt động {filterType !== 'all' && "phù hợp"}</span>
                             </div>
@@ -1323,7 +1362,7 @@ const StaffEventList = () => {
                             <div className="text-center mt-12">
                                 <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-xl text-gray-600">
                                     <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                    <span>Đã hiển thị tất cả {totalEvents} hoạt động</span>
+                                    <span>Đã hiển thị tất cả {visibleEventsCount} hoạt động</span>
                                 </div>
                             </div>
                         )}
