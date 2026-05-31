@@ -2,6 +2,33 @@ import React, { useEffect, useState } from "react";
 import { Search, Users, Loader2, MessageSquare } from "lucide-react";
 import { getImageUrl } from "../../../utils/Image";
 
+const formatRelativeTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffSeconds = Math.floor((now - date) / 1000);
+
+    if (diffSeconds < 60) return 'Vừa xong';
+    if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)} phút trước`;
+    if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)} giờ trước`;
+    return `${Math.floor(diffSeconds / 86400)} ngày trước`;
+};
+
+const getOnlineStatus = (lastLoginDate) => {
+    if (!lastLoginDate) return { text: 'Offline', color: 'gray', isOnline: false };
+    const lastLogin = new Date(lastLoginDate);
+    const now = new Date();
+    const diffMinutes = Math.floor((now - lastLogin) / (1000 * 60));
+
+    if (diffMinutes < 5) {
+        return { text: 'Đang hoạt động', color: 'green', isOnline: true };
+    }
+    if (diffMinutes < 30) {
+        return { text: 'Vừa hoạt động', color: 'yellow', isOnline: false };
+    }
+    return { text: formatRelativeTime(lastLoginDate), color: 'gray', isOnline: false };
+};
+
 export default function Sidebar({
     users,
     currentEmail,
@@ -37,40 +64,19 @@ export default function Sidebar({
             (account.email && account.email.toLowerCase().includes(searchTerm.toLowerCase()));
     });
 
-    const getPreviewText = (email, p) => {
-        if (!p || !p.text || p.text === undefined) return "Chưa có tin nhắn";
+    const getPreviewText = (p) => {
+        if (!p || (!p.text && !p.eventTitle)) return "Chưa có tin nhắn";
+
+        if (p.lastMessageType === 'event' || p.messageType === 'event') {
+            const title = p.eventTitle || p.event?.title || "hoạt động hiến máu";
+            return p.sender === currentEmail ? `Bạn: Đã chia sẻ hoạt động hiến máu: ${title}` : `Đã chia sẻ hoạt động hiến máu: ${title}`;
+        }
 
         if (p.sender === currentEmail) {
             return `Bạn: ${p.text}`;
         }
+
         return p.text;
-    };
-
-    const formatRelativeTime = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffSeconds = Math.floor((now - date) / 1000);
-
-        if (diffSeconds < 60) return 'Vừa xong';
-        if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)} phút trước`;
-        if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)} giờ trước`;
-        return `${Math.floor(diffSeconds / 86400)} ngày trước`;
-    };
-
-    const getOnlineStatus = (lastLoginDate) => {
-        if (!lastLoginDate) return { text: 'Offline', color: 'gray', isOnline: false };
-        const lastLogin = new Date(lastLoginDate);
-        const now = new Date();
-        const diffMinutes = Math.floor((now - lastLogin) / (1000 * 60));
-
-        if (diffMinutes < 5) {
-            return { text: 'Đang hoạt động', color: 'green', isOnline: true };
-        }
-        if (diffMinutes < 30) {
-            return { text: 'Vừa hoạt động', color: 'yellow', isOnline: false };
-        }
-        return { text: formatRelativeTime(lastLoginDate), color: 'gray', isOnline: false };
     };
 
     useEffect(() => {
@@ -163,7 +169,7 @@ export default function Sidebar({
                             : '/default-avatar.png';
 
                         const p = previews[email] || {};
-                        const previewText = getPreviewText(email, p);
+                        const previewText = getPreviewText(p);
                         const isActive = selectedUser?.account?.email === email || selectedUser?.email === email;
                         const userOnlineStatus = onlineStatuses[email] || { text: 'Offline', color: 'gray', isOnline: false };
 
@@ -192,7 +198,10 @@ export default function Sidebar({
                                     <div className="font-semibold text-sm text-gray-800 mb-1 truncate">
                                         {fullName}
                                     </div>
-                                    <div className={`text-xs ${p.sender !== currentEmail && p.text && !p.read ? 'font-bold text-gray-900' : 'text-gray-500'} truncat`}>
+                                    <div
+                                        className={`text-xs ${p.sender !== currentEmail && (p.text || p.eventTitle) && !p.read ? 'font-bold text-gray-900' : 'text-gray-500'} truncate`}
+                                        title={previewText}
+                                    >
                                         {previewText}
                                     </div>
                                 </div>
@@ -200,7 +209,7 @@ export default function Sidebar({
                                     <div className="text-[11px] text-gray-400">
                                         {p.timestamp && formatMessageTime(p.timestamp)}
                                     </div>
-                                    {p.sender !== currentEmail && p.text && !p.read && (
+                                    {p.sender !== currentEmail && (p.text || p.eventTitle) && !p.read && (
                                         <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                                     )}
                                 </div>

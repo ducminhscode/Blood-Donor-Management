@@ -974,7 +974,6 @@ const EmergencyRequestDetail = () => {
                 {relatedRequests.length > 0 && (
                     <div className="mt-12">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <TrendingUp className="w-6 h-6 text-red-500" />
                             Yêu cầu cấp cứu cùng bệnh viện {request.hospital?.name}
                         </h2>
 

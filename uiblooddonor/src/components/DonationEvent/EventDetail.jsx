@@ -1677,8 +1677,7 @@ const EventDetail = () => {
                 {relatedEvents.length > 0 && (
                     <div className="mt-12">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <TrendingUp className="w-6 h-6 text-red-500" />
-                            Hoạt động cùng khu vực {provinceName && `- ${provinceName}`}
+                            Hoạt động hiến máu cùng khu vực {provinceName && `- ${provinceName}`}
                         </h2>
 
                         {loadingRelated ? (
@@ -1729,7 +1728,9 @@ const EventDetail = () => {
                                             </p>
                                             <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                                                 <MapPin className="w-3 h-3" />
-                                                {relatedEvent.location}
+                                                <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                                                    {relatedEvent.location}
+                                                </span>
                                             </p>
                                         </div>
                                     </div>

@@ -124,7 +124,10 @@ export default function ChatBox() {
                     text: lastMessage.text,
                     sender: lastMessage.sender,
                     timestamp: lastMessage.timestamp,
-                    read: lastMessage.read || false
+                    read: lastMessage.read || false,
+                    lastMessageType: lastMessage.lastMessageType || lastMessage.messageType || (lastMessage.isFile ? "file" : "text"),
+                    eventTitle: lastMessage.eventTitle || lastMessage.event?.title || "",
+                    event: lastMessage.event || null
                 };
 
                 setPreviews(prev => ({

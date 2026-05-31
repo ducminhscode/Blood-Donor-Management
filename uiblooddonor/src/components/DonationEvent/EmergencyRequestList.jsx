@@ -514,9 +514,13 @@ const EmergencyRequestList = () => {
                                             <div className="space-y-2 mb-4">
                                                 <div className="flex items-start text-sm text-gray-600">
                                                     <Hospital className="w-4 h-4 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
-                                                    <div>
-                                                        <div className="font-medium">{request.hospital?.name}</div>
-                                                        <div className="text-xs text-gray-500">{request.hospital?.hospital_address}, {request.hospital?.sub_district}, {request.hospital?.province}</div>
+                                                    <div className="min-w-0">
+                                                        <div className="font-medium">
+                                                            {request.hospital?.name}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 truncate">
+                                                            {request.hospital?.hospital_address}, {request.hospital?.sub_district}, {request.hospital?.province}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center text-sm text-gray-600">
